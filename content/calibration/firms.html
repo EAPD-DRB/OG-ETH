@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Calibration of Firms Parameters &#8212; OG-ETH</title>
+    <title>Calibration of Firm Parameters &#8212; OG-ETH</title>
   
   
   
@@ -202,7 +202,7 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Calibration</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="households.html">Calibration of Household Preference Parameters</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Calibration of Firms Parameters</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Calibration of Firm Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="macro.html">Calibration of Macroeconomic Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="demographics.html">Demographics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="earnings.html">Lifetime Earnings Profiles</a></li>
@@ -403,7 +403,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Calibration of Firms Parameters</h1>
+    <h1>Calibration of Firm Parameters</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -430,8 +430,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="calibration-of-firms-parameters">
-<span id="chap-firmcalib"></span><h1>Calibration of Firms Parameters<a class="headerlink" href="#calibration-of-firms-parameters" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="calibration-of-firm-parameters">
+<span id="chap-firmcalib"></span><h1>Calibration of Firm Parameters<a class="headerlink" href="#calibration-of-firm-parameters" title="Link to this heading">#</a></h1>
 <section id="aggregate-production-function-and-capital-accumulation">
 <h2>Aggregate Production Function and Capital Accumulation<a class="headerlink" href="#aggregate-production-function-and-capital-accumulation" title="Link to this heading">#</a></h2>
 <p>The <a class="reference external" href="https://pslmodels.github.io/OG-Core/content/theory/firms.html">OG-Core firm theory documentation</a> outlines the constant returns to scale, constant elasticity of substitution production function of the representative firm.  This function has two parameters; the elasticity of substitution and capital’s share of output.</p>
@@ -456,11 +456,11 @@ document.write(`
 <section id="factor-shares-of-output">
 <h3>Factor shares of output<a class="headerlink" href="#factor-shares-of-output" title="Link to this heading">#</a></h3>
 <p>In the default calibration, we set infrastructure’s share of output to <span class="math notranslate nohighlight">\(\gamma_{g,m}=0.0\)</span> for all sectors.  This parameter is hard to identify from national accounts data and would entail an empirical study to tease out the relationship between infrastructure and output.</p>
-<p>We use a default value of <span class="math notranslate nohighlight">\(\gamma =0.40\)</span>, which corresponds to one minus labor’s share of output, where labor’s share of output is found as 0.60 in in the <a class="reference external" href="https://rshiny.ilo.org/dataexplorer9/?lang=en">UN ILOSTAT database</a>.</p>
+<p>We use a default value of <span class="math notranslate nohighlight">\(\gamma =0.61791\)</span>, which corresponds to one minus labor’s share of output, where labor’s share of output is found as 0.38209 in in the <a class="reference external" href="https://rshiny.ilo.org/dataexplorer41/?lang=en&amp;amp;segment=indicator&amp;amp;id=SDG_1041_NOC_RT_A">UN ILOSTAT database</a>.</p>
 </section>
 <section id="total-factor-productivity">
 <h3>Total factor productivity<a class="headerlink" href="#total-factor-productivity" title="Link to this heading">#</a></h3>
-<p>In the case of the single production sector, we can normalize <span class="math notranslate nohighlight">\(Z_{m,t}=1.0\)</span>.  In the case of multiple production sectors, we use <span id="id1">[<a class="reference internal" href="../OGETH_references.html#id76" title="Julius Pain, Mpho Rapapali, and Daan Steenkamp. Industry TFP estimates for South Africa. Occasional Bulletin of Economic Notes, ():, November 2020. URL: https://econpapers.repec.org/scripts/redir.pf?u=https%3A%2F%2Fwww.resbank.co.za%2Fcontent%2Fdam%2Fsarb%2Fpublications%2Foccasional-bulletin-of-economic-notes%2F2020%2F10412%2FOBEN%25202002%2520%28Industry%2520TFP%2520estimates%2520for%2520South%2520Africa%29%2520-%2520November%25202020.pdf;h=repec:rbz:oboens:10412, doi:.">Pain <em>et al.</em>, 2020</a>]</span> who identify TFP for various sectors in Ethiopia.</p>
+<p>In the case of the single production sector, we can normalize <span class="math notranslate nohighlight">\(Z_{m,t}=1.0\)</span>.</p>
 </section>
 </section>
 </section>

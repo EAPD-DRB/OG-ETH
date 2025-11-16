@@ -1,5 +1,5 @@
 (Chap_FirmCalib)=
-# Calibration of Firms Parameters
+# Calibration of Firm Parameters
 
 ## Aggregate Production Function and Capital Accumulation
 
@@ -30,8 +30,8 @@ The production function is given as:
 
 In the default calibration, we set infrastructure's share of output to $\gamma_{g,m}=0.0$ for all sectors.  This parameter is hard to identify from national accounts data and would entail an empirical study to tease out the relationship between infrastructure and output.
 
-We use a default value of $\gamma =0.40$, which corresponds to one minus labor's share of output, where labor's share of output is found as 0.60 in in the [UN ILOSTAT database](https://rshiny.ilo.org/dataexplorer9/?lang=en).
+We use a default value of $\gamma =0.61791$, which corresponds to one minus labor's share of output, where labor's share of output is found as 0.38209 in in the [UN ILOSTAT database](https://rshiny.ilo.org/dataexplorer41/?lang=en&segment=indicator&id=SDG_1041_NOC_RT_A).
 
 ### Total factor productivity
 
-In the case of the single production sector, we can normalize $Z_{m,t}=1.0$.  In the case of multiple production sectors, we use {cite}`PRS2020` who identify TFP for various sectors in Ethiopia.
+In the case of the single production sector, we can normalize $Z_{m,t}=1.0$.

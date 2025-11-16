@@ -66,7 +66,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Demographics" href="demographics.html" />
-    <link rel="prev" title="Calibration of Firms Parameters" href="firms.html" />
+    <link rel="prev" title="Calibration of Firm Parameters" href="firms.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -202,7 +202,7 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Calibration</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="households.html">Calibration of Household Preference Parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="firms.html">Calibration of Firms Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firms.html">Calibration of Firm Parameters</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Calibration of Macroeconomic Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="demographics.html">Demographics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="earnings.html">Lifetime Earnings Profiles</a></li>
@@ -444,28 +444,28 @@ document.write(`
 <span id="chap-macrocalib"></span><h1>Calibration of Macroeconomic Parameters<a class="headerlink" href="#calibration-of-macroeconomic-parameters" title="Link to this heading">#</a></h1>
 <section id="economic-assumptions">
 <h2>Economic Assumptions<a class="headerlink" href="#economic-assumptions" title="Link to this heading">#</a></h2>
-<p>As the default rate of labor augmenting technological change, <span class="math notranslate nohighlight">\(g_y\)</span>, we use a value of 0%.  The average annual growth rate in GDP per capita in Ethiopia between 2007 and 2023 is 0.0% per year.</p>
+<p>As the default rate of labor augmenting technological change, <span class="math notranslate nohighlight">\(g_y\)</span>, we use a value of 6%.  The average annual growth rate in GDP per capita in Ethiopia between 2006 and 2024 is 6.0% per year, according to <a class="reference external" href="https://data.worldbank.org/indicator/NY.GDP.PCAP.KD.ZG?locations=ET">data from the World Bank</a>.</p>
 </section>
 <section id="open-economy-parameters">
 <h2>Open Economy Parameters<a class="headerlink" href="#open-economy-parameters" title="Link to this heading">#</a></h2>
 <section id="foreign-holding-of-government-debt-in-the-initial-period">
 <h3>Foreign holding of government debt in the initial period<a class="headerlink" href="#foreign-holding-of-government-debt-in-the-initial-period" title="Link to this heading">#</a></h3>
-<p>The path of foreign holding of domestic debt is endogenous, but the initial period stock of debt held by foreign investors is exogenous.  We set this parameter, <code class="docutils literal notranslate"><span class="pre">initial_foreign_debt_ratio</span></code> to 0.26, consistent with data from the World Bank WDI.</p>
+<p>The path of foreign holding of domestic debt is endogenous, but the initial period stock of debt held by foreign investors is exogenous.  We set this parameter, <code class="docutils literal notranslate"><span class="pre">initial_foreign_debt_ratio</span></code> to 0.95, consistent with <a class="reference external" href="https://www.mofed.gov.et/media/filer_public/9b/92/9b9264db-1a2b-4cd5-aa7d-f0307d67b4ce/public_sector_debt_statistical_bulletin_no_50.pdf">this report from the Ministry of Finance</a>.</p>
 </section>
 <section id="foreign-purchases-of-newly-issued-debt">
 <h3>Foreign purchases of newly issued debt<a class="headerlink" href="#foreign-purchases-of-newly-issued-debt" title="Link to this heading">#</a></h3>
-<p>We set <span class="math notranslate nohighlight">\(\zeta_D = 0.23\)</span>.  This is the average share of foreign purchases of newly issued government debt found from the World Bank WDI.</p>
+<p>We set <span class="math notranslate nohighlight">\(\zeta_D = 0.95\)</span>, the same as initial holdings of government debt by foreigners.</p>
 </section>
 <section id="foreign-holdings-of-excess-capital">
 <h3>Foreign holdings of excess capital<a class="headerlink" href="#foreign-holdings-of-excess-capital" title="Link to this heading">#</a></h3>
-<p>We set <span class="math notranslate nohighlight">\(\zeta_K = 0.9\)</span>. Note, this parameter is harder to pin down from the data as foreign purchases on “excess” capital demand is not typically directly measured or reported.  A value of 0.9 implies a high degree of openness to international capital flows.</p>
+<p>We set <span class="math notranslate nohighlight">\(\zeta_K = 0.95\)</span>. Note, this parameter is harder to pin down from the data as foreign purchases on “excess” capital demand is not typically directly measured or reported.  A value of 0.95 implies a high degree of openness to international capital flows.</p>
 </section>
 </section>
 <section id="government-debt-spending-and-transfers">
 <h2>Government Debt, Spending and Transfers<a class="headerlink" href="#government-debt-spending-and-transfers" title="Link to this heading">#</a></h2>
 <section id="government-debt">
 <h3>Government Debt<a class="headerlink" href="#government-debt" title="Link to this heading">#</a></h3>
-<p>The path of government debt is endogenous.  But the initial value is exogenous.  To avoid converting between model units and dollars, we calibrate the initial debt to GDP ratio, rather than the dollar value of the debt.  This is the model parameter <span class="math notranslate nohighlight">\(\alpha_D\)</span>.  We compute this from the ratio of publicly held debt outstanding to GDP.  Based on 2023 values, this gives us a ratio of 0.59.</p>
+<p>The path of government debt is endogenous.  But the initial value is exogenous.  To avoid converting between model units and dollars, we calibrate the initial debt to GDP ratio, rather than the dollar value of the debt.  This is the model parameter <span class="math notranslate nohighlight">\(\alpha_D\)</span>.  We compute this from the ratio of publicly held debt outstanding to GDP.  Based on 2024 values, this gives us a ratio of 0.327.</p>
 <section id="interest-rates-on-government-debt">
 <h4>Interest rates on government debt<a class="headerlink" href="#interest-rates-on-government-debt" title="Link to this heading">#</a></h4>
 <p>We assume that there is a wedge between the real rate of return on private capital and the real interest rate on government debt.  We model this wedge a scale and level shift.  Specifically, we assume that the real interest rate on government debt, <span class="math notranslate nohighlight">\(r_{gov,t}\)</span>, is related to the real rate of return on private capital, <span class="math notranslate nohighlight">\(r_{t}\)</span>, by the following equation:</p>
@@ -476,13 +476,13 @@ document.write(`
 </section>
 <section id="aggregate-transfers">
 <h3>Aggregate transfers<a class="headerlink" href="#aggregate-transfers" title="Link to this heading">#</a></h3>
-<p>Aggregate (non-Social Security) transfers to households are set as a share of GDP with the parameter <span class="math notranslate nohighlight">\(\alpha_T\)</span>. We exclude Social Security from transfers since it is modeled specifically. With this definition, the share of transfers to GDP in 2015 is 0.04 according to <a class="reference external" href="https://data.imf.org/?sk=b052f0f0-c166-43b6-84fa-47cccae3e219&amp;amp;hide_uv=1">IMF data</a>.</p>
+<p>Aggregate (non-Social Security) transfers to households are set as a share of GDP with the parameter <span class="math notranslate nohighlight">\(\alpha_T\)</span>. We exclude Social Security from transfers since it is modeled specifically. With this definition, the share of transfers to GDP in 2015 is 0.034 according to <a class="reference external" href="https://data.imf.org/en/Data-Explorer?datasetUrn=IMF.STA:GFS_SOO(12.0.0)&amp;amp;INDICATOR=G271_T">IMF data</a>.</p>
 </section>
 <section id="government-expenditures">
 <h3>Government expenditures<a class="headerlink" href="#government-expenditures" title="Link to this heading">#</a></h3>
 <p>Government spending on goods and services are also set as a share of GDP with the parameter <span class="math notranslate nohighlight">\(\alpha_G\)</span>. We define government spending as:
 <center>Government Spending = Total Outlays - Transfers - Net Interest on Debt - Social Security</center>
-With this definition, the share of government expenditure to GDP is 0.267 based on <a class="reference external" href="https://data.imf.org/?sk=b052f0f0-c166-43b6-84fa-47cccae3e219&amp;amp;hide_uv=1">data from the IMF</a>.</p>
+With this definition, the share of government expenditure to GDP is 0.095 based on <a class="reference external" href="https://data.imf.org/en/Data-Explorer?datasetUrn=IMF.RES:WEO(9.0.0)&amp;amp;INDICATOR=GGX">data from the IMF</a>.</p>
 </section>
 </section>
 </section>
@@ -523,7 +523,7 @@ With this definition, the share of government expenditure to GDP is 0.267 based 
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Calibration of Firms Parameters</p>
+        <p class="prev-next-title">Calibration of Firm Parameters</p>
       </div>
     </a>
     <a class="right-next"

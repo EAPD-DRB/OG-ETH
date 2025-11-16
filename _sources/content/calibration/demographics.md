@@ -13,7 +13,7 @@ kernelspec:
 (Chap_Demog)=
 # Demographics
 
-Demographics are a key component of the macroeconmic model. {cite}`Nishiyama:2015` and {cite}`DeBackerEtAl:2019` have recently shown that demographic dynamics are likely the biggest influence on macroeconomic time series, exhibiting more influence than fiscal variables or household preference parameters.
+Demographics are a key component of the macroeconomic model. {cite}`Nishiyama:2015` and {cite}`DeBackerEtAl:2019` have recently shown that demographic dynamics are likely the biggest influence on macroeconomic time series, exhibiting more influence than fiscal variables or household preference parameters.
 
 In this chapter, we characterize the equations and parameters that govern the transition dynamics of the population distribution by age. In `OG-ETH`, we take the approach of taking mortality rates and fertility rates from outside estimates. But we estimate our immigration rates as residuals using the mortality rates, fertility rates, and at least two consecutive periods of population distribution data. This approach makes sense if one is modeling a country in which one is not confident in the immigration rate data. If the country has good immigration data, then the immigration residual approach we describe below can be skipped.
 
@@ -53,7 +53,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
 (SecDemogFert)=
 ## Fertility rates
 
-   Our data for Ethiopia fertility rates by age come from United Nations fertility rate data for a country for some range of years (at least one year) and by age. The country_id=710 is for Ethiopia. These data come from the United Nations Data Portal API for UN population data (see https://population.un.org/dataportal/about/dataapi). The UN variable code for Population by 1-year age groups and sex is "47" and that for Fertility rates by age of mother (1-year) is "68".
+   Our data for Ethiopia fertility rates by age come from United Nations fertility rate data for a country for some range of years (at least one year) and by age. The country_id=231 is for Ethiopia. These data come from the United Nations Data Portal API for UN population data (see https://population.un.org/dataportal/about/dataapi). The UN variable code for Population by 1-year age groups and sex is "47" and that for Fertility rates by age of mother (1-year) is "68".
 
   {numref}`Figure %s <FigFertRatesETH>` was created using the [`ogcore.demographics.get_fert()`](https://github.com/PSLmodels/OG-Core/blob/master/ogcore/demographics.py#L146) function, which downloaded the data from the United National Data Portal API and plotted it in Python.[^un_data_portal]
 
@@ -67,7 +67,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
       totpers=100,
       min_age=0,
       max_age=99,
-      country_id="710",
+      country_id="231",
       start_year=YEAR_TO_PLOT,
       end_year=YEAR_TO_PLOT,
       graph=True,
@@ -108,7 +108,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
       totpers=100,
       min_age=0,
       max_age=99,
-      country_id="710",
+      country_id="231",
       start_year=YEAR_TO_PLOT,
       end_year=YEAR_TO_PLOT,
       graph=True,
@@ -156,7 +156,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
       mort_rates=None,
       infmort_rates=None,
       pop_dist=None,
-      country_id="710",
+      country_id="231",
       start_year=YEAR_TO_PLOT,
       end_year=YEAR_TO_PLOT + 50,
       graph=True,
@@ -175,7 +175,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
   Ethiopia immigration rates by age $\left(i_s\right)$ for $E+S=100$: year 2023
   ```
 
-  We calculate our immigration rates for the consecutive-year-periods of population distribution data 2022 and 2023. The immigration rates $i_{s,t}$ that we use in our model are the the residuals described in {eq}`EqPopImmRates` implied by these two consecutive periods. {numref}`Figure %s <FigImmRatesETH>` shows the estimated immigration rates for $E+S=100$ and given the fertility rates from Section {ref}`SecDemogFert` and the mortality rates from Section {ref}`SecDemogMort`. These immigration rates show large out-migration from Ethiopia.[^out_migration]
+  We calculate our immigration rates for the consecutive-year-periods of population distribution data 2022 and 2023. The immigration rates $i_{s,t}$ that we use in our model are the the residuals described in {eq}`EqPopImmRates` implied by these two consecutive periods. {numref}`Figure %s <FigImmRatesETH>` shows the estimated immigration rates for $E+S=100$ and given the fertility rates from Section {ref}`SecDemogFert` and the mortality rates from Section {ref}`SecDemogMort`.
 
   At the end of Section {ref}`SecDemogPopSSTP`, we describe a small adjustment that we make to the immigration rates after a certain number of periods in order to make computation of the transition path equilibrium of the model compute more robustly.
 
@@ -353,4 +353,3 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
 [^calibage_note]: Theoretically, the model works without loss of generality for $S\geq 3$. However, because we are calibrating the ages outside of the economy to be one-fourth of $S$ (e.g., ages 21 to 100 in the economy, and ages 1 to 20 outside of the economy), it is convenient for $S$ to be at least 4.
 [^houseprob_note]: The parameter $\rho_s$ is the probability that a household of age $s$ dies before age $s+1$.
 [^un_data_portal]: Note that you might need a UN Data Portal API token to download the data directly from the United Nations Data Portal site. But the [`demographics.py`](https://github.com/PSLmodels/OG-Core/blob/master/ogcore/demographics.py) module will take the data from a pre-downloaded site if the API token is missing or fails.
-[^out_migration]: Out migration in Ethiopia is clearly a significant trend. {cite}`BusinessTech:2024` reports that "since 2000, around 413,000 Ethiopians have emigrated to other countries - and in 2022, just under 28,000 made their way back."

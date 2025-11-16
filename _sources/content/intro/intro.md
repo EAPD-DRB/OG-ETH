@@ -19,7 +19,7 @@
 (Sec_CoreMaintainers)=
 ## Core Maintainers
 
-Marcelo LaFleur (GitHub handle [@SeaCelo](https://github.com/SeaCelo)) and [Richard W. Evans](https://sites.google.com/site/rickecon/) (GitHub handle [@rickecon](https://github.com/rickecon)) are the core maintainers of `OG-ETH`. If you have questions about or contributions to the model or repository, please submit a GitHub "Issue" described in the {ref}`Sec_GitHubIssue` subsection or "Pull Request" as described in the {ref}`Sec_GitHubPR` subsection of the {ref}`Sec_Workflow` section of the `OG-ETH` {ref}`Chap_ContribGuide`.
+Marcelo LaFleur (GitHub handle [@SeaCelo](https://github.com/SeaCelo)), [Richard W. Evans](https://sites.google.com/site/rickecon/) (GitHub handle [@rickecon](https://github.com/rickecon)), and [Jason DeBacker](https://jasondebacker.com/)(GitHub handle [@jdebacker](https://github.com/jdebacker)) are the core maintainers of `OG-ETH`. If you have questions about or contributions to the model or repository, please submit a GitHub "Issue" described in the {ref}`Sec_GitHubIssue` subsection or "Pull Request" as described in the {ref}`Sec_GitHubPR` subsection of the {ref}`Sec_Workflow` section of the `OG-ETH` {ref}`Chap_ContribGuide`.
 
 
 (Sec_Disclaimer)=

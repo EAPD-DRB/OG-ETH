@@ -199,7 +199,7 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Calibration</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../content/calibration/households.html">Calibration of Household Preference Parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/firms.html">Calibration of Firms Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/firms.html">Calibration of Firm Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../content/calibration/macro.html">Calibration of Macroeconomic Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../content/calibration/demographics.html">Demographics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../content/calibration/earnings.html">Lifetime Earnings Profiles</a></li>
@@ -385,7 +385,7 @@ document.write(`
         <span class="n">macro_data_end_year</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
         <span class="n">demographic_data_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">update_from_api</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># Set True to update from World Bank and UN APIs</span>
+        <span class="n">update_from_api</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Set True to update from World Bank and UN APIs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Calibration class.</span>
@@ -412,6 +412,8 @@ document.write(`
             <span class="n">macro_data_end_year</span><span class="p">,</span>
             <span class="n">update_from_api</span><span class="o">=</span><span class="n">update_from_api</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calibrated macro parameters.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">macro_params</span><span class="p">)</span>
 
         <span class="c1"># io matrix and alpha_c</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">I</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># no need if just one consumption good</span>
@@ -436,7 +438,7 @@ document.write(`
             <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
             <span class="mi">0</span><span class="p">,</span>
             <span class="mi">99</span><span class="p">,</span>
-            <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;710&quot;</span><span class="p">,</span>
+            <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;231&quot;</span><span class="p">,</span>
             <span class="n">initial_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">final_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">GraphDiag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -450,7 +452,7 @@ document.write(`
             <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
             <span class="mi">0</span><span class="p">,</span>
             <span class="mi">99</span><span class="p">,</span>
-            <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;710&quot;</span><span class="p">,</span>
+            <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;231&quot;</span><span class="p">,</span>
             <span class="n">initial_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">final_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">GraphDiag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -458,10 +460,11 @@ document.write(`
 
         <span class="c1"># earnings profiles</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">e</span> <span class="o">=</span> <span class="n">income</span><span class="o">.</span><span class="n">get_e_interp</span><span class="p">(</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span>
             <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span><span class="p">[</span><span class="s2">&quot;omega_SS&quot;</span><span class="p">],</span>
-            <span class="n">demog80</span><span class="p">[</span><span class="s2">&quot;omega_SS&quot;</span><span class="p">],</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">J</span><span class="p">,</span>
             <span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span><span class="p">[</span><span class="s2">&quot;omega_SS&quot;</span><span class="p">],</span>
             <span class="n">plot_path</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
         <span class="p">)</span>
 
