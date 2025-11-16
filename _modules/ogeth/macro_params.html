@@ -1,0 +1,733 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ogeth.macro_params &#8212; OG-ETH</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/exercise.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/proof.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ogeth/macro_params';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../content/intro/intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/OG-ETH_logo.png" class="logo__image only-light" alt="OG-ETH - Home"/>
+    <script>document.write(`<img src="../../_static/OG-ETH_logo.png" class="logo__image only-dark" alt="OG-ETH - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../content/intro/intro.html">
+                    OG-ETH
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contributing to OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../content/contributing/contributor_guide.html">Contributor Guide</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">OG-ETH API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../content/api/public_api.html">API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../content/api/calibrate.html">Main Calibration Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../content/api/income.html">Life-cycle productivity profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../content/api/input_output.html">Output-Consumption Bridge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../content/api/macro_params.html">Macro Parameter Estimation Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../content/api/utils.html">Calibration Utilities</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Calibration</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/households.html">Calibration of Household Preference Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/firms.html">Calibration of Firms Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/macro.html">Calibration of Macroeconomic Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/demographics.html">Demographics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/earnings.html">Lifetime Earnings Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/taxes.html">Taxes in OG-ETH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/UBI.html">Universal Basic Income (UBI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/matching_lwi.html">Matching Labor, Wealth, and Income Moments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/calibration/exogenous_parameters.html">Exogenous Parameters</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../content/OGETH_references.html">References</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Citations of OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../content/citations.html">Citations and use cases of OG-ETH</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH/issues/new?title=Issue%20on%20page%20%2F_modules/ogeth/macro_params.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ogeth.macro_params</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module uses data from World Bank WDI, World Bank Quarterly Public</span>
+<span class="sd">Sector Debt (QPSD) database, the IMF, and UN ILO to find values for</span>
+<span class="sd">parameters for the OG-ETH model that rely on macro data for calibration.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># imports</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas_datareader</span><span class="w"> </span><span class="kn">import</span> <span class="n">wb</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
+
+
+<div class="viewcode-block" id="get_macro_params">
+<a class="viewcode-back" href="../../content/api/macro_params.html#ogeth.macro_params.get_macro_params">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_macro_params</span><span class="p">(</span>
+    <span class="n">data_start_date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1947</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">data_end_date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+    <span class="n">country_iso</span><span class="o">=</span><span class="s2">&quot;ETH&quot;</span><span class="p">,</span>
+    <span class="n">update_from_api</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute values of parameters that are derived from macro data</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_start_date (datetime): start date for data</span>
+<span class="sd">        data_end_date (datetime): end date for data</span>
+<span class="sd">        country_iso (str): ISO code for country</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        macro_parameters (dict): dictionary of parameter values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># initialize a dictionary of parameters</span>
+    <span class="n">macro_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># baseline date formatted for World Bank data</span>
+    <span class="n">baseline_YYYYQ</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">data_end_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">&quot;Q&quot;</span>
+        <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">data_end_date</span><span class="p">)</span><span class="o">.</span><span class="n">quarter</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve data from the World Bank World Development Indicators.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Dictionaries of variables and their corresponding World Bank codes</span>
+    <span class="c1"># Annual data</span>
+    <span class="n">wb_a_variable_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;GDP per capita (constant 2015 US$)&quot;</span><span class="p">:</span> <span class="s2">&quot;NY.GDP.PCAP.KD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Real GDP (constant 2015 US$)&quot;</span><span class="p">:</span> <span class="s2">&quot;NY.GDP.MKTP.KD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Nominal GDP (current US$)&quot;</span><span class="p">:</span> <span class="s2">&quot;NY.GDP.MKTP.CD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;General government final consumption expenditure (current US$)&quot;</span><span class="p">:</span> <span class="s2">&quot;NE.CON.GOVT.CD&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="c1"># Quarterly data</span>
+    <span class="n">wb_q_variable_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Gross PSD USD - domestic creditors&quot;</span><span class="p">:</span> <span class="s2">&quot;DP.DOD.DECD.CR.PS.CD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Gross PSD USD - external creditors&quot;</span><span class="p">:</span> <span class="s2">&quot;DP.DOD.DECX.CR.PS.CD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Gross PSD Gen Gov - percentage of GDP&quot;</span><span class="p">:</span> <span class="s2">&quot;DP.DOD.DECT.CR.GG.Z1&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">update_from_api</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># pull series of interest from the WB using pandas_datareader</span>
+            <span class="c1"># Annual data</span>
+            <span class="n">wb_data_a</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">download</span><span class="p">(</span>
+                <span class="n">indicator</span><span class="o">=</span><span class="n">wb_a_variable_dict</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+                <span class="n">country</span><span class="o">=</span><span class="n">country_iso</span><span class="p">,</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">data_start_date</span><span class="p">,</span>
+                <span class="n">end</span><span class="o">=</span><span class="n">data_end_date</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">wb_data_a</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+                <span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">((</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">wb_a_variable_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span>
+                <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># Quarterly data</span>
+            <span class="n">wb_data_q</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">download</span><span class="p">(</span>
+                <span class="n">indicator</span><span class="o">=</span><span class="n">wb_q_variable_dict</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+                <span class="n">country</span><span class="o">=</span><span class="n">country_iso</span><span class="p">,</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">data_start_date</span><span class="p">,</span>
+                <span class="n">end</span><span class="o">=</span><span class="n">data_end_date</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">wb_data_q</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+                <span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">((</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">wb_q_variable_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span>
+                <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># Remove the hierarchical index (country and year) of</span>
+            <span class="c1"># wb_data_q and create a single row index using year</span>
+            <span class="n">wb_data_q</span> <span class="o">=</span> <span class="n">wb_data_q</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+            <span class="n">wb_data_q</span> <span class="o">=</span> <span class="n">wb_data_q</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Function to get the latest valid data if baseline_YYYYQ is missing or NaN</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">get_valid_data</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">baseline_YYYYQ</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">baseline_YYYYQ</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                    <span class="n">latest_non_nan</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">last_valid_index</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">latest_non_nan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Warning: No data for </span><span class="si">{</span><span class="n">baseline_YYYYQ</span><span class="si">}</span><span class="s2">. Using last available quarter: </span><span class="si">{</span><span class="n">latest_non_nan</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">latest_non_nan</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="s2">&quot;Warning: No historical data available. Skipping update.&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">return</span> <span class="n">value</span>
+
+            <span class="c1"># Compute macro parameters from WB data</span>
+            <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;initial_debt_ratio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_valid_data</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">wb_data_q</span><span class="p">[</span><span class="s2">&quot;Gross PSD Gen Gov - percentage of GDP&quot;</span><span class="p">])</span>
+                <span class="o">/</span> <span class="mi">100</span><span class="p">,</span>
+                <span class="n">baseline_YYYYQ</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;initial_debt_ratio updated from World Bank API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;initial_debt_ratio&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Compute initial_foreign_debt_ratio safely</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="s2">&quot;Gross PSD USD - external creditors&quot;</span> <span class="ow">in</span> <span class="n">wb_data_q</span><span class="o">.</span><span class="n">columns</span>
+                <span class="ow">and</span> <span class="s2">&quot;Gross PSD USD - domestic creditors&quot;</span> <span class="ow">in</span> <span class="n">wb_data_q</span><span class="o">.</span><span class="n">columns</span>
+            <span class="p">):</span>
+
+                <span class="n">total_debt</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">wb_data_q</span><span class="p">[</span><span class="s2">&quot;Gross PSD USD - domestic creditors&quot;</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">wb_data_q</span><span class="p">[</span><span class="s2">&quot;Gross PSD USD - external creditors&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Avoid division by zero</span>
+                <span class="n">wb_data_q</span><span class="p">[</span><span class="s2">&quot;foreign_debt_ratio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wb_data_q</span><span class="p">[</span>
+                    <span class="s2">&quot;Gross PSD USD - external creditors&quot;</span>
+                <span class="p">]</span> <span class="o">/</span> <span class="n">total_debt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+                <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;initial_foreign_debt_ratio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">get_valid_data</span><span class="p">(</span>
+                        <span class="n">wb_data_q</span><span class="p">[</span><span class="s2">&quot;foreign_debt_ratio&quot;</span><span class="p">],</span> <span class="n">baseline_YYYYQ</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning: Missing debt variables in World Bank data. Skipping update for initial_foreign_debt_ratio.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;initial_foreign_debt_ratio updated from World Bank API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;initial_foreign_debt_ratio&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Compute zeta_D safely</span>
+            <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;zeta_D&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;initial_foreign_debt_ratio&quot;</span><span class="p">]</span>
+            <span class="p">]</span>  <span class="c1"># Since it&#39;s the same formula, we use the same calculated value</span>
+
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;zeta_D updated from World Bank API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;zeta_D&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Compute annual GDP growth safely</span>
+            <span class="k">if</span> <span class="s2">&quot;GDP per capita (constant 2015 US$)&quot;</span> <span class="ow">in</span> <span class="n">wb_data_a</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">g_y_series</span> <span class="o">=</span> <span class="n">wb_data_a</span><span class="p">[</span>
+                    <span class="s2">&quot;GDP per capita (constant 2015 US$)&quot;</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">pct_change</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># If all values are NaN, return None</span>
+                <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;g_y_annual&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">g_y_series</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">g_y_series</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning: Missing GDP per capita data in World Bank data. Skipping update for g_y_annual.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;g_y_annual updated from World Bank API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;g_y_annual&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to retrieve data from World Bank&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Will not update the following parameters:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;[initial_debt_ratio, initial_foreign_debt_ratio, zeta_D, g_y]&quot;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not updating from World Bank API&quot;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve labour share data from the United Nations ILOSTAT Data API</span>
+<span class="sd">    (see https://rshiny.ilo.org/dataexplorer9/?lang=en)</span>
+<span class="sd">    The series code is SDG_1041_NOC_RT_A (capital share)</span>
+<span class="sd">    Labor share (gamma) = 1 - capital share</span>
+<span class="sd">    If this fails we will not update gamma in &#39;default_parameters.json&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">update_from_api</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;https://rplumber.ilo.org/data/indicator/&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;?id=SDG_1041_NOC_RT_A&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&amp;ref_area=&quot;</span>
+                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">country_iso</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot;&amp;timefrom=&quot;</span>
+                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_start_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot;&amp;timeto=&quot;</span>
+                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_end_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot;&amp;type=both&amp;format=.csv&quot;</span>
+            <span class="p">)</span>
+            <span class="c1"># Add headers</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36&quot;</span>
+            <span class="p">}</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Attempting to update gamma from ILOSTAT&quot;</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Received status code </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Request successful.&quot;</span><span class="p">)</span>
+            <span class="n">csv_content</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            <span class="n">df_temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_content</span><span class="p">)</span>
+            <span class="n">ilo_data</span> <span class="o">=</span> <span class="n">df_temp</span><span class="p">[[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;obs_value&quot;</span><span class="p">]]</span>
+            <span class="c1"># find gamma, capital&#39;s share of income</span>
+            <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;gamma&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="mi">1</span>
+                <span class="o">-</span> <span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">ilo_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                            <span class="n">ilo_data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">data_end_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="s2">&quot;obs_value&quot;</span>
+                        <span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+                    <span class="p">)</span>
+                    <span class="o">/</span> <span class="mi">100</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;gamma updated from ILOSTAT API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to retrieve data from ILOSTAT&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Will not update gamma&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not updating from ILOSTAT API&quot;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calibrate parameters from IMF data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">update_from_api</span><span class="p">:</span>
+        <span class="c1"># alpha_T, non-social security benefits as a fraction of GDP</span>
+        <span class="c1"># source: https://data.imf.org/?sk=78d0bcc1-7a8f-44eb-8a2c-d4e472b8e64b&amp;hide_uv=1</span>
+        <span class="c1"># alpha_T = Employment-related social benefits expense - Social security benefits expense</span>
+        <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;alpha_T&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.36</span> <span class="o">-</span> <span class="mf">0.0</span><span class="p">]</span>  <span class="c1"># 2022 = 0.36</span>
+
+        <span class="c1"># alpha_G, gov&#39;t consumption expenditures as a fraction of GDP</span>
+        <span class="c1"># source: https://data.imf.org/?sk=23ca1c1d-e6a5-4f18-bc2e-7e215837f971&amp;hide_uv=1</span>
+        <span class="c1"># alpha_G = Expense	- Interest expense - Social benefits expense</span>
+        <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;alpha_G&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.324</span> <span class="o">-</span> <span class="mf">0.047</span> <span class="o">-</span> <span class="mf">0.036</span><span class="p">]</span>  <span class="c1"># 2022 = 0.241</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;</span>
+<span class="sd">        Esimate the discount on sovereign yields relative to private debt</span>
+<span class="sd">        Follow the methodology in Li, Magud, Werner, Witte (2021)</span>
+<span class="sd">        available at:</span>
+<span class="sd">        https://www.imf.org/en/Publications/WP/Issues/2021/06/04/The-Long-Run-Impact-of-Sovereign-Yields-on-Corporate-Yields-in-Emerging-Markets-50224</span>
+<span class="sd">        discussion is here: https://github.com/EAPD-DRB/OG-ETH/issues/22</span>
+<span class="sd">        Steps:</span>
+<span class="sd">        1) Generate modelled corporate yields (corp_yhat) for a range of</span>
+<span class="sd">        sovereign yields (sov_y)  using the estimated equation in col 2 of</span>
+<span class="sd">        table 8 (and figure 3). 2) Estimate the OLS using sovereign yields</span>
+<span class="sd">        as the dependent variable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># # estimate r_gov_shift and r_gov_scale</span>
+        <span class="n">sov_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span>
+        <span class="n">corp_yhat</span> <span class="o">=</span> <span class="mf">8.199</span> <span class="o">-</span> <span class="p">(</span><span class="mf">2.975</span> <span class="o">*</span> <span class="n">sov_y</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.478</span> <span class="o">*</span> <span class="n">sov_y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">corp_yhat</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">corp_yhat</span><span class="p">)</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span>
+            <span class="n">sov_y</span><span class="p">,</span>
+            <span class="n">corp_yhat</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+        <span class="c1"># First term is the constant and needs to be divided by 100 to have</span>
+        <span class="c1"># the correct unit. Second term is the coefficient</span>
+        <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;r_gov_shift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">res</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span><span class="p">]</span>
+        <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;r_gov_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="c1"># Report new values</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alpha_T updated from IMF data: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;alpha_T&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alpha_G updated from IMF data: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;alpha_G&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;r_gov_shift updated from IMF data: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;r_gov_shift&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;r_gov_scale updated from IMF data: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;r_gov_scale&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not updating alpha_T, alpha_G, r_gov_shift, r_gov_scale&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">macro_parameters</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Marcelo LaFleur, Richard W. Evans, and Jason DeBacker
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
