@@ -1,0 +1,927 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Demographics &#8212; OG-ETH</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/exercise.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/proof.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'content/calibration/demographics';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Lifetime Earnings Profiles" href="earnings.html" />
+    <link rel="prev" title="Calibration of Macroeconomic Parameters" href="macro.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../intro/intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/OG-ETH_logo.png" class="logo__image only-light" alt="OG-ETH - Home"/>
+    <script>document.write(`<img src="../../_static/OG-ETH_logo.png" class="logo__image only-dark" alt="OG-ETH - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro/intro.html">
+                    OG-ETH
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contributing to OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributor_guide.html">Contributor Guide</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">OG-ETH API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/public_api.html">API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/calibrate.html">Main Calibration Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/income.html">Life-cycle productivity profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/input_output.html">Output-Consumption Bridge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/macro_params.html">Macro Parameter Estimation Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/utils.html">Calibration Utilities</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Calibration</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="households.html">Calibration of Household Preference Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firms.html">Calibration of Firms Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="macro.html">Calibration of Macroeconomic Parameters</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Demographics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="earnings.html">Lifetime Earnings Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="taxes.html">Taxes in OG-ETH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UBI.html">Universal Basic Income (UBI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_lwi.html">Matching Labor, Wealth, and Income Moments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exogenous_parameters.html">Exogenous Parameters</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../OGETH_references.html">References</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Citations of OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../citations.html">Citations and use cases of OG-ETH</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/EAPD-DRB/OG-ETH/blob/main/docs/book/content/calibration/demographics.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Colab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Colab logo" src="../../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH/issues/new?title=Issue%20on%20page%20%2Fcontent/calibration/demographics.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/content/calibration/demographics.ipynb" target="_blank"
+   class="btn btn-sm btn-download-notebook-button dropdown-item"
+   title="Download notebook file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="../../_sources/content/calibration/demographics.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Demographics</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fertility-rates">Fertility rates</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mortality-rates">Mortality rates</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#immigration-rates">Immigration rates</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#population-steady-state-and-transition-path">Population steady-state and transition path</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="demographics">
+<span id="chap-demog"></span><h1>Demographics<a class="headerlink" href="#demographics" title="Link to this heading">#</a></h1>
+<p>Demographics are a key component of the macroeconmic model. <span id="id1">[<a class="reference internal" href="../OGETH_references.html#id60" title="Shinichi Nishiyama. Fiscal policy effects in a heterogeneous-agent olg economy with an aging population. Journal of Economic Dynamics and Control, 61:114-132, December 2015.">Nishiyama, 2015</a>]</span> and <span id="id2">[<a class="reference internal" href="../OGETH_references.html#id26" title="Jason DeBacker, Richard W. Evans, and Kerk L. Phillips. Integrating microsimulation models of tax policy into a dge macroeconomic model. Public Finance Review, 47(2):207-275, March 2019.">DeBacker <em>et al.</em>, 2019</a>]</span> have recently shown that demographic dynamics are likely the biggest influence on macroeconomic time series, exhibiting more influence than fiscal variables or household preference parameters.</p>
+<p>In this chapter, we characterize the equations and parameters that govern the transition dynamics of the population distribution by age. In <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code>, we take the approach of taking mortality rates and fertility rates from outside estimates. But we estimate our immigration rates as residuals using the mortality rates, fertility rates, and at least two consecutive periods of population distribution data. This approach makes sense if one is modeling a country in which one is not confident in the immigration rate data. If the country has good immigration data, then the immigration residual approach we describe below can be skipped.</p>
+<p>We define <span class="math notranslate nohighlight">\(\omega_{s,t}\)</span> as the number of households of age <span class="math notranslate nohighlight">\(s\)</span> alive at time <span class="math notranslate nohighlight">\(t\)</span>. A measure <span class="math notranslate nohighlight">\(\omega_{1,t}\)</span> of households is born in each period <span class="math notranslate nohighlight">\(t\)</span> and live for up to <span class="math notranslate nohighlight">\(E+S\)</span> periods, with <span class="math notranslate nohighlight">\(S\geq 4\)</span>.<a class="footnote-reference brackets" href="#calibage-note" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> Households are termed “youth”, and do not participate in market activity during ages <span class="math notranslate nohighlight">\(1\leq s\leq E\)</span>. The households enter the workforce and economy in period <span class="math notranslate nohighlight">\(E+1\)</span> and remain in the workforce until they unexpectedly die or live until age <span class="math notranslate nohighlight">\(s=E+S\)</span>. We model the population with households age <span class="math notranslate nohighlight">\(s\leq E\)</span> outside of the workforce and economy in order most closely match the empirical population dynamics.</p>
+<p>The population of agents of each age in each period <span class="math notranslate nohighlight">\(\omega_{s,t}\)</span> evolves according to the following function,</p>
+<div class="math notranslate nohighlight" id="equation-eqpoplawofmotion">
+<span class="eqno">(3)<a class="headerlink" href="#equation-eqpoplawofmotion" title="Link to this equation">#</a></span>\[\begin{split}    \omega_{1,t+1} &amp;= (1 - \rho_{0,t})\sum_{s=1}^{E+S} f_{s,t}\omega_{s,t} + i_1\omega_{1,t}\quad\forall t \\
+    \omega_{s+1,t+1} &amp;= (1 - \rho_{s,t})\omega_{s,t} + i_{s+1,t}\omega_{s+1,t}\quad\forall t\quad\text{and}\quad 1\leq s \leq E+S-1\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(f_{s,t}\geq 0\)</span> is an age-specific fertility rate, <span class="math notranslate nohighlight">\(i_{s,t}\)</span> is an age-specific net immigration rate, <span class="math notranslate nohighlight">\(\rho_{s,t}\)</span> is an age-specific mortality hazard rate, and <span class="math notranslate nohighlight">\(\rho_{0,t}\)</span> is an infant mortality rate.<a class="footnote-reference brackets" href="#houseprob-note" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> The total population in the economy <span class="math notranslate nohighlight">\(N_t\)</span> at any period is simply the sum of households in the economy, the population growth rate in any period <span class="math notranslate nohighlight">\(t\)</span> from the previous period <span class="math notranslate nohighlight">\(t-1\)</span> is <span class="math notranslate nohighlight">\(g_{n,t}\)</span>, <span class="math notranslate nohighlight">\(\tilde{N}_t\)</span> is the working age population, and <span class="math notranslate nohighlight">\(\tilde{g}_{n,t}\)</span> is the working age population growth rate in any period <span class="math notranslate nohighlight">\(t\)</span> from the previous period <span class="math notranslate nohighlight">\(t-1\)</span>.</p>
+<div class="math notranslate nohighlight" id="equation-eqpopn">
+<span class="eqno">(4)<a class="headerlink" href="#equation-eqpopn" title="Link to this equation">#</a></span>\[  N_t\equiv\sum_{s=1}^{E+S} \omega_{s,t} \quad\forall t\]</div>
+<div class="math notranslate nohighlight" id="equation-eqpopgrowth">
+<span class="eqno">(5)<a class="headerlink" href="#equation-eqpopgrowth" title="Link to this equation">#</a></span>\[  g_{n,t+1} \equiv \frac{N_{t+1}}{N_t} - 1 \quad\forall t\]</div>
+<div class="math notranslate nohighlight" id="equation-eqpopntil">
+<span class="eqno">(6)<a class="headerlink" href="#equation-eqpopntil" title="Link to this equation">#</a></span>\[  \tilde{N}_t\equiv\sum_{s=E+1}^{E+S} \omega_{s,t} \quad\forall t\]</div>
+<div class="math notranslate nohighlight" id="equation-eqpopgrowthtil">
+<span class="eqno">(7)<a class="headerlink" href="#equation-eqpopgrowthtil" title="Link to this equation">#</a></span>\[  \tilde{g}_{n,t+1} \equiv \frac{\tilde{N}_{t+1}}{\tilde{N}_t} - 1 \quad\forall t\]</div>
+<p>We discuss the approach to estimating fertility rates <span class="math notranslate nohighlight">\(f_{s,t}\)</span>, mortality rates <span class="math notranslate nohighlight">\(\rho_{s,t}\)</span>, and immigration rates <span class="math notranslate nohighlight">\(i_{s,t}\)</span> in Sections <a class="reference internal" href="#secdemogfert"><span class="std std-ref">Fertility rates</span></a>, <a class="reference internal" href="#secdemogmort"><span class="std std-ref">Mortality rates</span></a>, and <a class="reference internal" href="#secdemogimm"><span class="std std-ref">Immigration rates</span></a>.</p>
+<section id="fertility-rates">
+<span id="secdemogfert"></span><h2>Fertility rates<a class="headerlink" href="#fertility-rates" title="Link to this heading">#</a></h2>
+<p>Our data for Ethiopia fertility rates by age come from United Nations fertility rate data for a country for some range of years (at least one year) and by age. The country_id=710 is for Ethiopia. These data come from the United Nations Data Portal API for UN population data (see <a class="reference external" href="https://population.un.org/dataportal/about/dataapi">https://population.un.org/dataportal/about/dataapi</a>). The UN variable code for Population by 1-year age groups and sex is “47” and that for Fertility rates by age of mother (1-year) is “68”.</p>
+<p><a class="reference internal" href="#figfertrateseth"><span class="std std-numref">Figure 1</span></a> was created using the <a class="reference external" href="https://github.com/PSLmodels/OG-Core/blob/master/ogcore/demographics.py#L146"><code class="docutils literal notranslate"><span class="pre">ogcore.demographics.get_fert()</span></code></a> function, which downloaded the data from the United National Data Portal API and plotted it in Python.<a class="footnote-reference brackets" href="#un-data-portal" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p>
+<div class="cell tag_hide-input tag_remove-output docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ogcore.demographics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">demog</span>
+<span class="n">plot_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;images&#39;</span><span class="p">)</span>
+
+<span class="n">fert_rates</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">demog</span><span class="o">.</span><span class="n">get_fert</span><span class="p">(</span>
+    <span class="n">totpers</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">min_age</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_age</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+    <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;710&quot;</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">YEAR_TO_PLOT</span><span class="p">,</span>
+    <span class="n">end_year</span><span class="o">=</span><span class="n">YEAR_TO_PLOT</span><span class="p">,</span>
+    <span class="n">graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">plot_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">download_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="s2">&quot;fert_rates.png&quot;</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<figure class="align-default" id="figfertrateseth">
+<a class="reference internal image-reference" href="../../_images/fert_rates.png"><img alt="../../_images/fert_rates.png" src="../../_images/fert_rates.png" style="height: 400px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Ethiopia fertility rates by age <span class="math notranslate nohighlight">\(\left(f_s\right)\)</span> for <span class="math notranslate nohighlight">\(E+S=100\)</span>: year 2023</span><a class="headerlink" href="#figfertrateseth" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>The fertility rates in the UN data are births per 1,000 women of age-<span class="math notranslate nohighlight">\(s\)</span>. We adjust the units of those rates to represent the number of births per total population of both men and women of age-<span class="math notranslate nohighlight">\(s\)</span>.</p>
+</section>
+<section id="mortality-rates">
+<span id="secdemogmort"></span><h2>Mortality rates<a class="headerlink" href="#mortality-rates" title="Link to this heading">#</a></h2>
+<p>The mortality rates in our model <span class="math notranslate nohighlight">\(\rho_{s,t}\)</span> are a one-period hazard rate and represent the probability of dying within one year, given that an household is alive at the beginning of the period in which they are age-<span class="math notranslate nohighlight">\(s\)</span>. These data come from the United Nations Population Data Portal API for UN population data (see <a class="reference external" href="https://population.un.org/dataportal/about/dataapi">https://population.un.org/dataportal/about/dataapi</a>). The model uses neonatal mortality rates (deaths per 1,000 live births, divided by 1,000) for the infant mortality rate from World Bank World Development Indicators, available at <a class="reference external" href="https://data.worldbank.org/indicator/SH.DYN.NMRT">https://data.worldbank.org/indicator/SH.DYN.NMRT</a></p>
+<p>The mortality rates are a population-weighted average of the male and female mortality rates by one-year age increments reported by United Nations. The maximum age in years in our model is truncated to 100-years old. In addition, we constrain the mortality rate to be 1.0 or 100 percent at the maximum age of 100.</p>
+<div class="cell tag_hide-input tag_remove-output docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ogcore.demographics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">demog</span>
+
+<span class="n">plot_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;images&#39;</span><span class="p">)</span>
+<span class="n">mort_rates</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">demog</span><span class="o">.</span><span class="n">get_mort</span><span class="p">(</span>
+    <span class="n">totpers</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">min_age</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_age</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+    <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;710&quot;</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">YEAR_TO_PLOT</span><span class="p">,</span>
+    <span class="n">end_year</span><span class="o">=</span><span class="n">YEAR_TO_PLOT</span><span class="p">,</span>
+    <span class="n">graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">plot_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">download_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Age ($s$)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Mortality rate ($\rho_s$)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="s2">&quot;mort_rates.png&quot;</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<figure class="align-default" id="figmortrateseth">
+<a class="reference internal image-reference" href="../../_images/mort_rates.png"><img alt="../../_images/mort_rates.png" src="../../_images/mort_rates.png" style="height: 400px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">Ethiopia mortality rates by age <span class="math notranslate nohighlight">\(\left(\rho_{s,t}\right)\)</span> for <span class="math notranslate nohighlight">\(E+S=100\)</span>: year 2023</span><a class="headerlink" href="#figmortrateseth" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="immigration-rates">
+<span id="secdemogimm"></span><h2>Immigration rates<a class="headerlink" href="#immigration-rates" title="Link to this heading">#</a></h2>
+<p>Because of the difficulty in getting accurate immigration rate data by age, we estimate the immigration rates by age in our model <span class="math notranslate nohighlight">\(i_s\)</span> as the average residual that reconciles the current-period population distribution with next period’s population distribution given fertility rates <span class="math notranslate nohighlight">\(f_s\)</span> and mortality rates <span class="math notranslate nohighlight">\(\rho_{s,t}\)</span>. Solving equations <a class="reference internal" href="#equation-eqpoplawofmotion">(3)</a> for the immigration rate <span class="math notranslate nohighlight">\(i_s\)</span> gives the following characterization of the immigration rates in given population levels in any two consecutive periods <span class="math notranslate nohighlight">\(\omega_{s,t}\)</span> and <span class="math notranslate nohighlight">\(\omega_{s,t+1}\)</span> and the fertility rates <span class="math notranslate nohighlight">\(f_s\)</span> and mortality rates <span class="math notranslate nohighlight">\(\rho_{s,t}\)</span>.</p>
+<div class="math notranslate nohighlight" id="equation-eqpopimmrates">
+<span class="eqno">(8)<a class="headerlink" href="#equation-eqpopimmrates" title="Link to this equation">#</a></span>\[\begin{split}    i_{1,t} &amp;= \frac{\omega_{1,t+1} - (1 - \rho_{0,t})\sum_{s=1}^{E+S}f_{s,t}\omega_{s,t}}{\omega_{1,t}}\quad\forall t \\
+    i_{s+1,t+1} &amp;= \frac{\omega_{s+1,t+1} - (1 - \rho_{s,t})\omega_{s,t}}{\omega_{s+1,t}}\qquad\qquad\forall t\quad\text{and}\quad 1\leq s \leq E+S-1\end{split}\]</div>
+<div class="cell tag_hide-input tag_remove-output docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ogcore.demographics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">demog</span>
+<span class="n">plot_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;images&#39;</span><span class="p">)</span>
+
+<span class="n">imm_rates</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">demog</span><span class="o">.</span><span class="n">get_imm_rates</span><span class="p">(</span>
+    <span class="n">totpers</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">min_age</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_age</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+    <span class="n">fert_rates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mort_rates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">infmort_rates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">pop_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;710&quot;</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">YEAR_TO_PLOT</span><span class="p">,</span>
+    <span class="n">end_year</span><span class="o">=</span><span class="n">YEAR_TO_PLOT</span> <span class="o">+</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="n">graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">plot_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">download_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="s2">&quot;imm_rates.png&quot;</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<figure class="align-default" id="figimmrateseth">
+<a class="reference internal image-reference" href="../../_images/imm_rates.png"><img alt="../../_images/imm_rates.png" src="../../_images/imm_rates.png" style="height: 400px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">Ethiopia immigration rates by age <span class="math notranslate nohighlight">\(\left(i_s\right)\)</span> for <span class="math notranslate nohighlight">\(E+S=100\)</span>: year 2023</span><a class="headerlink" href="#figimmrateseth" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>We calculate our immigration rates for the consecutive-year-periods of population distribution data 2022 and 2023. The immigration rates <span class="math notranslate nohighlight">\(i_{s,t}\)</span> that we use in our model are the the residuals described in <a class="reference internal" href="#equation-eqpopimmrates">(8)</a> implied by these two consecutive periods. <a class="reference internal" href="#figimmrateseth"><span class="std std-numref">Figure 3</span></a> shows the estimated immigration rates for <span class="math notranslate nohighlight">\(E+S=100\)</span> and given the fertility rates from Section <a class="reference internal" href="#secdemogfert"><span class="std std-ref">Fertility rates</span></a> and the mortality rates from Section <a class="reference internal" href="#secdemogmort"><span class="std std-ref">Mortality rates</span></a>. These immigration rates show large out-migration from Ethiopia.<a class="footnote-reference brackets" href="#out-migration" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p>
+<p>At the end of Section <a class="reference internal" href="#secdemogpopsstp"><span class="std std-ref">Population steady-state and transition path</span></a>, we describe a small adjustment that we make to the immigration rates after a certain number of periods in order to make computation of the transition path equilibrium of the model compute more robustly.</p>
+</section>
+<section id="population-steady-state-and-transition-path">
+<span id="secdemogpopsstp"></span><h2>Population steady-state and transition path<a class="headerlink" href="#population-steady-state-and-transition-path" title="Link to this heading">#</a></h2>
+<p>This model requires information about mortality rates <span class="math notranslate nohighlight">\(\rho_{s,t}\)</span> in order to solve for the household’s problem each period. It also requires the steady-state stationary population distribution <span class="math notranslate nohighlight">\(\bar{\omega}_{s}\)</span> and population growth rate <span class="math notranslate nohighlight">\(\bar{g}_n\)</span> as well as the full transition path of the stationary population distribution <span class="math notranslate nohighlight">\(\hat{\omega}_{s,t}\)</span> and population grow rate <span class="math notranslate nohighlight">\(\tilde{g}_{n,t}\)</span> from the current state to the steady-state. To solve for the steady-state and the transition path of the stationary population distribution, we write the stationary population dynamic equations <a class="reference internal" href="#equation-eqpoplawofmotionstat">(9)</a> and their matrix representation <a class="reference internal" href="#equation-eqpoplomstatmat">(10)</a>.</p>
+<div class="math notranslate nohighlight" id="equation-eqpoplawofmotionstat">
+<span class="eqno">(9)<a class="headerlink" href="#equation-eqpoplawofmotionstat" title="Link to this equation">#</a></span>\[\begin{split}    \hat{\omega}_{1,t+1} &amp;= \frac{(1-\rho_{0,t})\sum_{s=1}^{E+S} f_{s,t}\hat{\omega}_{s,t} + i_{1,t}\hat{\omega}_{1,t}}{1+\tilde{g}_{n,t+1}}\quad\forall t \\
+    \hat{\omega}_{s+1,t+1} &amp;= \frac{(1 - \rho_{s,t})\hat{\omega}_{s,t} + i_{s+1,t}\hat{\omega}_{s+1,t}}{1+\tilde{g}_{n,t+1}}\qquad\quad\:\forall t\quad\text{and}\quad 1\leq s \leq E+S-1\end{split}\]</div>
+<div class="math notranslate nohighlight" id="equation-eqpoplomstatmat">
+<span class="eqno">(10)<a class="headerlink" href="#equation-eqpoplomstatmat" title="Link to this equation">#</a></span>\[\begin{split}    &amp; \begin{bmatrix}
+      \hat{\omega}_{1,t+1} \\ \hat{\omega}_{2,t+1} \\ \hat{\omega}_{2,t+1} \\ \vdots \\ \hat{\omega}_{E+S-1,t+1} \\ \hat{\omega}_{E+S,t+1}
+    \end{bmatrix}= \frac{1}{1 + g_{n,t+1}} \times ... \\
+    &amp; \begin{bmatrix}
+      (1-\rho_0)f_1+i_1 &amp; (1-\rho_0)f_2 &amp; (1-\rho_0)f_3 &amp; \cdots &amp; (1-\rho_0)f_{E+S-1} &amp; (1-\rho_0)f_{E+S} \\
+      1-\rho_1 &amp; i_2 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 \\
+      0 &amp; 1-\rho_2 &amp; i_3 &amp; \cdots &amp; 0 &amp; 0 \\
+      \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots \\
+      0 &amp; 0 &amp; 0 &amp; \cdots &amp; i_{E+S-1} &amp; 0 \\
+      0 &amp; 0 &amp; 0 &amp; \cdots &amp; 1-\rho_{E+S-1} &amp; i_{E+S}
+    \end{bmatrix}
+    \begin{bmatrix}
+      \hat{\omega}_{1,t} \\ \hat{\omega}_{2,t} \\ \hat{\omega}_{2,t} \\ \vdots \\ \hat{\omega}_{E+S-1,t} \\ \hat{\omega}_{E+S,t}
+    \end{bmatrix}\end{split}\]</div>
+<p>We can write system <a class="reference internal" href="#equation-eqpoplomstatmat">(10)</a> more simply in the following way.</p>
+<div class="math notranslate nohighlight" id="equation-eqpoplomstatmat2">
+<span class="eqno">(11)<a class="headerlink" href="#equation-eqpoplomstatmat2" title="Link to this equation">#</a></span>\[  \boldsymbol{\hat{\omega}}_{t+1} = \frac{1}{1+g_{n,t+1}}\boldsymbol{\Omega}\boldsymbol{\hat{\omega}}_t \quad\forall t\]</div>
+<p>The stationary steady-state population distribution <span class="math notranslate nohighlight">\(\boldsymbol{\bar{\omega}}\)</span> is the eigenvector <span class="math notranslate nohighlight">\(\boldsymbol{\omega}\)</span> with eigenvalue <span class="math notranslate nohighlight">\((1+\bar{g}_n)\)</span> of the matrix <span class="math notranslate nohighlight">\(\boldsymbol{\Omega}\)</span> that satisfies the following version of <a class="reference internal" href="#equation-eqpoplomstatmat2">(11)</a>.</p>
+<div class="math notranslate nohighlight" id="equation-eqpoplomss">
+<span class="eqno">(12)<a class="headerlink" href="#equation-eqpoplomss" title="Link to this equation">#</a></span>\[  (1+\bar{g}_n)\boldsymbol{\bar{\omega}} = \boldsymbol{\Omega}\boldsymbol{\bar{\omega}}\]</div>
+<div class="tip admonition">
+<p class="admonition-title">Proposition</p>
+<p>If the age <span class="math notranslate nohighlight">\(s=1\)</span> immigration rate is <span class="math notranslate nohighlight">\(i_1&gt;-(1-\rho_0)f_1\)</span> and the other immigration rates are strictly positive <span class="math notranslate nohighlight">\(i_s&gt;0\)</span> for all <span class="math notranslate nohighlight">\(s\geq 2\)</span> such that all elements of <span class="math notranslate nohighlight">\(\boldsymbol{\Omega}\)</span> are nonnegative, then there exists a unique positive real eigenvector <span class="math notranslate nohighlight">\(\boldsymbol{\bar{\omega}}\)</span> of the matrix <span class="math notranslate nohighlight">\(\boldsymbol{\Omega}\)</span>, and it is a stable equilibrium.</p>
+<p><strong>Proof:</strong>
+First, note that the matrix <span class="math notranslate nohighlight">\(\boldsymbol{\Omega}\)</span> is square and non-negative.  This is enough for a general version of the Perron-Frobenius Theorem to state that a positive real eigenvector exists with a positive real eigenvalue. This is not yet enough for uniqueness. For it to be unique by a version of the Perron-Fobenius Theorem, we need to know that the matrix is irreducible. This can be easily shown. The matrix is of the form</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\boldsymbol{\Omega} =
+  \begin{bmatrix}
+    * &amp; *  &amp; * &amp; \cdots &amp; * &amp; * &amp; *\\
+    * &amp; * &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; * &amp; * &amp; \cdots &amp; 0 &amp; 0 &amp; 0 \\
+    \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots &amp; \vdots \\
+    0 &amp; 0 &amp; 0 &amp; \cdots &amp; *  &amp; * &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; * &amp; *
+  \end{bmatrix}
+\end{split}\]</div>
+<p>Where each * is strictly positive. It is clear to see that taking powers of the matrix causes the sub-diagonal positive elements to be moved down a row and another row of positive entries is added at the top. None of these go to zero since the elements were all non-negative to begin with.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\boldsymbol{\Omega}^2 =
+  \begin{bmatrix}
+    * &amp; *  &amp; * &amp; \cdots &amp; * &amp; * &amp; *\\
+    * &amp; * &amp; * &amp; \cdots &amp; * &amp; * &amp; * \\
+    0 &amp; * &amp; * &amp; \cdots &amp; 0 &amp; 0 &amp; 0 \\
+    \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots &amp; \vdots \\
+    0 &amp; 0 &amp; 0 &amp; \cdots &amp; *  &amp; * &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; * &amp; *
+  \end{bmatrix}; ~~~
+  \boldsymbol{\Omega}^{S+E-1} =
+  \begin{bmatrix}
+    * &amp; *  &amp; * &amp; \cdots &amp; * &amp; * &amp; *\\
+    * &amp; * &amp; * &amp; \cdots &amp; * &amp; * &amp; * \\
+    * &amp; * &amp; * &amp; \cdots &amp; * &amp; * &amp; * \\
+    \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots &amp; \vdots \\
+    * &amp; * &amp; * &amp; \cdots &amp; *  &amp; * &amp; * \\
+    0 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; * &amp; *
+  \end{bmatrix}
+  \end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\boldsymbol{\Omega}^{S+E} =
+    \begin{bmatrix}
+    * &amp; *  &amp; * &amp; \cdots &amp; * &amp; * &amp; *\\
+    * &amp; * &amp; * &amp; \cdots &amp; * &amp; * &amp; * \\
+    * &amp; * &amp; * &amp; \cdots &amp; * &amp; * &amp; * \\
+    \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots &amp; \vdots \\
+    * &amp; * &amp; * &amp; \cdots &amp; * &amp; * &amp; * \\
+    * &amp; * &amp; * &amp; \cdots &amp; * &amp; * &amp; *
+  \end{bmatrix}
+\end{split}\]</div>
+<p>Existence of an <span class="math notranslate nohighlight">\(m \in \mathbb{N}\)</span> such that <span class="math notranslate nohighlight">\(\left(\bf\Omega^m\right)_{ij} \neq 0 ~~ ( &gt; 0)\)</span> is one of the definitions of an irreducible (primitive) matrix. It is equivalent to saying that the directed graph associated with the matrix is strongly connected. Now the Perron-Frobenius Theorem for irreducible matrices gives us that the equilibrium vector is unique.</p>
+<p>We also know from that theorem that the eigenvalue associated with the positive real eigenvector will be real and positive. This eigenvalue, <span class="math notranslate nohighlight">\(p\)</span>, is the Perron eigenvalue and it is the steady state population growth rate of the model. By the PF Theorem for irreducible matrices, <span class="math notranslate nohighlight">\(| \lambda_i | \leq p\)</span> for all eigenvalues <span class="math notranslate nohighlight">\(\lambda_i\)</span> and there will be exactly <span class="math notranslate nohighlight">\(h\)</span> eigenvalues that are equal, where <span class="math notranslate nohighlight">\(h\)</span> is the period of the matrix. Since our matrix <span class="math notranslate nohighlight">\(\bf\Omega\)</span> is aperiodic, the steady state growth rate is the unique largest eigenvalue in magnitude. This implies that almost all initial vectors will converge to this eigenvector under iteration.</p>
+</div>
+<p>For a full treatment and proof of the Perron-Frobenius Theorem, see <span id="id7">[<a class="reference internal" href="../OGETH_references.html#id69" title="Kotaro Suzumura. Perron-frobenius theorem on non-negative square matrices: an elementary proof. Hitotsubashi Journal of Economics, 24:137-141, 1983.">Suzumura, 1983</a>]</span>. Because the population growth process is exogenous to the model, we calibrate it to annual age data for age years <span class="math notranslate nohighlight">\(s=1\)</span> to <span class="math notranslate nohighlight">\(s=100\)</span>.</p>
+<p><a class="reference internal" href="#figorigvsfixsspop"><span class="std std-numref">Figure 4</span></a> shows the steady-state population distribution <span class="math notranslate nohighlight">\(\boldsymbol{\bar{\omega}}\)</span> and the population distribution after 120 periods <span class="math notranslate nohighlight">\(\boldsymbol{\hat{\omega}}_{120}\)</span>. Although the two distributions look very close to each other, they are not exactly the same.</p>
+<figure class="align-default" id="figorigvsfixsspop">
+<a class="reference internal image-reference" href="../../_images/OrigVsFixSSpop.png"><img alt="../../_images/OrigVsFixSSpop.png" src="../../_images/OrigVsFixSSpop.png" style="height: 500px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">Theoretical steady-state population distribution vs. population distribution at period <span class="math notranslate nohighlight">\(t=120\)</span></span><a class="headerlink" href="#figorigvsfixsspop" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Further, we find that the maximum absolute difference between the population levels <span class="math notranslate nohighlight">\(\hat{\omega}_{s,t}\)</span> and <span class="math notranslate nohighlight">\(\hat{\omega}_{s,t+1}\)</span> was less than <span class="math notranslate nohighlight">\(1\times 10^{-4}\)</span> after 160 periods. That is to say, that after 160 periods, given the estimated mortality, fertility, and immigration rates, the population has not achieved its steady state. For convergence in our solution method over a reasonable time horizon, we want the population to reach a stationary distribution after <span class="math notranslate nohighlight">\(T\)</span> periods. To do this, we artificially impose that the population distribution in period <span class="math notranslate nohighlight">\(t=120\)</span> is the steady-state. As can be seen from <a class="reference internal" href="#figorigvsfixsspop"><span class="std std-numref">Figure 4</span></a>, this assumption is not very restrictive. <a class="reference internal" href="#figimmratechg"><span class="std std-numref">Figure 5</span></a> shows the change in immigration rates that would make the period <span class="math notranslate nohighlight">\(t=120\)</span> population distribution equal be the steady-state. The maximum absolute difference between any two corresponding immigration rates in <a class="reference internal" href="#figimmratechg"><span class="std std-numref">Figure 5</span></a> is very small.</p>
+<figure class="align-default" id="figimmratechg">
+<a class="reference internal image-reference" href="../../_images/OrigVsAdjImm.png"><img alt="../../_images/OrigVsAdjImm.png" src="../../_images/OrigVsAdjImm.png" style="height: 500px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">Original immigration rates vs. adjusted immigration rates to make fixed steady-state population distribution</span><a class="headerlink" href="#figimmratechg" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>We begin with 2023 population data and use the population transition matrix <a class="reference internal" href="#equation-eqpoplomstatmat2">(11)</a> to age it to the start year of the model (e.g., 2024 or 2025). We then use <a class="reference internal" href="#equation-eqpoplomstatmat2">(11)</a> to generate the transition path of the population distribution over the time period of the model. <a class="reference internal" href="#figpopdistpath"><span class="std std-numref">Figure 6</span></a> shows the progression from the 2023 population data to the fixed steady-state at period <span class="math notranslate nohighlight">\(t=120\)</span>. The time path of the growth rate of the economically active population <span class="math notranslate nohighlight">\(\tilde{g}_{n,t}\)</span> is shown in <a class="reference internal" href="#figpopdistpath"><span class="std std-numref">Figure 6</span></a>.</p>
+<figure class="align-default" id="figpopdistpath">
+<a class="reference internal image-reference" href="../../_images/pop_distribution.png"><img alt="../../_images/pop_distribution.png" src="../../_images/pop_distribution.png" style="height: 500px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 6 </span><span class="caption-text">Exogenous stationary population distribution at periods along transition path</span><a class="headerlink" href="#figpopdistpath" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<div class="cell tag_hide-input tag_remove-output docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ogcore.demographics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">demog</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="n">YEAR_TO_PLOT</span> <span class="o">=</span> <span class="mi">2023</span>
+<span class="n">plot_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;images&#39;</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot_pop_growth</span><span class="p">(</span>
+    <span class="n">p</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">YEAR_TO_PLOT</span><span class="p">,</span>
+    <span class="n">num_years_to_plot</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+    <span class="n">include_title</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Add average growth rate with this</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">YEAR_TO_PLOT</span><span class="p">,</span> <span class="n">YEAR_TO_PLOT</span> <span class="o">+</span> <span class="mi">150</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">g_n</span><span class="p">[:</span><span class="mi">150</span><span class="p">]),</span>
+    <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Model Period ($t$)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Population Growth Rate ($g_{n,t}$)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="s2">&quot;population_growth_rates.png&quot;</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<figure class="align-default" id="figgrowthpath">
+<a class="reference internal image-reference" href="../../_images/population_growth_rates.png"><img alt="../../_images/population_growth_rates.png" src="../../_images/population_growth_rates.png" style="height: 500px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 7 </span><span class="caption-text">Time path of the population growth rate <span class="math notranslate nohighlight">\(\tilde{g}_{n,t}\)</span></span><a class="headerlink" href="#figgrowthpath" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="calibage-note" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
+<p>Theoretically, the model works without loss of generality for <span class="math notranslate nohighlight">\(S\geq 3\)</span>. However, because we are calibrating the ages outside of the economy to be one-fourth of <span class="math notranslate nohighlight">\(S\)</span> (e.g., ages 21 to 100 in the economy, and ages 1 to 20 outside of the economy), it is convenient for <span class="math notranslate nohighlight">\(S\)</span> to be at least 4.</p>
+</aside>
+<aside class="footnote brackets" id="houseprob-note" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">2</a><span class="fn-bracket">]</span></span>
+<p>The parameter <span class="math notranslate nohighlight">\(\rho_s\)</span> is the probability that a household of age <span class="math notranslate nohighlight">\(s\)</span> dies before age <span class="math notranslate nohighlight">\(s+1\)</span>.</p>
+</aside>
+<aside class="footnote brackets" id="un-data-portal" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">3</a><span class="fn-bracket">]</span></span>
+<p>Note that you might need a UN Data Portal API token to download the data directly from the United Nations Data Portal site. But the <a class="reference external" href="https://github.com/PSLmodels/OG-Core/blob/master/ogcore/demographics.py"><code class="docutils literal notranslate"><span class="pre">demographics.py</span></code></a> module will take the data from a pre-downloaded site if the API token is missing or fails.</p>
+</aside>
+<aside class="footnote brackets" id="out-migration" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">4</a><span class="fn-bracket">]</span></span>
+<p>Out migration in Ethiopia is clearly a significant trend. <span id="id8">[<a class="reference internal" href="../OGETH_references.html#id4" title="Business Tech. `reverse emigration' in south africa - this is how many people actually came home. Business Tech, April 2, 2024. URL: https://businesstech.co.za/news/lifestyle/764879/reverse-emigration-in-south-africa-this-is-how-many-people-actually-came-home/.">Business Tech, April 2, 2024</a>]</span> reports that “since 2000, around 413,000 Ethiopians have emigrated to other countries - and in 2022, just under 28,000 made their way back.”</p>
+</aside>
+</aside>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./content/calibration"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="macro.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Calibration of Macroeconomic Parameters</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="earnings.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Lifetime Earnings Profiles</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fertility-rates">Fertility rates</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mortality-rates">Mortality rates</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#immigration-rates">Immigration rates</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#population-steady-state-and-transition-path">Population steady-state and transition path</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Marcelo LaFleur, Richard W. Evans, and Jason DeBacker
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

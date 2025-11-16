@@ -1,0 +1,845 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Life-cycle productivity profiles &#8212; OG-ETH</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/exercise.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/proof.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'content/api/income';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Output-Consumption Bridge" href="input_output.html" />
+    <link rel="prev" title="Main Calibration Functions" href="calibrate.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../intro/intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/OG-ETH_logo.png" class="logo__image only-light" alt="OG-ETH - Home"/>
+    <script>document.write(`<img src="../../_static/OG-ETH_logo.png" class="logo__image only-dark" alt="OG-ETH - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro/intro.html">
+                    OG-ETH
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contributing to OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributor_guide.html">Contributor Guide</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">OG-ETH API</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="public_api.html">API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="calibrate.html">Main Calibration Functions</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Life-cycle productivity profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_output.html">Output-Consumption Bridge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="macro_params.html">Macro Parameter Estimation Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Calibration Utilities</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Calibration</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../calibration/households.html">Calibration of Household Preference Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/firms.html">Calibration of Firms Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/macro.html">Calibration of Macroeconomic Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/demographics.html">Demographics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/earnings.html">Lifetime Earnings Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/taxes.html">Taxes in OG-ETH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/UBI.html">Universal Basic Income (UBI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/matching_lwi.html">Matching Labor, Wealth, and Income Moments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/exogenous_parameters.html">Exogenous Parameters</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../OGETH_references.html">References</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Citations of OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../citations.html">Citations and use cases of OG-ETH</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH/issues/new?title=Issue%20on%20page%20%2Fcontent/api/income.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/content/api/income.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Life-cycle productivity profiles</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-ogeth.income">ogeth.income</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#percentiles-as-it-uses-fitted-polynomials-to-those-percentiles">percentiles, as it uses fitted polynomials to those percentiles.</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.arc_error"><code class="docutils literal notranslate"><span class="pre">arc_error()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.arctan_deriv_func"><code class="docutils literal notranslate"><span class="pre">arctan_deriv_func()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.arctan_fit"><code class="docutils literal notranslate"><span class="pre">arctan_fit()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.arctan_func"><code class="docutils literal notranslate"><span class="pre">arctan_func()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.get_e_interp"><code class="docutils literal notranslate"><span class="pre">get_e_interp()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.get_e_orig"><code class="docutils literal notranslate"><span class="pre">get_e_orig()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="life-cycle-productivity-profiles">
+<span id="income"></span><h1>Life-cycle productivity profiles<a class="headerlink" href="#life-cycle-productivity-profiles" title="Link to this heading">#</a></h1>
+<p><strong>income.py modules</strong></p>
+<section id="module-ogeth.income">
+<span id="ogeth-income"></span><h2>ogeth.income<a class="headerlink" href="#module-ogeth.income" title="Link to this heading">#</a></h2>
+<section id="percentiles-as-it-uses-fitted-polynomials-to-those-percentiles">
+<h3>percentiles, as it uses fitted polynomials to those percentiles.<a class="headerlink" href="#percentiles-as-it-uses-fitted-polynomials-to-those-percentiles" title="Link to this heading">#</a></h3>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="ogeth.income.arc_error">
+<span class="sig-prename descclassname"><span class="pre">ogeth.income.</span></span><span class="sig-name descname"><span class="pre">arc_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">abc_vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ogeth/income.html#arc_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ogeth.income.arc_error" title="Link to this definition">#</a></dt>
+<dd><p>This function returns a vector of errors in the three criteria on
+which the arctan function is fit to predict extrapolated ability in
+ages 81 to 100.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span><span class="p">)</span> <span class="n">The</span> <span class="n">arctan</span> <span class="n">function</span> <span class="n">value</span> <span class="n">at</span> <span class="n">age</span> <span class="mi">80</span> <span class="n">must</span> <span class="n">match</span> <span class="n">the</span> <span class="n">estimated</span>
+   <span class="n">original</span> <span class="n">function</span> <span class="n">value</span> <span class="n">at</span> <span class="n">age</span> <span class="mf">80.</span>
+<span class="mi">2</span><span class="p">)</span> <span class="n">The</span> <span class="n">arctan</span> <span class="n">function</span> <span class="n">slope</span> <span class="n">at</span> <span class="n">age</span> <span class="mi">80</span> <span class="n">must</span> <span class="n">match</span> <span class="n">the</span> <span class="n">estimated</span>
+   <span class="n">original</span> <span class="n">function</span> <span class="n">slope</span> <span class="n">at</span> <span class="n">age</span> <span class="mf">80.</span>
+<span class="mi">3</span><span class="p">)</span> <span class="n">The</span> <span class="n">level</span> <span class="n">of</span> <span class="n">ability</span> <span class="n">at</span> <span class="n">age</span> <span class="mi">100</span> <span class="n">must</span> <span class="n">be</span> <span class="n">a</span> <span class="n">given</span> <span class="n">fraction</span>
+   <span class="p">(</span><span class="n">abil_deprec</span><span class="p">)</span> <span class="n">below</span> <span class="n">the</span> <span class="n">ability</span> <span class="n">level</span> <span class="n">at</span> <span class="n">age</span> <span class="mf">80.</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>abc_vals</strong> (<em>tuple</em>) – <p>contains (a,b,c)</p>
+<ul>
+<li><p>a (scalar): scale parameter for arctan function</p></li>
+<li><p>b (scalar): curvature parameter for arctan function</p></li>
+<li><p>c (scalar): shift parameter for arctan function</p></li>
+</ul>
+</p></li>
+<li><p><strong>params</strong> (<em>tuple</em>) – <p>contains (first_point, coef1, coef2, coef3,
+abil_deprec)</p>
+<ul>
+<li><p>first_point (scalar): ability level at age 80, &gt; 0</p></li>
+<li><dl class="simple">
+<dt>coef1 (scalar): coefficient in log ability equation on</dt><dd><p>linear term in age</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>coef2 (scalar): coefficient in log ability equation on</dt><dd><p>quadratic term in age</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>coef3 (scalar): coefficient in log ability equation on</dt><dd><p>cubic term in age</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>abil_deprec (scalar): ability depreciation rate between</dt><dd><p>ages 80 and 100, in (0, 1).</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>errors ([error1, error2, error3])</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>error1 (scalar): error between ability level at age 80</dt><dd><p>from original function minus the predicted ability at
+age 80 from the arctan function given a, b, and c</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>error2 (scalar): error between the slope of the original</dt><dd><p>function at age 80 minus the slope of the arctan
+function at age 80 given a, b, and c</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>error3 (scalar): error between the ability level at age</dt><dd><p>100 predicted by the original model value times
+abil_deprec minus the ability predicted by the arctan
+function at age 100 given a, b, and c</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>error_vec (Numpy array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ogeth.income.arctan_deriv_func">
+<span class="sig-prename descclassname"><span class="pre">ogeth.income.</span></span><span class="sig-name descname"><span class="pre">arctan_deriv_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xvals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ogeth/income.html#arctan_deriv_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ogeth.income.arctan_deriv_func" title="Link to this definition">#</a></dt>
+<dd><p>This function generates predicted derivatives of arctan function
+given data (xvals) and parameters a, b, and c. The functional form
+of the derivative of the function is the following:</p>
+<div class="math notranslate nohighlight">
+\[y = - (a * b) / (\pi * (1 + (b * xvals + c)^2))\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xvals</strong> (<em>Numpy array</em>) – data inputs to arctan derivative function</p></li>
+<li><p><strong>a</strong> (<em>scalar</em>) – scale parameter for arctan function</p></li>
+<li><p><strong>b</strong> (<em>scalar</em>) – curvature parameter for arctan function</p></li>
+<li><p><strong>c</strong> (<em>scalar</em>) – shift parameter for arctan function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>predicted values (output) of arctan</dt><dd><p>derivative function</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>yvals (Numpy array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ogeth.income.arctan_fit">
+<span class="sig-prename descclassname"><span class="pre">ogeth.income.</span></span><span class="sig-name descname"><span class="pre">arctan_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abil_deprec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_guesses</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ogeth/income.html#arctan_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ogeth.income.arctan_fit" title="Link to this definition">#</a></dt>
+<dd><p>This function fits an arctan function to the last 20 years of the
+ability levels of a particular ability group to extrapolate
+abilities by trying to match the slope in the 80th year and the
+ability depreciation rate between years 80 and 100.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>first_point</strong> (<em>scalar</em>) – ability level at age 80, &gt; 0</p></li>
+<li><p><strong>coef1</strong> (<em>scalar</em>) – coefficient in log ability equation on linear
+term in age</p></li>
+<li><p><strong>coef2</strong> (<em>scalar</em>) – coefficient in log ability equation on
+quadratic term in age</p></li>
+<li><p><strong>coef3</strong> (<em>scalar</em>) – coefficient in log ability equation on cubic
+term in age</p></li>
+<li><p><strong>abil_deprec</strong> (<em>scalar</em>) – ability depreciation rate between
+ages 80 and 100, in (0, 1)</p></li>
+<li><p><strong>init_guesses</strong> (<em>Numpy array</em>) – initial guesses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>extrapolated ability levels for ages</dt><dd><p>81 to 100, length 20</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>abil_last (Numpy array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ogeth.income.arctan_func">
+<span class="sig-prename descclassname"><span class="pre">ogeth.income.</span></span><span class="sig-name descname"><span class="pre">arctan_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xvals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ogeth/income.html#arctan_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ogeth.income.arctan_func" title="Link to this definition">#</a></dt>
+<dd><p>This function generates predicted ability levels given data (xvals)
+and parameters a, b, and c, from the following arctan function:</p>
+<div class="math notranslate nohighlight">
+\[y = (-a / \pi) * \arctan(b * x + c) + (a / 2)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xvals</strong> (<em>Numpy array</em>) – data inputs to arctan function</p></li>
+<li><p><strong>a</strong> (<em>scalar</em>) – scale parameter for arctan function</p></li>
+<li><p><strong>b</strong> (<em>scalar</em>) – curvature parameter for arctan function</p></li>
+<li><p><strong>c</strong> (<em>scalar</em>) – shift parameter for arctan function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>predicted values (output) of arctan</dt><dd><p>function</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>yvals (Numpy array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ogeth.income.get_e_interp">
+<span class="sig-prename descclassname"><span class="pre">ogeth.income.</span></span><span class="sig-name descname"><span class="pre">get_e_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_wgts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_wgts_80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abil_wgts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ogeth/income.html#get_e_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ogeth.income.get_e_interp" title="Link to this definition">#</a></dt>
+<dd><p>This function takes a source matrix of lifetime earnings profiles
+(abilities, emat) of size (80, 7), where 80 is the number of ages
+and 7 is the number of ability types in the source matrix, and
+interpolates new values of a new S x J sized matrix of abilities
+using linear interpolation. [NOTE: For this application, cubic
+spline interpolation introduces too much curvature.]</p>
+<p>This function also includes the two cases in which J = 9 and J = 10
+that include higher lifetime earning percentiles calibrated using
+Piketty and Saez (2003).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>S</strong> (<em>int</em>) – number of ages to interpolate. This method assumes that
+ages are evenly spaced between the beginning of the 21st
+year and the end of the 100th year, &gt;= 3</p></li>
+<li><p><strong>age_wgts</strong> (<em>Numpy array</em>) – distribution of population in each age
+for the interpolated ages, length S</p></li>
+<li><p><strong>age_wgts_80</strong> (<em>Numpy array</em>) – percent of population in each
+one-year age from 21 to 100, length 80</p></li>
+<li><p><strong>abil_wgts</strong> (<em>Numpy array</em>) – distribution of population in each
+ability group, length J</p></li>
+<li><p><strong>plot_path</strong> (<em>str</em><em>)</em>) – if True, creates plots of emat_orig and the new
+interpolated emat_new</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>interpolated ability matrix scaled</dt><dd><p>so that population-weighted average is 1, size SxJ</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>emat_new_scaled (Numpy array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ogeth.income.get_e_orig">
+<span class="sig-prename descclassname"><span class="pre">ogeth.income.</span></span><span class="sig-name descname"><span class="pre">get_e_orig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">age_wgts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abil_wgts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ogeth/income.html#get_e_orig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ogeth.income.get_e_orig" title="Link to this definition">#</a></dt>
+<dd><p>This function generates the 80 x 7 matrix of lifetime earnings
+ability profiles, corresponding to annual ages from 21 to 100 and to
+paths based on income percentiles 0-25, 25-50, 50-70, 70-80, 80-90,
+90-99, 99-100. The ergodic population distribution is an input in
+order to rescale the paths so that the weighted average equals 1.</p>
+<p>The base curves are the ones in OG-USA, which are then adjusted for ETH.</p>
+<p>The polynomials are of the form</p>
+<div class="math notranslate nohighlight">
+\[\ln(abil) = \alpha + \beta_{1}\text{age} + \beta_{2}\text{age}^2
+    + \beta_{3}\text{age}^3\]</div>
+<p>To calibrate for ETH, the USA curves are adjusted in 2 ways (in this order)
+1) Adjustment by income (J): adjust the gaps between the J-income earning curves</p>
+<blockquote>
+<div><p>using data from WID.</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><dl class="simple">
+<dt>Adjustment by age (S): adjust the shape/distribution of each J-income earning</dt><dd><p>profile curve using data from NTA.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>The methodology is described here:
+<a class="github reference external" href="https://github.com/EAPD-DRB/OG-ETH/issues/18#issuecomment-1368580323">EAPD-DRB/OG-ETH#18</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>age_wgts</strong> (<em>Numpy array</em>) – ergodic age distribution, length S</p></li>
+<li><p><strong>abil_wgts</strong> (<em>Numpy array</em>) – population weights in each lifetime
+earnings group, length J</p></li>
+<li><p><strong>plot_path</strong> (<em>str</em>) – Path to save plots to</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>= lifetime ability profiles scaled</dt><dd><p>so that population-weighted average is 1, size SxJ</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>e_orig_scaled (Numpy array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./content/api"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="calibrate.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Main Calibration Functions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="input_output.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Output-Consumption Bridge</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-ogeth.income">ogeth.income</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#percentiles-as-it-uses-fitted-polynomials-to-those-percentiles">percentiles, as it uses fitted polynomials to those percentiles.</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.arc_error"><code class="docutils literal notranslate"><span class="pre">arc_error()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.arctan_deriv_func"><code class="docutils literal notranslate"><span class="pre">arctan_deriv_func()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.arctan_fit"><code class="docutils literal notranslate"><span class="pre">arctan_fit()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.arctan_func"><code class="docutils literal notranslate"><span class="pre">arctan_func()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.get_e_interp"><code class="docutils literal notranslate"><span class="pre">get_e_interp()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ogeth.income.get_e_orig"><code class="docutils literal notranslate"><span class="pre">get_e_orig()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Marcelo LaFleur, Richard W. Evans, and Jason DeBacker
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

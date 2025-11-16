@@ -1,0 +1,71 @@
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/ogeth-dev/lib/python3.13/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+    ~~~~~~~~~^
+        nb,
+        ^^^
+    ...<4 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "/opt/anaconda3/envs/ogeth-dev/lib/python3.13/site-packages/nbclient/client.py", line 1319, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/anaconda3/envs/ogeth-dev/lib/python3.13/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/opt/anaconda3/envs/ogeth-dev/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/opt/anaconda3/envs/ogeth-dev/lib/python3.13/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+        cell, index, execution_count=self.code_cells_executed + 1
+    )
+  File "/opt/anaconda3/envs/ogeth-dev/lib/python3.13/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/opt/anaconda3/envs/ogeth-dev/lib/python3.13/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+import os
+import ogcore.demographics as demog
+plot_path = os.path.join(os.path.abspath(''), 'images')
+
+fert_rates, fig = demog.get_fert(
+    totpers=100,
+    min_age=0,
+    max_age=99,
+    country_id="710",
+    start_year=YEAR_TO_PLOT,
+    end_year=YEAR_TO_PLOT,
+    graph=True,
+    plot_path=None,
+    download_path=None,
+)
+plt.savefig(os.path.join(plot_path, "fert_rates.png"), dpi=300)
+plt.show()
+------------------
+
+
+[31m---------------------------------------------------------------------------[39m
+[31mNameError[39m                                 Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[1][39m[32m, line 10[39m
+[32m      2[39m [38;5;28;01mimport[39;00m[38;5;250m [39m[34;01mogcore[39;00m[34;01m.[39;00m[34;01mdemographics[39;00m[38;5;250m [39m[38;5;28;01mas[39;00m[38;5;250m [39m[34;01mdemog[39;00m
+[32m      3[39m plot_path = os.path.join(os.path.abspath([33m'[39m[33m'[39m), [33m'[39m[33mimages[39m[33m'[39m)
+[32m      5[39m fert_rates, fig = demog.get_fert(
+[32m      6[39m     totpers=[32m100[39m,
+[32m      7[39m     min_age=[32m0[39m,
+[32m      8[39m     max_age=[32m99[39m,
+[32m      9[39m     country_id=[33m"[39m[33m710[39m[33m"[39m,
+[32m---> [39m[32m10[39m     start_year=[43mYEAR_TO_PLOT[49m,
+[32m     11[39m     end_year=YEAR_TO_PLOT,
+[32m     12[39m     graph=[38;5;28;01mTrue[39;00m,
+[32m     13[39m     plot_path=[38;5;28;01mNone[39;00m,
+[32m     14[39m     download_path=[38;5;28;01mNone[39;00m,
+[32m     15[39m )
+[32m     16[39m plt.savefig(os.path.join(plot_path, [33m"[39m[33mfert_rates.png[39m[33m"[39m), dpi=[32m300[39m)
+[32m     17[39m plt.show()
+
+[31mNameError[39m: name 'YEAR_TO_PLOT' is not defined
+
