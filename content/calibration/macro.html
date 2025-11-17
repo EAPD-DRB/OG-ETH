@@ -429,6 +429,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#government-expenditures">Government expenditures</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#footnotes">Footnotes</a></li>
 </ul>
             </nav>
         </div>
@@ -465,13 +466,13 @@ document.write(`
 <h2>Government Debt, Spending and Transfers<a class="headerlink" href="#government-debt-spending-and-transfers" title="Link to this heading">#</a></h2>
 <section id="government-debt">
 <h3>Government Debt<a class="headerlink" href="#government-debt" title="Link to this heading">#</a></h3>
-<p>The path of government debt is endogenous.  But the initial value is exogenous.  To avoid converting between model units and dollars, we calibrate the initial debt to GDP ratio, rather than the dollar value of the debt.  This is the model parameter <span class="math notranslate nohighlight">\(\alpha_D\)</span>.  We compute this from the ratio of publicly held debt outstanding to GDP.  Based on 2024 values, this gives us a ratio of 0.327.</p>
+<p>The path of government debt is endogenous. But the initial value and the steady-state (long-run) value are exogenous. To avoid converting between model units and dollars, we calibrate the initial debt to GDP ratio, rather than the dollar value of the debt. This is the model parameter <span class="math notranslate nohighlight">\(\alpha_D\)</span> and the parameter name in <a class="reference external" href="https://github.com/EAPD-DRB/OG-ETH/blob/main/ogeth/ogeth_default_parameters.json"><code class="docutils literal notranslate"><span class="pre">ogeth_default_parameters.json</span></code></a> is <code class="docutils literal notranslate"><span class="pre">initial_debt_ratio</span></code>.  We compute this from the ratio of publicly held debt outstanding to GDP. Based on the 2019 value reported by the World Bank, the initial debt-to-GDP ratio in Ethiopia is 0.314.<a class="footnote-reference brackets" href="#macro-wb-dy" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
 <section id="interest-rates-on-government-debt">
 <h4>Interest rates on government debt<a class="headerlink" href="#interest-rates-on-government-debt" title="Link to this heading">#</a></h4>
 <p>We assume that there is a wedge between the real rate of return on private capital and the real interest rate on government debt.  We model this wedge a scale and level shift.  Specifically, we assume that the real interest rate on government debt, <span class="math notranslate nohighlight">\(r_{gov,t}\)</span>, is related to the real rate of return on private capital, <span class="math notranslate nohighlight">\(r_{t}\)</span>, by the following equation:</p>
 <div class="math notranslate nohighlight" id="equation-eqn-r-gov">
 <span class="eqno">(2)<a class="headerlink" href="#equation-eqn-r-gov" title="Link to this equation">#</a></span>\[    r_{gov,t} = (1-\tau_{d,t})r_t + \mu_d\]</div>
-<p>where <span class="math notranslate nohighlight">\(\tau_d\)</span> is the scale parameter and <span class="math notranslate nohighlight">\(\mu_d\)</span> is the level shift parameter.  We set the values of these two parameters to 0.245 and -0.034, respectively.  These are found by using the estimated relationship between corporate and sovereign yields in <span id="id1">[<a class="reference internal" href="../OGETH_references.html#id75" title="Delong Li, Nicolas E. Magud, and Alejandro Werner. The long-run impact of sovereign yields on corporate yields in emerging markets. Journal of International Money and Finance, 130(C):, 2023. URL: https://ideas.repec.org/a/eee/jimfin/v130y2023ics0261560622001516.html, doi:10.1016/j.jimonfin.2022.1.">Li <em>et al.</em>, 2023</a>]</span> (Table 8, Column 2) and simulating a series of corporate yields given a series of sovereign yields between 2% and 12%.  We then estimate the scale and level shift parameters that best fit these simulated data using ordinary least squares.</p>
+<p>where <span class="math notranslate nohighlight">\(\tau_d\)</span> is the scale parameter and <span class="math notranslate nohighlight">\(\mu_d\)</span> is the level shift parameter.  We set the values of these two parameters to 0.245 and -0.034, respectively.  These are found by using the estimated relationship between corporate and sovereign yields in <span id="id2">[<a class="reference internal" href="../OGETH_references.html#id75" title="Delong Li, Nicolas E. Magud, and Alejandro Werner. The long-run impact of sovereign yields on corporate yields in emerging markets. Journal of International Money and Finance, 130(C):, 2023. URL: https://ideas.repec.org/a/eee/jimfin/v130y2023ics0261560622001516.html, doi:10.1016/j.jimonfin.2022.1.">Li <em>et al.</em>, 2023</a>]</span> (Table 8, Column 2) and simulating a series of corporate yields given a series of sovereign yields between 2% and 12%.  We then estimate the scale and level shift parameters that best fit these simulated data using ordinary least squares.</p>
 </section>
 </section>
 <section id="aggregate-transfers">
@@ -484,6 +485,17 @@ document.write(`
 <center>Government Spending = Total Outlays - Transfers - Net Interest on Debt - Social Security</center>
 With this definition, the share of government expenditure to GDP is 0.095 based on <a class="reference external" href="https://data.imf.org/en/Data-Explorer?datasetUrn=IMF.RES:WEO(9.0.0)&amp;amp;INDICATOR=GGX">data from the IMF</a>.</p>
 </section>
+</section>
+<section id="footnotes">
+<span id="seclwi-footnotes"></span><h2>Footnotes<a class="headerlink" href="#footnotes" title="Link to this heading">#</a></h2>
+<p>The following are the footnotes for this section.</p>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="macro-wb-dy" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>See <a class="reference external" href="https://data.worldbank.org/country/ethiopia">https://data.worldbank.org/country/ethiopia</a>, accessed Nov. 17, 2025.</p>
+</aside>
+</aside>
 </section>
 </section>
 
@@ -567,6 +579,7 @@ With this definition, the share of government expenditure to GDP is 0.095 based 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#government-expenditures">Government expenditures</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#footnotes">Footnotes</a></li>
 </ul>
   </nav></div>
 

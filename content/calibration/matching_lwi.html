@@ -390,7 +390,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -406,6 +408,15 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#average-household-income">Average household income</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#footnotes">Footnotes</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -417,7 +428,22 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="matching-labor-wealth-and-income-moments">
 <span id="chap-matchinglwi"></span><h1>Matching Labor, Wealth, and Income Moments<a class="headerlink" href="#matching-labor-wealth-and-income-moments" title="Link to this heading">#</a></h1>
-<p>[TO BE COMPLETED: As we note in Chapter <a class="reference internal" href="earnings.html#chap-lfearn"><span class="std std-ref">Lifetime Earnings Profiles</span></a>, we match the Gini coefficient of the income distribution through our calibration of the lifecyle productivity profile.  With survey data on hours worked by age, we can adjust the <span class="math notranslate nohighlight">\(\chi^n_s\)</span> parameter to match the lifecycle profile of labor supply. The <span class="math notranslate nohighlight">\(\beta^j\)</span> and <span class="math notranslate nohighlight">\(\chi^b_j\)</span> parameters can be used to match the distribution of wealth given survey or administrative data describing its distribution.]</p>
+<p>As we note in Chapter <a class="reference internal" href="earnings.html#chap-lfearn"><span class="std std-ref">Lifetime Earnings Profiles</span></a>, we match the Gini coefficient of the income distribution through our calibration of the lifecyle productivity profile.  With survey data on hours worked by age, we can adjust the <span class="math notranslate nohighlight">\(\chi^n_s\)</span> parameter to match the lifecycle profile of labor supply. The <span class="math notranslate nohighlight">\(\beta^j\)</span> and <span class="math notranslate nohighlight">\(\chi^b_j\)</span> parameters can be used to match the distribution of wealth given survey or administrative data describing its distribution.</p>
+<section id="average-household-income">
+<span id="seclwi-avghhinc"></span><h2>Average household income<a class="headerlink" href="#average-household-income" title="Link to this heading">#</a></h2>
+<p>We use the average household income parameter (<code class="docutils literal notranslate"><span class="pre">mean_income_data</span></code>) to map the tax functions in country currency to model units. The World Bank reported that Ethiopia had “a per capita gross national income of $1,020” in Fiscal Year 2023/2024.<a class="footnote-reference brackets" href="#wb-avginc" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> This is equivalent to 157,845 ETB using the Nov. 17, 2025 exchange rate.</p>
+</section>
+<section id="footnotes">
+<span id="seclwi-footnotes"></span><h2>Footnotes<a class="headerlink" href="#footnotes" title="Link to this heading">#</a></h2>
+<p>The following are the footnotes for this section.</p>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="wb-avginc" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>See <a class="reference external" href="https://www.worldbank.org/en/country/ethiopia/overview">https://www.worldbank.org/en/country/ethiopia/overview</a>, accessed Nov. 17, 2025.</p>
+</aside>
+</aside>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -474,6 +500,22 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#average-household-income">Average household income</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#footnotes">Footnotes</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

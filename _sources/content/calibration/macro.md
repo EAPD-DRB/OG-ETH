@@ -23,7 +23,7 @@ We set $\zeta_K = 0.95$. Note, this parameter is harder to pin down from the dat
 
 ### Government Debt
 
-The path of government debt is endogenous.  But the initial value is exogenous.  To avoid converting between model units and dollars, we calibrate the initial debt to GDP ratio, rather than the dollar value of the debt.  This is the model parameter $\alpha_D$.  We compute this from the ratio of publicly held debt outstanding to GDP.  Based on 2024 values, this gives us a ratio of 0.327.
+The path of government debt is endogenous. But the initial value and the steady-state (long-run) value are exogenous. To avoid converting between model units and dollars, we calibrate the initial debt to GDP ratio, rather than the dollar value of the debt. This is the model parameter $\alpha_D$ and the parameter name in [`ogeth_default_parameters.json`](https://github.com/EAPD-DRB/OG-ETH/blob/main/ogeth/ogeth_default_parameters.json) is `initial_debt_ratio`.  We compute this from the ratio of publicly held debt outstanding to GDP. Based on the 2019 value reported by the World Bank, the initial debt-to-GDP ratio in Ethiopia is 0.314.[^macro_wb_DY]
 
 
 #### Interest rates on government debt
@@ -47,3 +47,9 @@ Government spending on goods and services are also set as a share of GDP with th
     <center>Government Spending = Total Outlays - Transfers - Net Interest on Debt - Social Security</center>
 With this definition, the share of government expenditure to GDP is 0.095 based on [data from the IMF](https://data.imf.org/en/Data-Explorer?datasetUrn=IMF.RES:WEO(9.0.0)&INDICATOR=GGX).
 
+
+(SecLWI_footnotes)=
+## Footnotes
+The following are the footnotes for this section.
+
+[^macro_wb_DY]: See https://data.worldbank.org/country/ethiopia, accessed Nov. 17, 2025.
