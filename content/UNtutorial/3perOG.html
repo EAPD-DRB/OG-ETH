@@ -1,0 +1,938 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>A “Simple” 3-period-lived agent OG model &#8212; OG-ETH</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/exercise.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/proof.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'content/UNtutorial/3perOG';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Research Projects" href="projects.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../intro/intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/OG-ETH_logo.png" class="logo__image only-light" alt="OG-ETH - Home"/>
+    <img src="../../_static/OG-ETH_logo.png" class="logo__image only-dark pst-js-only" alt="OG-ETH - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro/intro.html">
+                    OG-ETH
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contributing to OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributor_guide.html">Contributor Guide</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">OG-ETH API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/public_api.html">API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/calibrate.html">Main Calibration Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/income.html">Life-cycle productivity profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/input_output.html">Output-Consumption Bridge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/macro_params.html">Macro Parameter Estimation Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/utils.html">Calibration Utilities</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Calibration</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../calibration/households.html">Calibration of Household Preference Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/firms.html">Calibration of Firm Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/macro.html">Calibration of Macroeconomic Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/demographics.html">Demographics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/earnings.html">Lifetime Earnings Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/taxes.html">Taxes in OG-ETH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/UBI.html">Universal Basic Income (UBI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/matching_lwi.html">Matching Labor, Wealth, and Income Moments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../calibration/exogenous_parameters.html">Exogenous Parameters</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">UN Tutorial</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">A “Simple” 3-period-lived agent OG model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projects.html">Research Projects</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../OGETH_references.html">References</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Citations of OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../citations.html">Citations and use cases of OG-ETH</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/3perOG.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Colab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Colab logo" src="../../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH/issues/new?title=Issue%20on%20page%20%2Fcontent/UNtutorial/3perOG.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/content/UNtutorial/3perOG.ipynb" target="_blank"
+   class="btn btn-sm btn-download-notebook-button dropdown-item"
+   title="Download notebook file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="../../_sources/content/UNtutorial/3perOG.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>A “Simple” 3-period-lived agent OG model</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-this-simple-theory">Why this “simple” theory?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#households">Households</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#firms">Firms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#market-clearing">Market clearing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#equilibrium">Equilibrium</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#solution-method-time-path-iteration-tpi">Solution method: time path iteration (TPI)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calibration">Calibration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#footnotes">Footnotes</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="a-simple-3-period-lived-agent-og-model">
+<span id="chap-untutor-3perog"></span><h1>A “Simple” 3-period-lived agent OG model<a class="headerlink" href="#a-simple-3-period-lived-agent-og-model" title="Link to this heading">#</a></h1>
+<section id="why-this-simple-theory">
+<span id="secuntutorial-3perogwhysimp"></span><h2>Why this “simple” theory?<a class="headerlink" href="#why-this-simple-theory" title="Link to this heading">#</a></h2>
+<p>Almost every module of the OG-Core model is straightforward on its own in terms of theory, mathematics, and intuition. Most undergraduate students with basic economics and mathematical training are able to understand them quickly. Examples include:</p>
+<ul class="simple">
+<li><p>The <a class="reference external" href="https://github.com/PSLmodels/OG-Core/blob/master/ogcore/household.py"><code class="docutils literal notranslate"><span class="pre">household.py</span></code></a> module that has all the functions that come from the theory of household decision making in the “<a class="reference external" href="https://pslmodels.github.io/OG-Core/content/theory/households.html">Households</a>” chapter of the OG-Core documentation,</p></li>
+<li><p>The <a class="reference external" href="https://github.com/PSLmodels/OG-Core/blob/master/ogcore/firm.py"><code class="docutils literal notranslate"><span class="pre">firm.py</span></code></a> module that has all the functions that come from the theory of firms’ decisions about how much capital to rent and how much labor to hire as described in the “<a class="reference external" href="https://pslmodels.github.io/OG-Core/content/theory/firms.html">Firms</a>” chapter of the OG-Core documentation, and</p></li>
+<li><p>The <a class="reference external" href="https://github.com/PSLmodels/OG-Core/blob/master/ogcore/demographics.py"><code class="docutils literal notranslate"><span class="pre">demographics.py</span></code></a> module that has the functions that generate the population distribution and how it changes over time as described in the “<a class="reference external" href="https://pslmodels.github.io/OG-Core/content/theory/demographics.html">Demographics</a>” chapter  of the OG-Core documentation.</p></li>
+</ul>
+<p>In contrast, users of the country calibrations of the OG-Core macroeconomic model often struggle to understand the difference and relationship between the steady-state equilibrium solution and the transition path equilibrium solution and why those algorithms in <a class="reference external" href="https://github.com/PSLmodels/OG-Core/blob/master/ogcore/SS.py"><code class="docutils literal notranslate"><span class="pre">SS.py</span></code></a> and <a class="reference external" href="https://github.com/PSLmodels/OG-Core/blob/master/ogcore/TPI.py"><code class="docutils literal notranslate"><span class="pre">TPI.py</span></code></a> are so complex. Indeed, understanding the transition path solution algorithm often requires more in-depth theoretical and mathematical training.</p>
+<p>The text of this chapter is almost exactly Chapter 2 of <span id="id1">[<a class="reference internal" href="../OGETH_references.html#id27" title="Jason DeBacker and Richard W. Evans. Overlapping Generations Models for Policy Analysis: Theory and Computation. unpublished, 2024.">DeBacker and Evans, 2024</a>]</span>.<a class="footnote-reference brackets" href="#ogtextbook" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> The model presented in this chapter is nearly the simplest version of the OG model. It is “nearly” the simplest because we start with overlapping generations of agents who live for three periods. The simplest overlapping generations model is a two-period-lived agent model as described in Chapter 1 of <span id="id3">[<a class="reference internal" href="../OGETH_references.html#id27" title="Jason DeBacker and Richard W. Evans. Overlapping Generations Models for Policy Analysis: Theory and Computation. unpublished, 2024.">DeBacker and Evans, 2024</a>]</span>. Although the two-period-lived agent model seems like the natural starting place, that model is fundamentally different from any OG model in which agents live for three periods or more.<a class="footnote-reference brackets" href="#persimp" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> We start with the three-period-lived agent model because its solution method and results are similar for all life spans <span class="math notranslate nohighlight">\(S\geq 3\)</span>.</p>
+<p>The model presented here is a perfect foresight, three-period-lived agent OG model. The model in this chapter has trivial demographics in that a unit measure of agents are born each period, and each generation of agents lives for three periods. There is no population growth because the population in each period equals 3 (young, middle-aged, and old), and the mortality rate is zero in every period except the last period in which it is one. And the agents inelastically supply labor. We also characterize “nearly” the simplest production sector with a unit measure of infinitely lived, perfectly competitive firms that rent capital and hire labor from households.<a class="footnote-reference brackets" href="#simpprod" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> There is no government sector in that agents and firms in the model pay no taxes nor receive any transfers.</p>
+</section>
+<section id="households">
+<span id="secuntutorial-3peroghh"></span><h2>Households<a class="headerlink" href="#households" title="Link to this heading">#</a></h2>
+<p>A unit measure of identical individuals are born each period and live for three periods. Let the age of an individual be indexed by <span class="math notranslate nohighlight">\(s = \{1,2,3\}\)</span>. In general, an age-<span class="math notranslate nohighlight">\(s\)</span> individual faces a budget constraint each period that looks like the following,</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhbc">
+<span class="eqno">(19)<a class="headerlink" href="#equation-equntut-hhbc" title="Link to this equation">#</a></span>\[  c_{s,t} + b_{s+1,t+1} = w_t n_{s,t} + (1 + r_{t})b_{s,t} \quad\forall s,t\]</div>
+<p>where <span class="math notranslate nohighlight">\(c_{s,t}\)</span> is consumption and <span class="math notranslate nohighlight">\(n_{s,t}\)</span> is labor supply by age-<span class="math notranslate nohighlight">\(s\)</span> individuals in period <span class="math notranslate nohighlight">\(t\)</span>. The variable <span class="math notranslate nohighlight">\(b_{s+1,t+1}\)</span> is savings by age-<span class="math notranslate nohighlight">\(s\)</span> individuals in period <span class="math notranslate nohighlight">\(t\)</span> to be returned to them with interest in the next period, and <span class="math notranslate nohighlight">\(b_{s,t}\)</span> is the savings with which the age-<span class="math notranslate nohighlight">\(s\)</span> agent entered period <span class="math notranslate nohighlight">\(t\)</span> that was chosen in the previous period. The current period wage <span class="math notranslate nohighlight">\(w_t\)</span> and interest rate <span class="math notranslate nohighlight">\(r_t\)</span> are the same for all agents (no age <span class="math notranslate nohighlight">\(s\)</span> subscript).</p>
+<p>We assume the individuals supply a unit of labor inelastically in the first two periods of life and are retired in the last period of life.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhlab">
+<span class="eqno">(20)<a class="headerlink" href="#equation-equntut-hhlab" title="Link to this equation">#</a></span>\[\begin{split}  n_{s,t} =
+    \begin{cases}
+      1\quad\:\:\:\,\text{if}\quad s = 1,2 \\
+      0.2\quad\text{if}\quad s = 3
+    \end{cases} \quad\forall t\end{split}\]</div>
+<p>We also assume that individuals are born with no savings <span class="math notranslate nohighlight">\(b_{1,t} = 0\)</span> and that they save no income in the last period of their lives <span class="math notranslate nohighlight">\(b_{4,t}=0\)</span> for all periods <span class="math notranslate nohighlight">\(t\)</span>.</p>
+<p>These assumptions give rise to the three age-specific budget constraints derived from the general version Equation <a class="reference internal" href="#equation-equntut-hhbc">(19)</a>.<a class="footnote-reference brackets" href="#pergentos" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhbc1">
+<span class="eqno">(21)<a class="headerlink" href="#equation-equntut-hhbc1" title="Link to this equation">#</a></span>\[  c_{1,t} + b_{2,t+1} = w_t \quad\forall t\]</div>
+<div class="math notranslate nohighlight" id="equation-equntut-hhbc2">
+<span class="eqno">(22)<a class="headerlink" href="#equation-equntut-hhbc2" title="Link to this equation">#</a></span>\[  c_{2,t+1} + b_{3,t+2} = w_{t+1} + (1 + r_{t+1})b_{2,t+1} \quad\forall t\]</div>
+<div class="math notranslate nohighlight" id="equation-equntut-hhbc3">
+<span class="eqno">(23)<a class="headerlink" href="#equation-equntut-hhbc3" title="Link to this equation">#</a></span>\[  c_{3,t+2} = 0.2w_{t+2} + (1 + r_{t+2})b_{3,t+2} \quad\forall t\]</div>
+<p>We assume that consumption must be nonnegative <span class="math notranslate nohighlight">\(c_{s,t}\geq 0\)</span> for all <span class="math notranslate nohighlight">\(s\)</span> and <span class="math notranslate nohighlight">\(t\)</span>.<a class="footnote-reference brackets" href="#cnonneg" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a> And we assume that <span class="math notranslate nohighlight">\(b_{2,t} + b_{3,t}&gt;0\)</span> because the aggregate capital stock must be strictly positive.</p>
+<p>Let the utility of consumption in each period be defined by a function <span class="math notranslate nohighlight">\(u(c_{s,t})\)</span>, such that <span class="math notranslate nohighlight">\(u'&gt;0\)</span>, <span class="math notranslate nohighlight">\(u''&lt;0\)</span>, and <span class="math notranslate nohighlight">\(\lim_{c\rightarrow 0}u(c) = -\infty\)</span>. We will use the constant relative risk aversion (CRRA) utility function that takes the following form,</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhutil">
+<span class="eqno">(24)<a class="headerlink" href="#equation-equntut-hhutil" title="Link to this equation">#</a></span>\[  u(c_{s,t}) = \frac{(c_{s,t})^{1-\sigma}- 1}{1-\sigma} \quad\forall s,t \quad\text{and}\quad c_{s,t}&gt;0\]</div>
+<p>where the parameter <span class="math notranslate nohighlight">\(\sigma\geq 1\)</span> represents the coefficient of relative risk aversion.</p>
+<p>Individuals choose lifetime consumption <span class="math notranslate nohighlight">\(\{c_{s,t+s-1}\}_{s=1}^3\)</span>, savings <span class="math notranslate nohighlight">\(\{b_{s+1,t+s}\}_{s=1}^2\)</span> to maximize lifetime utility, subject to the budget constraints and non negativity constraints.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhmaxprob">
+<span class="eqno">(25)<a class="headerlink" href="#equation-equntut-hhmaxprob" title="Link to this equation">#</a></span>\[\begin{split}  &amp;\max_{\{c_{s,t+s-1}\}_{s=1}^3,\{b_{s+1,t+s}\}_{s=1}^2}\:u(c_{1,t}) + \beta u(c_{2,t+1}) + \beta^2 u(c_{3,t+2}) \\
+  &amp;\quad\quad c_{1,t} = w_t - b_{2,t+1} \\
+  &amp;\quad\quad c_{2,t+1} = w_{t+1} + (1 + r_{t+1})b_{2,t+1} - b_{3,t+2} \\
+  &amp;\quad\quad c_{3,t+2} = 0.2w_{t+2}+(1 + r_{t+2})b_{3,t+2}\end{split}\]</div>
+<p>The number of variables to choose in the household’s optimization problem can be reduced by substituting the budget constraints into the optimization problem Equation <a class="reference internal" href="#equation-equntut-hhmaxprob">(25)</a> and assuming that the non-negativity constraints on the two capital stocks do not bind.<a class="footnote-reference brackets" href="#reduceprob" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a></p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhlagrang">
+<span class="eqno">(26)<a class="headerlink" href="#equation-equntut-hhlagrang" title="Link to this equation">#</a></span>\[\begin{split}  \max_{b_{2,t+1},b_{3,t+2}}\:\mathcal{L} = &amp;u\Bigl(w_t - b_{2,t+1}\Bigr) + \beta u\Bigl(w_{t+1} + [1 + r_{t+1}]b_{2,t+1} - b_{3,t+2}\Bigr) ... \\
+  &amp;\quad\quad + \beta^2 u\Bigl([1 + r_{t+2}]b_{3,t+2} + 0.2w_{t+2}\Bigr)\end{split}\]</div>
+<p>The optimal choice of how much to save in the second period of life <span class="math notranslate nohighlight">\(b_{3,t+2}\)</span> is given by taking the derivative of the Lagrangian Equation <a class="reference internal" href="#equation-equntut-hhlagrang">(26)</a> with respect to <span class="math notranslate nohighlight">\(b_{3,t+2}\)</span> and setting it equal to zero.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhfock3">
+<span class="eqno">(27)<a class="headerlink" href="#equation-equntut-hhfock3" title="Link to this equation">#</a></span>\[\begin{split}  \frac{\partial\mathcal{L}}{\partial b_{3,t+2}} = 0 \quad\Rightarrow\quad &amp;u'\bigl(c_{2,t+1}\bigr) = \beta(1 + r_{t+2})u'\bigl(c_{3,t+2}\bigr) \\
+  \Rightarrow\quad &amp;u'\Bigl(w_{t+1} + [1 + r_{t+1}]b_{2,t+1} - b_{3,t+2}\Bigr) = ... \\
+  &amp;\quad\quad \beta(1 + r_{t+2})u'\Bigl([1 + r_{t+2}]b_{3,t+2} + 0.2w_{t+2}\Bigr)\end{split}\]</div>
+<p>Equation <a class="reference internal" href="#equation-equntut-hhfock3">(27)</a> implies that the optimal savings for age-2 individuals is a function <span class="math notranslate nohighlight">\(\psi_{2,t+1}\)</span> of the wage and interest rate in that period, the interest rate in the next period, and how much capital the individual saved in the previous period.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhk3funcpe">
+<span class="eqno">(28)<a class="headerlink" href="#equation-equntut-hhk3funcpe" title="Link to this equation">#</a></span>\[  b_{3,t+2} = \psi_{2,t+1}\Bigl(b_{2,t+1},w_{t+1},r_{t+1},r_{t+2},w_{t+2}\Bigr)\]</div>
+<p>The optimal choice of how much to save in the first period of life <span class="math notranslate nohighlight">\(b_{2,t+1}\)</span> is a little more involved. The first order condition of the Lagrangian includes derivatives of <span class="math notranslate nohighlight">\(b_{3,t+2}\)</span> with respect to <span class="math notranslate nohighlight">\(b_{2,t+1}\)</span> because Equations <a class="reference internal" href="#equation-equntut-hhfock3">(27)</a> and <a class="reference internal" href="#equation-equntut-hhk3funcpe">(28)</a> show that optimal middle-aged savings <span class="math notranslate nohighlight">\(b_{3,t+2}\)</span> is a function of savings when young <span class="math notranslate nohighlight">\(b_{2,t+1}\)</span>.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhfock2a">
+<span class="eqno">(29)<a class="headerlink" href="#equation-equntut-hhfock2a" title="Link to this equation">#</a></span>\[\begin{split}  \frac{\partial\mathcal{L}}{\partial b_{2,t+1}} = 0 \quad\Rightarrow\quad &amp;-u'\bigl(c_{1,t}\bigr)  + \beta(1+r_{t+1})u'\bigl(c_{2,t+1}\bigr) ... \\
+  &amp;\quad - \beta u'\bigl(c_{2,t+1}\bigr)\frac{\partial\psi_{2,t+1}}{\partial b_{2,t+1}} + \beta^2(1+r_{t+2})u'\bigl(c_{3,t+2}\bigr)\frac{\partial\psi_{2,t+1}}{\partial b_{2,t+1}} = 0 \\
+  \Rightarrow\quad &amp;u'\Bigl(w_{t} - b_{2,t+1}\Bigr) = \\
+  &amp;\quad\beta(1 + r_{t+1})u'\Bigl([1 + r_{t+1}]b_{2,t+1} + w_{t+1} - b_{3,t+2}\Bigr) ... \\
+  &amp;\quad - \beta\frac{\partial \psi_{2,t+1}}{\partial b_{2,t+1}}\biggl[u'(c_{2,t+1}) - \beta(1+r_{t+2})u'(c_{3,t+2})\biggr]\end{split}\]</div>
+<p>Notice that the term in the brackets on the third line of Equation <a class="reference internal" href="#equation-equntut-hhfock2a">(29)</a> equals zero because of the optimality condition Equation <a class="reference internal" href="#equation-equntut-hhfock3">(27)</a> for <span class="math notranslate nohighlight">\(b_{3,t+1}\)</span>. This is the envelope condition or the principle of optimality. The intuition is that I don’t need to worry about the effect of my choice today on my choice tomorrow because I will optimize tomorrow given today. So the first order condition for optimal savings when young <span class="math notranslate nohighlight">\(b_{2,t+1}\)</span> simplifies to the following expression.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhfock2b">
+<span class="eqno">(30)<a class="headerlink" href="#equation-equntut-hhfock2b" title="Link to this equation">#</a></span>\[\begin{split}  \frac{\partial\mathcal{L}}{\partial b_{2,t+1}} = 0 \quad\Rightarrow\quad &amp;u'\bigl(c_{1,t}\bigr) = \beta(1 + r_{t+1})u'\bigl(c_{2,t+1}\bigr) \\
+  \Rightarrow\quad &amp;u'\Bigl(w_{t} - b_{2,t+1}\Bigr) = ... \\
+  &amp;\quad \beta(1 + r_{t+1})u'\Bigl(w_{t+1} + [1 + r_{t+1}]b_{2,t+1} - \psi_{2,t+1}\Bigr)\end{split}\]</div>
+<p>Equation <a class="reference internal" href="#equation-equntut-hhfock2b">(30)</a> implies that the optimal savings for age-1 individuals is a function of the wages in that period and the next period and the interest rate in the next period and in the period after that.<a class="footnote-reference brackets" href="#envelopecond" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a></p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhk2funcpe">
+<span class="eqno">(31)<a class="headerlink" href="#equation-equntut-hhk2funcpe" title="Link to this equation">#</a></span>\[  b_{2,t+1} = \psi_{1,t}\Bigl(w_t,w_{t+1},r_{t+1},r_{t+2},w_{t+2}\Bigr)\]</div>
+<p>Instead of looking at the age-1 and age-2 savings decisions of a particular individual, which happen in consecutive periods, we could look at the age-1 savings decisions of the young in period <span class="math notranslate nohighlight">\(t\)</span> as characterized in Equation <a class="reference internal" href="#equation-equntut-hhfock2b">(30)</a> and the age-2 savings decisions of the middle-aged in period <span class="math notranslate nohighlight">\(t\)</span>. This savings <span class="math notranslate nohighlight">\(b_{3,t+1}\)</span> is characterized by the following first order condition, which is simply Equation <a class="reference internal" href="#equation-equntut-hhfock3">(27)</a> iterated backward in time one period,</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhfock3b">
+<span class="eqno">(32)<a class="headerlink" href="#equation-equntut-hhfock3b" title="Link to this equation">#</a></span>\[\begin{split}  u'\bigl(c_{2,t}\bigr) &amp;= \beta(1+r_{t+1})u'\bigl(c_{3,t+1}\bigr) \\
+  u'\Bigl(w_t + [1 + r_t]b_{2,t} - b_{3,t+1}\Bigr) &amp;= \beta(1 + r_{t+1})u'\Bigl(0.2w_{t+1} + [1 + r_{t+1}]b_{3,t+1}\Bigr)\end{split}\]</div>
+<p>which implies that the period-<span class="math notranslate nohighlight">\(t\)</span> savings decision of the middle aged is a function of the wage and interest rate in period-<span class="math notranslate nohighlight">\(t\)</span>, the interest rate in the period <span class="math notranslate nohighlight">\(t+1\)</span>, and how much capital the individual saved in the previous period.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhk3funcpeb">
+<span class="eqno">(33)<a class="headerlink" href="#equation-equntut-hhk3funcpeb" title="Link to this equation">#</a></span>\[  b_{3,t+1} = \psi_{2,t}\Bigl(b_{2,t},w_{t},r_{t},r_{t+1},w_{t+1}\Bigr)\]</div>
+<p>Define <span class="math notranslate nohighlight">\(\Gamma_t\)</span> as the distribution of household savings across households at time <span class="math notranslate nohighlight">\(t\)</span>.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhsavedist">
+<span class="eqno">(34)<a class="headerlink" href="#equation-equntut-hhsavedist" title="Link to this equation">#</a></span>\[  \Gamma_t \equiv \bigl\{b_{2,t},b_{3,t}\bigr\} \quad\forall t\]</div>
+<p>As will be shown in Section <a class="reference internal" href="#secuntutorial-3perogeqlb"><span class="std std-ref">Equilibrium</span></a>, the state as defined in <a class="reference internal" href="#DefUNtut_StateSpace">Definition 2</a> in every period <span class="math notranslate nohighlight">\(t\)</span> for the entire equilibrium system described in the non-steady-state equilibrium characterized in <a class="reference internal" href="#DefUNtut_3perSimpNSSEql">Definition 4</a> is the current distribution of individual savings <span class="math notranslate nohighlight">\(\Gamma_t\)</span> from Equation <a class="reference internal" href="#equation-equntut-hhsavedist">(34)</a>. Because individuals must forecast wages and interest rates in every period in order to solve their optimal lifetime decisions and because each of those future variables depends on the entire distribution of savings in the future, we must assume some individual beliefs about how the entire distribution will evolve over time. Let general beliefs about the future distribution of capital in period <span class="math notranslate nohighlight">\(t+u\)</span> be characterized by the operator <span class="math notranslate nohighlight">\(\Omega(\cdot)\)</span> such that:</p>
+<div class="math notranslate nohighlight" id="equation-equntut-beliefs">
+<span class="eqno">(35)<a class="headerlink" href="#equation-equntut-beliefs" title="Link to this equation">#</a></span>\[  \Gamma^e_{t+u} = \Omega^u\left(\Gamma_t\right) \quad \forall t, \quad u\geq 1\]</div>
+<p>where the <span class="math notranslate nohighlight">\(e\)</span> superscript signifies that <span class="math notranslate nohighlight">\(\Gamma^e_{t+u}\)</span> is the expected distribution of wealth at time <span class="math notranslate nohighlight">\(t+u\)</span> based on general beliefs <span class="math notranslate nohighlight">\(\Omega(\cdot)\)</span> that are not constrained to be correct.<a class="footnote-reference brackets" href="#beliefs" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a></p>
+</section>
+<section id="firms">
+<span id="secuntutorial-3perogfirms"></span><h2>Firms<a class="headerlink" href="#firms" title="Link to this heading">#</a></h2>
+<p>The economy also includes a unit measure of identical, perfectly competitive firms that rent investment capital from individuals for real return <span class="math notranslate nohighlight">\(r_t\)</span> and hire labor for real wage <span class="math notranslate nohighlight">\(w_t\)</span>. Firms use their total capital <span class="math notranslate nohighlight">\(K_t\)</span> and labor <span class="math notranslate nohighlight">\(L_t\)</span> to produce output <span class="math notranslate nohighlight">\(Y_t\)</span> every period according to a Cobb-Douglas production technology.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-firmprodfunc">
+<span class="eqno">(36)<a class="headerlink" href="#equation-equntut-firmprodfunc" title="Link to this equation">#</a></span>\[  Y_t = F(K_t,L_t) \equiv AK_t^\alpha L_t^{1-\alpha}\quad\text{where}\quad \alpha\in(0,1) \quad\text{and}\quad A&gt;0\]</div>
+<p>We assume that the price of the output in every period <span class="math notranslate nohighlight">\(P_t=1\)</span>.<a class="footnote-reference brackets" href="#priceassumpt" id="id11" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a> The representative firm chooses how much capital to rent and how much labor to hire to maximize profits,</p>
+<div class="math notranslate nohighlight" id="equation-equntut-firmprofmax">
+<span class="eqno">(37)<a class="headerlink" href="#equation-equntut-firmprofmax" title="Link to this equation">#</a></span>\[  \max_{K_t,L_t}\: AK_t^\alpha L_t^{1-\alpha} - (r_t + \delta)K_t - w_t L_t\]</div>
+<p>where <span class="math notranslate nohighlight">\(\delta\in[0,1]\)</span> is the rate of capital depreciation.<a class="footnote-reference brackets" href="#depreciation" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>10<span class="fn-bracket">]</span></a> The two first order conditions that characterize firm optimization are the following.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-firmfock">
+<span class="eqno">(38)<a class="headerlink" href="#equation-equntut-firmfock" title="Link to this equation">#</a></span>\[  r_t = \alpha A\left(\frac{L_t}{K_t}\right)^{1-\alpha} - \delta \quad\forall t\]</div>
+<div class="math notranslate nohighlight" id="equation-equntut-firmfocl">
+<span class="eqno">(39)<a class="headerlink" href="#equation-equntut-firmfocl" title="Link to this equation">#</a></span>\[  w_t = (1-\alpha)A\left(\frac{K_t}{L_t}\right)^\alpha\]</div>
+</section>
+<section id="market-clearing">
+<span id="secuntutorial-3perogmc"></span><h2>Market clearing<a class="headerlink" href="#market-clearing" title="Link to this heading">#</a></h2>
+<p>Three markets must clear in this model: the labor market, the capital market, and the goods market. Each of these equations amounts to a statement of supply equals demand.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-mcn">
+<span class="eqno">(40)<a class="headerlink" href="#equation-equntut-mcn" title="Link to this equation">#</a></span>\[  L_t = \sum_{s=1}^3 n_{s,t} = 2.2 \quad\forall t\]</div>
+<div class="math notranslate nohighlight" id="equation-equntut-mck">
+<span class="eqno">(41)<a class="headerlink" href="#equation-equntut-mck" title="Link to this equation">#</a></span>\[  K_t = \sum_{s=2}^3 b_{s,t} = b_{2,t} + b_{3,t} \quad\forall t\]</div>
+<div class="math notranslate nohighlight" id="equation-equntut-mcy">
+<span class="eqno">(42)<a class="headerlink" href="#equation-equntut-mcy" title="Link to this equation">#</a></span>\[\begin{split}  &amp;Y_t = C_t + I_t \quad\forall t \\
+  &amp;\qquad\text{where}\quad I_t \equiv K_{t+1} - (1-\delta)K_t\end{split}\]</div>
+<p>The goods market clearing equation <a class="reference internal" href="#equation-equntut-mcy">(42)</a> is redundant by Walras’ Law.</p>
+</section>
+<section id="equilibrium">
+<span id="secuntutorial-3perogeqlb"></span><h2>Equilibrium<a class="headerlink" href="#equilibrium" title="Link to this heading">#</a></h2>
+<p>Before providing exact definitions of the functional equilibrium concepts, we give a rough sketch of the equilibrium, so you can see what the functions look like and understand the exact equilibrium definition more clearly. A rough description of the equilibrium solution to the problem above is the following three points.</p>
+<ul class="simple">
+<li><p>Households optimize according to Equations <a class="reference internal" href="#equation-equntut-hhfock2b">(30)</a> and <a class="reference internal" href="#equation-equntut-hhfock3b">(32)</a>.</p></li>
+<li><p>Firms optimize according to Equations <a class="reference internal" href="#equation-equntut-firmfock">(38)</a> and <a class="reference internal" href="#equation-equntut-firmfocl">(39)</a>.</p></li>
+<li><p>Markets clear according to Equations <a class="reference internal" href="#equation-equntut-mcn">(40)</a> and <a class="reference internal" href="#equation-equntut-mck">(41)</a>.
+These equations characterize the equilibrium and constitute a system of nonlinear difference equations.</p></li>
+</ul>
+<p>The easiest way to understand the equilibrium solution is to substitute the market clearing conditions <a class="reference internal" href="#equation-equntut-mcn">(40)</a> and <a class="reference internal" href="#equation-equntut-mck">(41)</a> into the firm’s optimal conditions <a class="reference internal" href="#equation-equntut-firmfock">(38)</a> and <a class="reference internal" href="#equation-equntut-firmfocl">(39)</a> and solve for the equilibrium wage and interest rate as functions of the distribution of capital.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-eqlwt">
+<span class="eqno">(43)<a class="headerlink" href="#equation-equntut-eqlwt" title="Link to this equation">#</a></span>\[  w_t\bigl(b_{2,t},b_{3,t}\bigr):\quad w_t = (1-\alpha)A\left(\frac{b_{2,t}+b_{3,t}}{2.2}\right)^\alpha\]</div>
+<div class="math notranslate nohighlight" id="equation-equntut-eqlrt">
+<span class="eqno">(44)<a class="headerlink" href="#equation-equntut-eqlrt" title="Link to this equation">#</a></span>\[  r_t\bigl(b_{2,t},b_{3,t}\bigr):\:\quad r_t = \alpha A\left(\frac{2.2}{b_{2,t}+b_{3,t}}\right)^{1-\alpha} - \delta\]</div>
+<p>Now Equations <a class="reference internal" href="#equation-equntut-eqlwt">(43)</a> and <a class="reference internal" href="#equation-equntut-eqlrt">(44)</a> can be substituted into household Euler equations <a class="reference internal" href="#equation-equntut-hhfock2b">(30)</a> and <a class="reference internal" href="#equation-equntut-hhfock3b">(32)</a> to get the following two-equation system that completely characterizes the equilibrium.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-eqlfock2">
+<span class="eqno">(45)<a class="headerlink" href="#equation-equntut-eqlfock2" title="Link to this equation">#</a></span>\[\begin{split}  &amp;u'\Bigl(w_t(b_{2,t},b_{3,t}) - b_{2,t+1}\Bigr) = \beta\Bigl(1 + r_{t+1}(b_{2,t+1},b_{3,t+1})\Bigr) \times... \\
+  &amp;\quad u'\Bigl(w_{t+1}(b_{2,t+1},b_{3,t+1}) + [1 + r_{t+1}(b_{2,t+1},b_{3,t+1})]b_{2,t+1} - b_{3,t+2}\Bigr)\end{split}\]</div>
+<div class="math notranslate nohighlight" id="equation-equntut-eqlfock3">
+<span class="eqno">(46)<a class="headerlink" href="#equation-equntut-eqlfock3" title="Link to this equation">#</a></span>\[\begin{split}  &amp;u'\Bigl(w_t(b_{2,t},b_{3,t}) + [1 + r_t(b_{2,t},b_{3,t})]b_{2,t} - b_{3,t+1}\Bigr) = ... \\
+  &amp;\quad \beta\Bigl(1 + r_{t+1}(b_{2,t+1},b_{3,t+1})\Bigr)u'\Bigl([1 + r_{t+1}(b_{2,t+1},b_{3,t+1})]b_{3,t+1} + 0.2w_{t+1}(b_{2,t+1},b_{3,t+1})\Bigr)\end{split}\]</div>
+<p>The system of two dynamic equations <a class="reference internal" href="#equation-equntut-eqlfock2">(45)</a> and <a class="reference internal" href="#equation-equntut-eqlfock3">(46)</a> characterizing the decisions for <span class="math notranslate nohighlight">\(b_{2,t+1}\)</span> and <span class="math notranslate nohighlight">\(b_{3,t+1}\)</span> in every period <span class="math notranslate nohighlight">\(t\)</span> is not identified. These households know the current distribution of capital <span class="math notranslate nohighlight">\(b_{2,t}\)</span> and <span class="math notranslate nohighlight">\(b_{3,t}\)</span>. However, we need to solve for policy functions for <span class="math notranslate nohighlight">\(b_{2,t+1}\)</span>, <span class="math notranslate nohighlight">\(b_{3,t+1}\)</span>, and <span class="math notranslate nohighlight">\(b_{3,t+2}\)</span> from these two equations. It looks like this system is unidentified. But the solution is a fixed point of stationary functions.</p>
+<p>We first define the steady-state equilibrium, which is exactly identified. Let the steady state of endogenous variable <span class="math notranslate nohighlight">\(x_t\)</span> be characterized by <span class="math notranslate nohighlight">\(x_{t+1}=x_t=\bar{x}\)</span> in which the endogenous variables are constant over time. Then we can define the steady-state equilibrium as follows.</p>
+<div class="proof definition admonition" id="DefUNtut_3perSimpSSeql">
+<p class="admonition-title"><span class="caption-number">Definition 1 </span> (Steady-state equilibrium)</p>
+<section class="definition-content" id="proof-content">
+<p>A non-autarkic steady-state equilibrium in the perfect foresight overlapping generations model with <span class="math notranslate nohighlight">\(3\)</span>-period lived agents is defined as constant allocations of consumption <span class="math notranslate nohighlight">\(\{\bar{c}_s\}_{s=1}^3\)</span>, capital <span class="math notranslate nohighlight">\(\{\bar{b}_s\}_{s=2}^3\)</span>, and prices <span class="math notranslate nohighlight">\(\bar{w}\)</span> and <span class="math notranslate nohighlight">\(\bar{r}\)</span> such that:</p>
+<ol class="arabic simple">
+<li><p>households optimize according to Equations <a class="reference internal" href="#equation-equntut-hhfock2b">(30)</a> and <a class="reference internal" href="#equation-equntut-hhfock3b">(32)</a>,</p></li>
+<li><p>firms optimize according to Equations <a class="reference internal" href="#equation-equntut-firmfock">(38)</a> and <a class="reference internal" href="#equation-equntut-firmfocl">(39)</a>,</p></li>
+<li><p>markets clear according to Equations <a class="reference internal" href="#equation-equntut-mcn">(40)</a> and <a class="reference internal" href="#equation-equntut-mck">(41)</a>.</p></li>
+</ol>
+</section>
+</div><p>As we saw earlier in this section, the characterizing equations in <a class="reference internal" href="#DefUNtut_3perSimpSSeql">Definition 1</a> reduce to <a class="reference internal" href="#equation-equntut-eqlfock2">(45)</a> and <a class="reference internal" href="#equation-equntut-eqlfock3">(46)</a> in every period. These two equations are exactly identified in the steady state. That is, they are two equations and two unknowns (<span class="math notranslate nohighlight">\(\bar{b}_2,\bar{b}_3\)</span>).</p>
+<div class="math notranslate nohighlight" id="equation-equntut-eqlfock2ss">
+<span class="eqno">(47)<a class="headerlink" href="#equation-equntut-eqlfock2ss" title="Link to this equation">#</a></span>\[  u'\Bigl(w(\bar{b}_2,\bar{b}_3) - \bar{b}_2\Bigr) = \beta\Bigl(1 + r(\bar{b}_2,\bar{b}_3)\Bigr)u'\Bigl(w(\bar{b}_2,\bar{b}_3) + [1 + r(\bar{b}_2,\bar{b}_3)]\bar{b}_2 - \bar{b}_3\Bigr)\]</div>
+<div class="math notranslate nohighlight" id="equation-equntut-eqlfock3ss">
+<span class="eqno">(48)<a class="headerlink" href="#equation-equntut-eqlfock3ss" title="Link to this equation">#</a></span>\[\begin{split}  &amp;u'\Bigl(w(\bar{b}_2,\bar{b}_3) + [1 + r(\bar{b}_2,\bar{b}_3)]\bar{b}_2 - \bar{b}_3\Bigr) = ... \\
+  &amp;\quad\quad \beta\Bigl(1 + r(\bar{b}_2,\bar{b}_3)\Bigr)u'\Bigl([1 + r(\bar{b}_2,\bar{b}_3)]\bar{b}_3 + 0.2w(\bar{b}_2,\bar{b}_3)\Bigr)\end{split}\]</div>
+<p>We can solve for steady-state <span class="math notranslate nohighlight">\(\bar{b}_2\)</span> and <span class="math notranslate nohighlight">\(\bar{b}_3\)</span> by using a unconstrained optimization solver. Then we solve for <span class="math notranslate nohighlight">\(\bar{w}\)</span>, <span class="math notranslate nohighlight">\(\bar{r}\)</span>, <span class="math notranslate nohighlight">\(\bar{c}_1\)</span>, <span class="math notranslate nohighlight">\(\bar{c}_2\)</span>, and <span class="math notranslate nohighlight">\(\bar{c}_3\)</span> by substituting <span class="math notranslate nohighlight">\(\bar{b}_2\)</span> and <span class="math notranslate nohighlight">\(\bar{b}_3\)</span> into the equilibrium firm first order conditions and into the household budget constraints.</p>
+<p>Now we can get ready to define the non-steady-state equilibrium. To do this, we need to define two other important concepts.</p>
+<div class="proof definition admonition" id="DefUNtut_StateSpace">
+<p class="admonition-title"><span class="caption-number">Definition 2 </span> (State of a dynamical system)</p>
+<section class="definition-content" id="proof-content">
+<p>The state of a dynamical system—sometimes called the state vector—is the smallest set of variables that completely summarizes all the information necessary for determining the future of the system at a given point in time.</p>
+</section>
+</div><p>In the 3-period-lived agent, perfect foresight, OG model described in this section, the state vector can be seen in equations <a class="reference internal" href="#equation-equntut-eqlfock2">(45)</a> and <a class="reference internal" href="#equation-equntut-eqlfock3">(46)</a>. What is the smallest set of variables that completely summarize all the information necessary for the three generations of all three generations living at time <span class="math notranslate nohighlight">\(t\)</span> to make their consumption and saving decisions? What information do they have at time <span class="math notranslate nohighlight">\(t\)</span> that will allow them to make their savings decisions? The state vector of this model in each period is the distribution of capital <span class="math notranslate nohighlight">\((b_{2,t},b_{3,t})\)</span>.</p>
+<div class="proof definition admonition" id="DefUNtut_StatnFunc">
+<p class="admonition-title"><span class="caption-number">Definition 3 </span> (Stationary function)</p>
+<section class="definition-content" id="proof-content">
+<p>We define a stationary function to be a function that only depends upon its arguments and does not depend upon time.</p>
+</section>
+</div><p>The relevant examples of stationary functions in this model are the policy functions for saving and investment. We defined the functions <span class="math notranslate nohighlight">\(\psi_{1,t}\)</span> and <span class="math notranslate nohighlight">\(\psi_{2,t}\)</span> generally in equations <a class="reference internal" href="#equation-equntut-hhk2funcpe">(31)</a> and <a class="reference internal" href="#equation-equntut-hhk3funcpeb">(33)</a>. But they were indexed by time as evidenced by the <span class="math notranslate nohighlight">\(t\)</span> in <span class="math notranslate nohighlight">\(\psi_{1,t}\)</span> and <span class="math notranslate nohighlight">\(\psi_{2,t}\)</span>. The stationary versions of those functions would be <span class="math notranslate nohighlight">\(\psi_{1}\)</span> and <span class="math notranslate nohighlight">\(\psi_2\)</span>, which do not depend upon time. The arguments of the functions (the state) may change overtime causing the savings levels to change over time, but the function of the arguments is constant across time.</p>
+<p>With the concept of the state of a dynamical system and a stationary function, we are ready to define a functional non-steady-state equilibrium of the model.</p>
+<div class="proof definition admonition" id="DefUNtut_3perSimpNSSEql">
+<p class="admonition-title"><span class="caption-number">Definition 4 </span> (Non-steady-state functional equilibrium)</p>
+<section class="definition-content" id="proof-content">
+<p>A non-steady-state functional equilibrium in the perfect foresight overlapping generations model with <span class="math notranslate nohighlight">\(3\)</span>-period lived agents is defined as stationary allocation functions of the state <span class="math notranslate nohighlight">\(\psi_{1}\bigl(b_{2,t},b_{3,t}\bigr)\)</span> and <span class="math notranslate nohighlight">\(\psi_{2}\bigl(b_{2,t},b_{3,t}\bigr)\)</span> and stationary price functions <span class="math notranslate nohighlight">\(w(b_{2,t},b_{3,t})\)</span> and <span class="math notranslate nohighlight">\(r(b_{2,t},b_{3,t})\)</span> such that:</p>
+<ol class="arabic simple">
+<li><p>households have symmetric beliefs <span class="math notranslate nohighlight">\(\Omega(\cdot)\)</span> about the evolution of the distribution of savings as characterized in Equation <a class="reference internal" href="#equation-equntut-beliefs">(35)</a>, and those beliefs about the future distribution of savings equal the realized outcome (rational expectations): <span class="math notranslate nohighlight">\(\Gamma_{t+u} = \Gamma^e_{t+u} = \Omega^u\left(\Gamma_t\right) \quad\forall t,\quad u\geq 1\)</span></p></li>
+<li><p>households optimize according to Equations <a class="reference internal" href="#equation-equntut-hhfock2b">(30)</a> and <a class="reference internal" href="#equation-equntut-hhfock3b">(32)</a>,</p></li>
+<li><p>firms optimize according to Equations <a class="reference internal" href="#equation-equntut-firmfock">(38)</a> and <a class="reference internal" href="#equation-equntut-firmfocl">(39)</a>,</p></li>
+<li><p>markets clear according to <a class="reference internal" href="#equation-equntut-mcn">(40)</a> and <a class="reference internal" href="#equation-equntut-mck">(41)</a>.</p></li>
+</ol>
+</section>
+</div><p>We have already shown how to boil down the characterizing equations in <a class="reference internal" href="#DefUNtut_3perSimpNSSEql">Definition 4</a> to two equations <a class="reference internal" href="#equation-equntut-eqlfock2">(45)</a> and <a class="reference internal" href="#equation-equntut-eqlfock3">(46)</a>. But we have also seen that those two equations are not identified. So how do we solve for these equilibrium functions? The solution to the non-steady-state equilibrium in <a class="reference internal" href="#DefUNtut_3perSimpNSSEql">Definition 4</a> is a fixed point in function space. Choose two functions <span class="math notranslate nohighlight">\(\psi_1\)</span> and <span class="math notranslate nohighlight">\(\psi_2\)</span> and verify that they satisfy the Euler equations for all points in the state space (all possible values of the state).</p>
+</section>
+<section id="solution-method-time-path-iteration-tpi">
+<span id="secuntutorial-3perogtpi"></span><h2>Solution method: time path iteration (TPI)<a class="headerlink" href="#solution-method-time-path-iteration-tpi" title="Link to this heading">#</a></h2>
+<p>The benchmark conventional solution method for the non-steady-state rational expectations equilibrium transition path in OG models was originally outlined in a series of papers between 1981 and 1985,<a class="footnote-reference brackets" href="#auerbackkotlikoff" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>11<span class="fn-bracket">]</span></a> in chapter 4 of the seminal book <span id="id14">[<a class="reference internal" href="../OGETH_references.html#id13" title="Alan J. Auerbach and Laurence J. Kotlikoff. Dynamic Fiscal Policy. Cambridge University Press, 1987.">Auerbach and Kotlikoff, 1987</a>]</span> for the perfect foresight case, and in Appendix II of <span id="id15">[<a class="reference internal" href="../OGETH_references.html#id59" title="Shinichi Nishiyama and Kent Smetters. Does social security privatization produce efficiency gains? Quarterly Journal of Economics, 122(4):1677-1719, November 2007.">Nishiyama and Smetters, 2007</a>]</span> and Section 3.1 of <span id="id16">[<a class="reference internal" href="../OGETH_references.html#id31" title="Richard W. Evans and Kerk L. Phillips. Olg life cycle model transition paths: alternate model forecast method. Computational Economics, 43(1):105-131, January 2014.">Evans and Phillips, 2014</a>]</span> for the stochastic case. We call this method time path iteration (TPI). The idea is that the economy is infinitely lived, even though the agents that make up the economy are not. Rather than recursively solving for equilibrium policy functions by iterating on individual value functions, one must recursively solve for the policy functions by iterating on the entire transition path of the endogenous objects in the economy (see Chapter 17 of <span id="id17">[<a class="reference internal" href="../OGETH_references.html#id67" title="Nancy L. Stokey, Robert E. Lucas, Jr., and Edward C. Prescott. Recursive Methods in Economic Dynamics. Harvard University Press, 1989.">Stokey <em>et al.</em>, 1989</a>]</span>). <span id="id18">[<a class="reference internal" href="../OGETH_references.html#id31" title="Richard W. Evans and Kerk L. Phillips. Olg life cycle model transition paths: alternate model forecast method. Computational Economics, 43(1):105-131, January 2014.">Evans and Phillips, 2014</a>]</span> give a good description of how to implement this method.</p>
+<p>The key assumption is that the economy will reach the steady-state equilibrium <span class="math notranslate nohighlight">\((\bar{b}_2,\bar{b}_3)\)</span> described in <a class="reference internal" href="#DefUNtut_3perSimpSSeql">Definition 1</a> in a finite number of periods <span class="math notranslate nohighlight">\(T&lt;\infty\)</span> regardless of the initial state <span class="math notranslate nohighlight">\((b_{2,1},b_{3,1})\)</span>. The first step is to assume a transition path for aggregate capital <span class="math notranslate nohighlight">\(K^i = \left\{K_1^i,K_2^i,...K_T^i\right\}\)</span> such that <span class="math notranslate nohighlight">\(T\)</span> is sufficiently large to ensure that <span class="math notranslate nohighlight">\((b_{2,T},b_{3,T}) = (\bar{b}_2,\bar{b}_3)\)</span>. The superscript <span class="math notranslate nohighlight">\(i\)</span> is an index for the iteration number. The transition path for aggregate capital determines the transition path for both the real wage <span class="math notranslate nohighlight">\(w^i = \left\{w_1^i,w_2^i,...w_T^i\right\}\)</span> and the real return on investment <span class="math notranslate nohighlight">\(r^i = \left\{r_1^i,r_2^i,...r_T^i\right\}\)</span>. The exact initial distribution of capital in the first period <span class="math notranslate nohighlight">\((b_{2,1},b_{3,1})\)</span> can be arbitrarily chosen as long as it satisfies <span class="math notranslate nohighlight">\(K_1^i = b_{2,1} + b_{3,1}\)</span> according to market clearing condition <a class="reference internal" href="#equation-equntut-mck">(41)</a>. One could also first choose the initial distribution of capital <span class="math notranslate nohighlight">\((b_{2,1},b_{3,1})\)</span> and then choose an initial aggregate capital stock <span class="math notranslate nohighlight">\(K_1^i\)</span> that corresponds to that distribution. As mentioned earlier, the only other restriction on the initial transition path for aggregate capital is that it equal the steady-state level <span class="math notranslate nohighlight">\(K_T^i = \bar{K} = \bar{b}_2 + \bar{b}_3\)</span> by period <span class="math notranslate nohighlight">\(T\)</span>. But the aggregate capital stocks <span class="math notranslate nohighlight">\(K_t^j\)</span> for periods <span class="math notranslate nohighlight">\(1&lt;t&lt;T\)</span> can be any level.</p>
+<p>Given the initial capital distribution <span class="math notranslate nohighlight">\((b_{2,1},b_{3,1})\)</span> and the transition paths of aggregate capital <span class="math notranslate nohighlight">\(K^i = \left\{K_1^i,K_2^i,...K_T^i\right\}\)</span>, the real wage <span class="math notranslate nohighlight">\(w^i = \left\{w_1^i,w_2^i,...w_T^i\right\}\)</span>, and the real return to investment <span class="math notranslate nohighlight">\(r^i = \left\{r_1^i,r_2^i,...r_T^i\right\}\)</span>, one can solve for the optimal savings decision for the initial middle-aged <span class="math notranslate nohighlight">\(s=2\)</span> individual for the last period of his life <span class="math notranslate nohighlight">\(b_{3,2}\)</span> using his intertemporal Euler equation <a class="reference internal" href="#equation-equntut-eqlfock3">(46)</a>.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-eqlfock3tpi1">
+<span class="eqno">(49)<a class="headerlink" href="#equation-equntut-eqlfock3tpi1" title="Link to this equation">#</a></span>\[  u'\Bigl(w_1^i + [1 + r_1^i]b_{2,1} - b_{3,2}\Bigr) = \beta\Bigl(1 + r_2^i\Bigr)u'\Bigl([1 + r_2^i]b_{3,2} + 0.2w_2^i\Bigr)\]</div>
+<p>Notice that everything in equation <a class="reference internal" href="#equation-equntut-eqlfock3tpi1">(49)</a> is known except for the savings decision <span class="math notranslate nohighlight">\(b_{3,2}\)</span>. This is one equation and one unknown.</p>
+<p>The next step is to solve for <span class="math notranslate nohighlight">\(b_{2,2}\)</span> and <span class="math notranslate nohighlight">\(b_{3,3}\)</span> for the initial young <span class="math notranslate nohighlight">\(s=1\)</span> agent at period <span class="math notranslate nohighlight">\(1\)</span> using the appropriately timed versions of Equations <a class="reference internal" href="#equation-equntut-hhfock2b">(30)</a> and <a class="reference internal" href="#equation-equntut-hhfock3">(27)</a> with the conjectured interest rates and real wages.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-hhfock3tpi1">
+<span class="eqno">(50)<a class="headerlink" href="#equation-equntut-hhfock3tpi1" title="Link to this equation">#</a></span>\[  u'\Bigl(w_1^i - b_{2,2}\Bigr) = \beta(1 + r_2^i)u'\Bigl(w_2^i + [1 + r_2^i]b_{2,2} - b_{3,3}\Bigr)\]</div>
+<div class="math notranslate nohighlight" id="equation-equntut-hhfock3tpi2">
+<span class="eqno">(51)<a class="headerlink" href="#equation-equntut-hhfock3tpi2" title="Link to this equation">#</a></span>\[  u'\Bigl(w_2^i + [1 + r_2^i]b_{2,2} - b_{3,3}\Bigr) = \beta(1 + r_3^i)u'\Bigl([1 + r_3^i]b_{3,3} + 0.2w_3^i\Bigr)\]</div>
+<p>Everything is known in these two equations except for <span class="math notranslate nohighlight">\(b_{2,2}\)</span> and <span class="math notranslate nohighlight">\(b_{3,3}\)</span>. So we can solve for those with a standard unconstrained solver. We next solve for <span class="math notranslate nohighlight">\(b_{2,t}\)</span> and <span class="math notranslate nohighlight">\(b_{3,t+1}\)</span> for the remaining <span class="math notranslate nohighlight">\(t\in\{3,4,...T+m\}\)</span>, where <span class="math notranslate nohighlight">\(T\)</span> represents the period in the future at which the economy should have converged to the steady-state and <span class="math notranslate nohighlight">\(m\)</span> represents some number of periods past that.<a class="footnote-reference brackets" href="#timepastt" id="id19" role="doc-noteref"><span class="fn-bracket">[</span>12<span class="fn-bracket">]</span></a></p>
+<p>At this point, we have solved for the distribution of capital <span class="math notranslate nohighlight">\((b_{2,t},b_{3,t})\)</span> over the entire time period <span class="math notranslate nohighlight">\(t\in\{1,2,...T\}\)</span>. In each period <span class="math notranslate nohighlight">\(t\)</span>, the distribution of capital implies an aggregate capital stock <span class="math notranslate nohighlight">\(K_t^{i'} = b_{2,t} + b_{3,t}\)</span>. We put a ``<span class="math notranslate nohighlight">\(\, ' \,\)</span>’’ on this aggregate capital stock because, in general, <span class="math notranslate nohighlight">\(K_t^{i'}\neq K_t^i\)</span>. That is, the conjectured path of the aggregate capital stock is not equal to the optimally chosen path of the aggregate capital stock given <span class="math notranslate nohighlight">\(K^i\)</span>.<a class="footnote-reference brackets" href="#tbigenough" id="id20" role="doc-noteref"><span class="fn-bracket">[</span>13<span class="fn-bracket">]</span></a></p>
+<p>Let <span class="math notranslate nohighlight">\(\left\lVert\cdot\right\rVert\)</span> be a norm on the space of time paths for the aggregate capital stock. Common norms to use are the <span class="math notranslate nohighlight">\(L^2\)</span> and the <span class="math notranslate nohighlight">\(L^\infty\)</span> norms. Then the fixed point necessary for the equilibrium transition path from <a class="reference internal" href="#DefUNtut_3perSimpNSSEql">Definition 4</a> has been found when the distance between <span class="math notranslate nohighlight">\(K^{i'}\)</span> and <span class="math notranslate nohighlight">\(K^{i}\)</span> is arbitrarily close to zero.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-eqltpidist">
+<span class="eqno">(52)<a class="headerlink" href="#equation-equntut-eqltpidist" title="Link to this equation">#</a></span>\[  \left\lVert K^{i'} - K^{i}\right\rVert &lt; \varepsilon \quad\text{for}\quad \varepsilon&gt;0\]</div>
+<p>If the fixed point has not been found <span class="math notranslate nohighlight">\(\left\lVert K^{i'} - K^{i}\right\rVert &gt; \varepsilon\)</span>, then a new transition path for the aggregate capital stock is generated as a convex combination of <span class="math notranslate nohighlight">\(K^{i'}\)</span> and <span class="math notranslate nohighlight">\(K^{i}\)</span>.</p>
+<div class="math notranslate nohighlight" id="equation-equntut-eqltpinewpath">
+<span class="eqno">(53)<a class="headerlink" href="#equation-equntut-eqltpinewpath" title="Link to this equation">#</a></span>\[  K^{i+1} = \xi K^{i'} + (1-\xi) K^{i} \quad\text{for}\quad \xi\in(0,1)\]</div>
+<p>This process is repeated until the initial transition path for the aggregate capital stock is consistent with the transition path implied by those beliefs and household and firm optimization. TPI solves for the equilibrium transition path from <a class="reference internal" href="#DefUNtut_3perSimpNSSEql">Definition 4</a> by finding a fixed point in the time path of the economy.</p>
+</section>
+<section id="calibration">
+<span id="secuntutorial-3perogcalib"></span><h2>Calibration<a class="headerlink" href="#calibration" title="Link to this heading">#</a></h2>
+<p>Use the following parameterization of the model for the problems below. Because agents live for only three periods, assume that each period of life is 20 years. If the annual discount factor is estimated to be 0.96, then the 20-year discount factor is <span class="math notranslate nohighlight">\(\beta = 0.96^{20} = 0.442\)</span>. Let the annual depreciation rate of capital be 0.05. Then the 20-year depreciation rate is <span class="math notranslate nohighlight">\(\delta = 1-(1-0.05)^{20} = 0.6415\)</span>. Let the coefficient of relative risk aversion be <span class="math notranslate nohighlight">\(\sigma = 3\)</span>, let the productivity scale parameter of firms be <span class="math notranslate nohighlight">\(A=1\)</span>, and let the capital share of income be <span class="math notranslate nohighlight">\(\alpha = 0.35\)</span>.</p>
+</section>
+<section id="exercises">
+<span id="secuntutorial-3perogex"></span><h2>Exercises<a class="headerlink" href="#exercises" title="Link to this heading">#</a></h2>
+<div class="exercise green admonition" id="ExerUNtut_3perOGfeas">
+
+<p class="admonition-title"><span class="caption-number">Exercise 1 </span> (Checking feasibility of guesses for b_vec)</p>
+<section id="exercise-content">
+<p>Using the calibration from Section <a class="reference internal" href="#secuntutorial-3perogcalib"><span class="std std-ref">Calibration</span></a> of this chapter, write a Python function named <code class="docutils literal notranslate"><span class="pre">feasible()</span></code> that has the following form,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">b_cnstr</span><span class="p">,</span> <span class="n">c_cnstr</span><span class="p">,</span> <span class="n">K_cnstr</span> <span class="o">=</span> <span class="n">feasible</span><span class="p">(</span><span class="n">f_params</span><span class="p">,</span> <span class="n">bvec_guess</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the inputs are a tuple <code class="docutils literal notranslate"><span class="pre">f_params</span> <span class="pre">=</span> <span class="pre">(nvec,</span> <span class="pre">A,</span> <span class="pre">alpha,</span> <span class="pre">delta)</span></code>, and a guess for the steady-state savings vector <code class="docutils literal notranslate"><span class="pre">bvec_guess</span> <span class="pre">=</span> <span class="pre">np.array([scalar,</span> <span class="pre">scalar])</span></code>. The outputs should be Boolean (<code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code>) vectors of lengths 2, 3, and 1, respectively. <code class="docutils literal notranslate"><span class="pre">K_cnstr</span></code> should be a singleton Boolean that equals <code class="docutils literal notranslate"><span class="pre">True</span></code> if <span class="math notranslate nohighlight">\(K\leq 0\)</span> for the given <code class="docutils literal notranslate"><span class="pre">f_params</span></code> and <code class="docutils literal notranslate"><span class="pre">bvec_guess</span></code>. The object <code class="docutils literal notranslate"><span class="pre">c_cnstr</span></code> should be a length-3 Boolean vector in which the <span class="math notranslate nohighlight">\(s\)</span>th element equals <code class="docutils literal notranslate"><span class="pre">True</span></code> if <span class="math notranslate nohighlight">\(c_s\leq 0\)</span> given <code class="docutils literal notranslate"><span class="pre">f_params</span></code> and <code class="docutils literal notranslate"><span class="pre">bvec_guess</span></code>. And <code class="docutils literal notranslate"><span class="pre">b_cnstr</span></code> is a length-2 Boolean vector that denotes which element of <code class="docutils literal notranslate"><span class="pre">bvec_guess</span></code> is likely responsible for any of the consumption nonnegativity constraint violations identified in <code class="docutils literal notranslate"><span class="pre">c_cnstr</span></code>. If the first element of <code class="docutils literal notranslate"><span class="pre">c_cnstr</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the first element of <code class="docutils literal notranslate"><span class="pre">b_cnstr</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>. If the second element of <code class="docutils literal notranslate"><span class="pre">c_cnstr</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then both elements of <code class="docutils literal notranslate"><span class="pre">b_cnstr</span></code> are <code class="docutils literal notranslate"><span class="pre">True</span></code>. And if the last element of <code class="docutils literal notranslate"><span class="pre">c_cnstr</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the last element of <code class="docutils literal notranslate"><span class="pre">b_cnstr</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<ol class="arabic simple">
+<li><p>Which, if any, of the constraints is violated if you choose an initial guess for steady-state savings of <code class="docutils literal notranslate"><span class="pre">bvec_guess</span> <span class="pre">=</span> <span class="pre">np.array([1.0,</span> <span class="pre">1.2])</span></code>?</p></li>
+<li><p>Which, if any, of the constraints is violated if you choose an initial guess for steady-state savings of <code class="docutils literal notranslate"><span class="pre">bvec_guess</span> <span class="pre">=</span> <span class="pre">np.array([0.06,</span> <span class="pre">-0.001])</span></code>?</p></li>
+<li><p>Which, if any, of the constraints is violated if you choose an initial guess for steady-state savings of <code class="docutils literal notranslate"><span class="pre">bvec_guess</span> <span class="pre">=</span> <span class="pre">np.array([0.1,</span> <span class="pre">0.1])</span></code>?</p></li>
+</ol>
+</section>
+</div>
+<div class="exercise green admonition" id="ExerUNtut_3perOGSS">
+
+<p class="admonition-title"><span class="caption-number">Exercise 2 </span> (Computing the steady-state equilibrium)</p>
+<section id="exercise-content">
+<p>Use the calibration from Section <a class="reference internal" href="#secuntutorial-3perogcalib"><span class="std std-ref">Calibration</span></a> and the steady-state equilibrium <a class="reference internal" href="#DefUNtut_3perSimpSSeql">Definition 1</a>. Write a function named <code class="docutils literal notranslate"><span class="pre">get_SS()</span></code> that has the following form,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ss_output</span> <span class="o">=</span> <span class="n">get_SS</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">bvec_guess</span><span class="p">,</span> <span class="n">SS_graphs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the inputs are a tuple of the parameters for the model <code class="docutils literal notranslate"><span class="pre">params</span> <span class="pre">=</span> <span class="pre">(beta,</span> <span class="pre">sigma,</span> <span class="pre">nvec,</span> <span class="pre">L,</span> <span class="pre">A,</span> <span class="pre">alpha,</span> <span class="pre">delta,</span> <span class="pre">SS_tol)</span></code>, an initial guess of the steady-state savings <code class="docutils literal notranslate"><span class="pre">bvec_guess</span></code>, and a Boolean <code class="docutils literal notranslate"><span class="pre">SS_graphs</span></code> that generates a figure of the steady-state distribution of consumption and savings if it is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. The output object <code class="docutils literal notranslate"><span class="pre">ss_output</span></code> is a Python dictionary with the steady-state solution values for the following endogenous objects.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ss_output</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;b_ss&#39;</span><span class="p">:</span> <span class="n">b_ss</span><span class="p">,</span> <span class="s1">&#39;c_ss&#39;</span><span class="p">:</span> <span class="n">c_ss</span><span class="p">,</span> <span class="s1">&#39;w_ss&#39;</span><span class="p">:</span> <span class="n">w_ss</span><span class="p">,</span> <span class="s1">&#39;r_ss&#39;</span><span class="p">:</span> <span class="n">r_ss</span><span class="p">,</span>
+    <span class="s1">&#39;K_ss&#39;</span><span class="p">:</span> <span class="n">K_ss</span><span class="p">,</span> <span class="s1">&#39;I_ss&#39;</span><span class="p">:</span> <span class="n">I_ss</span><span class="p">,</span> <span class="s1">&#39;Y_ss&#39;</span><span class="p">:</span> <span class="n">Y_ss</span><span class="p">,</span> <span class="s1">&#39;C_ss&#39;</span><span class="p">:</span> <span class="n">C_ss</span><span class="p">,</span>
+    <span class="s1">&#39;EulErr_ss&#39;</span><span class="p">:</span> <span class="n">EulErr_ss</span><span class="p">,</span> <span class="s1">&#39;RCerr_ss&#39;</span><span class="p">:</span> <span class="n">RCerr_ss</span><span class="p">,</span>
+    <span class="s1">&#39;ss_time&#39;</span><span class="p">:</span> <span class="n">ss_time</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Let <code class="docutils literal notranslate"><span class="pre">ss_time</span></code> be the number of seconds it takes to run your steady-state program. You can time your program by importing the <code class="docutils literal notranslate"><span class="pre">time</span></code> library.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="o">...</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>  <span class="c1"># Place at beginning of get_SS()</span>
+<span class="o">...</span>
+<span class="n">ss_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>  <span class="c1"># Place at end of get_SS()</span>
+</pre></div>
+</div>
+<p>And let the object <code class="docutils literal notranslate"><span class="pre">EulErr_ss</span></code> be a length-2 vector of the two Euler errors from the resulting steady-state solution given in difference form <span class="math notranslate nohighlight">\(\beta(1+\bar{r})u'(\bar{c}_{s+1}) - u'(\bar{c}_s)\)</span>. The object <code class="docutils literal notranslate"><span class="pre">RCerr_ss</span></code> is a resource constraint error which should be close to zero. It is given by <span class="math notranslate nohighlight">\(\bar{Y}-\bar{C} - \delta\bar{K}\)</span>.</p>
+<ol class="arabic simple">
+<li><p>Solve numerically for the steady-state equilibrium values of <span class="math notranslate nohighlight">\(\{\bar{c}_s\}_{s=1}^3\)</span>, <span class="math notranslate nohighlight">\(\{\bar{b}_s\}_{s=2}^3\)</span>, <span class="math notranslate nohighlight">\(\bar{w}\)</span>, <span class="math notranslate nohighlight">\(\bar{r}\)</span>, <span class="math notranslate nohighlight">\(\bar{K}\)</span>, <span class="math notranslate nohighlight">\(\bar{Y}\)</span>, <span class="math notranslate nohighlight">\(\bar{C}\)</span>, the two Euler errors and the resource constraint error. List those values. Time your function. How long did it take to compute the steady-state?</p></li>
+<li><p>Generate a figure that shows the steady-state distribution of consumption and savings by age <span class="math notranslate nohighlight">\(\{\bar{c}_s\}_{s=1}^3\)</span> and <span class="math notranslate nohighlight">\(\{\bar{b}_s\}_{s=2}^3\)</span>.</p></li>
+<li><p>What happens to each of these steady-state values if all households become more patient <span class="math notranslate nohighlight">\(\beta\uparrow\)</span> (an example would be <span class="math notranslate nohighlight">\(\beta = 0.55\)</span>)? That is, in what direction does <span class="math notranslate nohighlight">\(\beta\uparrow\)</span> move each steady-state value <span class="math notranslate nohighlight">\(\{\bar{c}_s\}_{s=1}^3\)</span>, <span class="math notranslate nohighlight">\(\{\bar{b}_s\}_{s=2}^3\)</span>, <span class="math notranslate nohighlight">\(\bar{w}\)</span>, and <span class="math notranslate nohighlight">\(\bar{r}\)</span>? What is the intuition?</p></li>
+</ol>
+</section>
+</div>
+<div class="exercise green admonition" id="ExerUNtut_3perOGTPI">
+
+<p class="admonition-title"><span class="caption-number">Exercise 3 </span> (Computing the transition path equilibrium)</p>
+<section id="exercise-content">
+<p>Use the calibration from Section <a class="reference internal" href="#secuntutorial-3perogcalib"><span class="std std-ref">Calibration</span></a> and the steady-state solution from part 1 of <a class="reference internal" href="#ExerUNtut_3perOGSS"><span class="std std-numref">Exercise 2</span></a>. Use time path iteration (TPI) to solve for the non-steady state equilibrium transition path of the economy from <span class="math notranslate nohighlight">\((b_{2,1},b_{3,1})=(0.8\bar{b}_2,1.1\bar{b}_3)\)</span> to the steady-state <span class="math notranslate nohighlight">\((\bar{b}_2,\bar{b}_3)\)</span>. You’ll have to choose a guess for <span class="math notranslate nohighlight">\(T\)</span> and a time path updating parameter <span class="math notranslate nohighlight">\(\xi\in(0,1)\)</span>, but you can know that <span class="math notranslate nohighlight">\(T&lt;50\)</span>. Use an <span class="math notranslate nohighlight">\(L^2\)</span> norm for your distance measure (sum of squared percent deviations), and use a convergence parameter of <span class="math notranslate nohighlight">\(\varepsilon = 10^{-9}\)</span>. Use a linear initial guess for the time path of the aggregate capital stock from the initial state <span class="math notranslate nohighlight">\(K_1^1\)</span> to the steady state <span class="math notranslate nohighlight">\(K_T^1\)</span> at time <span class="math notranslate nohighlight">\(T\)</span>.</p>
+<ol class="arabic simple">
+<li><p>Report the maximum of the absolute values of all the Euler errors across the entire time path. Also report the maximum of the absolute value of all the aggregate resource constraint errors <span class="math notranslate nohighlight">\(Y_t - C_t - K_{t+1} + (1 - \delta)K_t\)</span> across the entire time path.</p></li>
+<li><p>Plot the equilibrium time paths of the aggregate capital stock <span class="math notranslate nohighlight">\(\{K_t\}_{t=1}^{T+5}\)</span>, wage <span class="math notranslate nohighlight">\(\{w_t\}_{t=1}^{T+5}\)</span>, and interest rate <span class="math notranslate nohighlight">\(\{r_t\}_{t=1}^{T+5}\)</span>.</p></li>
+<li><p>How many periods did it take for the economy to get within 0.00001 of the steady-state aggregate capital stock <span class="math notranslate nohighlight">\(\bar{K}\)</span>? What is the period after which the aggregate capital stock never is again farther than 0.00001 away from the steady-state?</p></li>
+</ol>
+</section>
+</div>
+</section>
+<section id="footnotes">
+<span id="secuntutorial-3perogfootnotes"></span><h2>Footnotes<a class="headerlink" href="#footnotes" title="Link to this heading">#</a></h2>
+<p>This section contains the footnotes for this chapter.</p>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="ogtextbook" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">1</a><span class="fn-bracket">]</span></span>
+<p>The <span id="id21">[<a class="reference internal" href="../OGETH_references.html#id27" title="Jason DeBacker and Richard W. Evans. Overlapping Generations Models for Policy Analysis: Theory and Computation. unpublished, 2024.">DeBacker and Evans, 2024</a>]</span> textbook, <em>Overlapping Generations Models for Policy Analysis: Theory and Computation</em>, is currently unpublished. However, the authors have posted selected chapters in <a class="reference external" href="https://github.com/OpenRG/OGprimer">this GitHub repository</a> along with the <a class="reference external" href="https://github.com/OpenRG/OGprimer/blob/master/Chapters/OGtext_toc.pdf">table of contents</a> and the <a class="reference external" href="https://github.com/OpenRG/OGprimer/blob/master/Chapters/OGtext_bib.pdf">references</a>. The authors can make other selected chapters available upon request.</p>
+</aside>
+<aside class="footnote brackets" id="persimp" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">2</a><span class="fn-bracket">]</span></span>
+<p>The main reason for this difference is that, in the two-period-lived agent OG model, young agents completely determine the supply of capital in the next period due to the fact that old people will not be around. This greatly simplifies the two-period-lived agent model and makes its solution method much easier than OG models with agents that live for three or more periods. However, two-period-lived OG models have been productively used in the literature to show many qualitatively interesting results.</p>
+</aside>
+<aside class="footnote brackets" id="simpprod" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">3</a><span class="fn-bracket">]</span></span>
+<p>This production sector is “nearly” the simplest because many simple 2-period-lived OG models assume a type of yeoman farmer that works and produces himself—a type of home production.</p>
+</aside>
+<aside class="footnote brackets" id="pergentos" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">4</a><span class="fn-bracket">]</span></span>
+<p>Note that the 3-period-lived agent OG model generalizes to the <span class="math notranslate nohighlight">\(S\)</span>-period-lived agent model. The more periods an agent lives, the more period budget constraints there are that look like Equation <a class="reference internal" href="#equation-equntut-hhbc2">(22)</a>.</p>
+</aside>
+<aside class="footnote brackets" id="cnonneg" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">5</a><span class="fn-bracket">]</span></span>
+<p>In equilibrium, consumption will be strictly positive <span class="math notranslate nohighlight">\(c_{s,t}&gt;0\)</span> for all <span class="math notranslate nohighlight">\(s\)</span> and <span class="math notranslate nohighlight">\(t\)</span> for two reasons. First, the utility function we use is not defined for <span class="math notranslate nohighlight">\(c\leq 0\)</span>. Second, the utility function we use has an Inada condition <span class="math notranslate nohighlight">\(\lim_{c\rightarrow 0}u'(c)=\infty\)</span>, which ensures that the solution to the household problem is always strictly positive consumption <span class="math notranslate nohighlight">\(c_{s,t}&gt;0\)</span> in equilibrium (interior solution). But because these conditions are equilibrium conditions, we state the general inequality constraint here <span class="math notranslate nohighlight">\(c_{s,t}\geq 0\)</span>.</p>
+</aside>
+<aside class="footnote brackets" id="reduceprob" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">6</a><span class="fn-bracket">]</span></span>
+<p>Notice that the individual’s problem can be reduced from 5 choice variables to 2 choice variables because the choice in the first two periods between consumption and savings is really just one choice. And the choice of how much to consume in the last period is trivial, because an individual just consumes all their income in the last period.</p>
+</aside>
+<aside class="footnote brackets" id="envelopecond" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">7</a><span class="fn-bracket">]</span></span>
+<p>The presence of <span class="math notranslate nohighlight">\(r_{t+2}\)</span> and <span class="math notranslate nohighlight">\(w_{t+2}\)</span> in Equation <a class="reference internal" href="#equation-equntut-hhk2funcpe">(31)</a> comes from the fact that optimal <span class="math notranslate nohighlight">\(b_{2,t+1}\)</span> depends on the optimal <span class="math notranslate nohighlight">\(b_{3,t+2}\)</span> from Equation <a class="reference internal" href="#equation-equntut-hhk3funcpe">(28)</a>.</p>
+</aside>
+<aside class="footnote brackets" id="beliefs" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">8</a><span class="fn-bracket">]</span></span>
+<p>In Section <a class="reference internal" href="#secuntutorial-3perogeqlb"><span class="std std-ref">Equilibrium</span></a> we assume that beliefs are correct (rational expectations) for the non-steady-state equilibrium in <a class="reference internal" href="#DefUNtut_3perSimpNSSEql">Definition 4</a>.</p>
+</aside>
+<aside class="footnote brackets" id="priceassumpt" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id11">9</a><span class="fn-bracket">]</span></span>
+<p>This is just a cheap way to assume no monetary policy. Relaxing this assumption is important in many applications for which price fluctuation is important.</p>
+</aside>
+<aside class="footnote brackets" id="depreciation" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id12">10</a><span class="fn-bracket">]</span></span>
+<p>Note that it is equivalent whether we put depreciation on the firms’ side as in equation <a class="reference internal" href="#equation-equntut-firmprofmax">(37)</a> or on the household side making the return on capital savings <span class="math notranslate nohighlight">\(1+r_t-\delta\)</span>. Depreciation must be in one place or the other, not both. We choose to put depreciation on the firm’s side here because the tax model we are building up to includes taxes and subsidies to firms for depreciation expenses.</p>
+</aside>
+<aside class="footnote brackets" id="auerbackkotlikoff" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id13">11</a><span class="fn-bracket">]</span></span>
+<p>See <span id="id22">[<a class="reference internal" href="../OGETH_references.html#id11" title="Alan J. Auerbach, Laurence J. Kotlikoff, and Jonathan Skinner. The efficiency gains from dynamic tax reform. NBER Working Paper 819, National Bureau of Economic Research, December 1981.">Auerbach <em>et al.</em>, 1981</a>]</span>, <span id="id23">[<a class="reference internal" href="../OGETH_references.html#id12" title="Alan J. Auerbach, Laurence J. Kotlikoff, and Jonathan Skinner. The efficiency gains from dynamic tax reform. International Economic Review, 24(1):81-100, February 1983.">Auerbach <em>et al.</em>, 1983</a>]</span>, <span id="id24">[<a class="reference internal" href="../OGETH_references.html#id6" title="Alan J. Auerbach and Laurence J. Kotlikoff. National savings, economic welfare, and the structure of taxation. In Martin Feldstein, editor, Behavioral Simulation Methods in Tax Policy Analysis, chapter Chap. 13, pages pp. 459-498. University of Chicago Press, 1983.">Auerbach and Kotlikoff, 1983</a>]</span>, <span id="id25">[<a class="reference internal" href="../OGETH_references.html#id7" title="Alan J. Auerbach and Laurence J. Kotlikoff. Investment versus savings incentives: the size of the bang for the buck and the potential for self-financing business tax cuts. In Lawrence. H. Meyer, editor, The Economic Consequences of Government Deficits, Economic Policy Conference Series, chapter Chap. 4, pages pp. 121-149. Kluwer-Nijhoff Publishing, 1983.">Auerbach and Kotlikoff, 1983</a>]</span>, <span id="id26">[<a class="reference internal" href="../OGETH_references.html#id8" title="Alan J. Auerbach and Laurence J. Kotlikoff. An examination of empirical tests of social security and savings. In Elhanan Helpman, Assaf Razin, and Efraim Sadka, editors, Social Policy Evaluation: An Economic Perspective, chapter Chap. 8, pages pp. 161-179. Academic Press, 1983.">Auerbach and Kotlikoff, 1983</a>]</span>, and <span id="id27">[<a class="reference internal" href="../OGETH_references.html#id9" title="Alan J. Auerbach and Laurence J. Kotlikoff. Simulating alternative social security responses to the demographic transition. National Tax Journal, 38(2):153-168, June 1985.">Auerbach and Kotlikoff, 1985</a>]</span>.</p>
+</aside>
+<aside class="footnote brackets" id="timepastt" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id19">12</a><span class="fn-bracket">]</span></span>
+<p>For models in which agents live for <span class="math notranslate nohighlight">\(S\)</span> periods, <span class="math notranslate nohighlight">\(m\geq S\)</span> so that the full distribution of capital at time <span class="math notranslate nohighlight">\(T\)</span> can be solved for. In the 3-period-lived agent model described here, <span class="math notranslate nohighlight">\(m\geq 3\)</span>.</p>
+</aside>
+<aside class="footnote brackets" id="tbigenough" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id20">13</a><span class="fn-bracket">]</span></span>
+<p>A check here for whether <span class="math notranslate nohighlight">\(T\)</span> is large enough is if <span class="math notranslate nohighlight">\(K_T^{i'}=\bar{K}\)</span> as well as <span class="math notranslate nohighlight">\(K_{T+1}^{i'}\)</span> and <span class="math notranslate nohighlight">\(K_{T+2}^{i'}\)</span>. If not, then <span class="math notranslate nohighlight">\(T\)</span> needs to be larger.</p>
+</aside>
+</aside>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./content/UNtutorial"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="getting_started.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Getting Started</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="projects.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Research Projects</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-this-simple-theory">Why this “simple” theory?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#households">Households</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#firms">Firms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#market-clearing">Market clearing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#equilibrium">Equilibrium</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#solution-method-time-path-iteration-tpi">Solution method: time path iteration (TPI)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calibration">Calibration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#footnotes">Footnotes</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Marcelo LaFleur, Richard W. Evans, and Jason DeBacker
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
