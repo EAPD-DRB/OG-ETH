@@ -28,7 +28,7 @@ For the May 11-15, 2026 United Nations `OG-ETH` training in Addis Ababa, Ethiopi
 * - Mon.
   - Morning
   - Organizer introductions <br> [Setup Python](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#install-python), [Git, GitHub](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#installing-git-and-github), and [OG-ETH](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#fork-and-clone-og-eth-repository)
-  - %[Intro slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-Open.pdf)
+  - [Intro slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-Open.pdf)
 * -
   - Afternoon
   - Theory: ["Simple" 3-period-lived agent model](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/3perOG.html)
