@@ -36,11 +36,11 @@ For the May 11-15, 2026 United Nations `OG-ETH` training in Addis Ababa, Ethiopi
 * - Tue.
   - Morning
   - Review 3-period-lived-agent exercises (solutions in [this folder](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/solutions/3perOG/)) <br> Review OG-Core and OG-ETH modules <br> Quick Git and GitHub workflow review
-  -
+  - <br>  <br> [Git/GitHub slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/WorkingOpenSource_Rick.pdf)
 * -
   - Afternoon
-  - Running OG-ETH, inputs, outputs <br> <br> Calibrating OG-ETH, current state, still to do
-  - %[I/O slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-inputoutput.pdf) <br> [I/O Colab notebook](https://colab.research.google.com/drive/1H-byv7BYtzieXQMTyDhYjZMxVCVB5t7W?usp=sharing) <br> [Calibrate slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-CurrentState.pdf)
+  - Running OG-ETH, inputs, outputs <br> <br> Calibrating OG-ETH, current state
+  - [I/O slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-inputoutput.pdf) <br> [I/O Colab notebook](https://colab.research.google.com/drive/1j411kYj0MrRA1sK3t9lHRpfy4F7uQNtx?usp=sharing) <br> [Calibrate slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-CurrentState.pdf)
 * - Wed.
   - Morning
   - Running OG-ETH: Revisit some reforms from 2-day visit <br> Talk about new reforms <br> Create project teams (see "[Research Projects](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/projects.html)" chapter)
