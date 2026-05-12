@@ -25,6 +25,9 @@ We set $\zeta_K = 0.95$. Note, this parameter is harder to pin down from the dat
 
 The path of government debt is endogenous. But the initial value and the steady-state (long-run) value are exogenous. To avoid converting between model units and dollars, we calibrate the initial debt to GDP ratio, rather than the dollar value of the debt. This is the model parameter $\alpha_D$ and the parameter name in [`ogeth_default_parameters.json`](https://github.com/EAPD-DRB/OG-ETH/blob/main/ogeth/ogeth_default_parameters.json) is `initial_debt_ratio`.  We compute this from the ratio of publicly held debt outstanding to GDP. Based on the 2019 value reported by the World Bank, the initial debt-to-GDP ratio in Ethiopia is 0.314.[^macro_wb_DY]
 
+### Foreign aid
+I chose foreign aid to be 10% of GDP because it sounded good. But Teddy said it was 8%.
+
 
 #### Interest rates on government debt
 
