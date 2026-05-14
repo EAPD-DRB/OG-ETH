@@ -371,6 +371,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
+<span class="c1"># Public capital elasticity; see firms.md.</span>
+<span class="n">GAMMA_G_LIC</span> <span class="o">=</span> <span class="mf">0.1</span>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_wb_data</span><span class="p">(</span><span class="n">indicators</span><span class="p">,</span> <span class="n">country_iso</span><span class="p">,</span> <span class="n">start_year</span><span class="p">,</span> <span class="n">end_year</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -731,10 +734,12 @@
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve labour share data from the United Nations ILOSTAT Data API</span>
-<span class="sd">    (see https://rshiny.ilo.org/dataexplorer9/?lang=en)</span>
-<span class="sd">    The series code is SDG_1041_NOC_RT_A (capital share)</span>
-<span class="sd">    Labor share (gamma) = 1 - capital share</span>
-<span class="sd">    If this fails we will not update gamma in &#39;default_parameters.json&#39;</span>
+<span class="sd">    (see https://rshiny.ilo.org/dataexplorer9/?lang=en).</span>
+<span class="sd">    The series code is SDG_1041_NOC_RT_A (labour income share as a percent</span>
+<span class="sd">    of GDP). Total capital share equals 1 - labour share. We subtract</span>
+<span class="sd">    GAMMA_G_LIC, which matches the gamma_g value in</span>
+<span class="sd">    &#39;default_parameters.json&#39;, to recover the private capital share gamma.</span>
+<span class="sd">    If this fails we will not update gamma in &#39;default_parameters.json&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">update_from_api</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
@@ -763,18 +768,15 @@
             <span class="n">csv_content</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
             <span class="n">df_temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_content</span><span class="p">)</span>
             <span class="n">ilo_data</span> <span class="o">=</span> <span class="n">df_temp</span><span class="p">[[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;obs_value&quot;</span><span class="p">]]</span>
-            <span class="c1"># find gamma, capital&#39;s share of income</span>
-            <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;gamma&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="mi">1</span>
-                <span class="o">-</span> <span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="n">ilo_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                            <span class="n">ilo_data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">data_end_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="s2">&quot;obs_value&quot;</span>
-                        <span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-                    <span class="p">)</span>
-                    <span class="o">/</span> <span class="mi">100</span>
-                <span class="p">)</span>
-            <span class="p">]</span>
+            <span class="c1"># find gamma (private capital share) by subtracting GAMMA_G_LIC</span>
+            <span class="c1"># from the ILOSTAT-derived total capital share.</span>
+            <span class="n">labor_share</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ilo_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                    <span class="n">ilo_data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">data_end_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="s2">&quot;obs_value&quot;</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+                <span class="o">/</span> <span class="mi">100</span>
+            <span class="p">)</span>
+            <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;gamma&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">labor_share</span> <span class="o">-</span> <span class="n">GAMMA_G_LIC</span><span class="p">]</span>
             <span class="nb">print</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;gamma updated from ILOSTAT API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>

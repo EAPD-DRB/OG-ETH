@@ -408,6 +408,8 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate-production-function-and-capital-accumulation">Aggregate Production Function and Capital Accumulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#elasticity-of-substitution">Elasticity of substitution</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#factor-shares-of-output">Factor shares of output</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#public-investment-efficiency">Public-investment efficiency</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-public-capital-to-gdp-ratio">Initial public capital to GDP ratio</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#total-factor-productivity">Total factor productivity</a></li>
 </ul>
 </li>
@@ -447,8 +449,45 @@
 </section>
 <section id="factor-shares-of-output">
 <h3>Factor shares of output<a class="headerlink" href="#factor-shares-of-output" title="Link to this heading">#</a></h3>
-<p>In the default calibration, we set infrastructure’s share of output to <span class="math notranslate nohighlight">\(\gamma_{g,m}=0.0\)</span> for all sectors.  This parameter is hard to identify from national accounts data and would entail an empirical study to tease out the relationship between infrastructure and output.</p>
-<p>We use a default value of <span class="math notranslate nohighlight">\(\gamma =0.61791\)</span>, which corresponds to one minus labor’s share of output, where labor’s share of output is found as 0.38209 in in the <a class="reference external" href="https://rshiny.ilo.org/dataexplorer41/?lang=en&amp;amp;segment=indicator&amp;amp;id=SDG_1041_NOC_RT_A">UN ILOSTAT database</a>.</p>
+<p>Labour’s share of output for Ethiopia comes from the <a class="reference external" href="https://rshiny.ilo.org/dataexplorer41/?lang=en&amp;amp;segment=indicator&amp;amp;id=SDG_1041_NOC_RT_A">UN ILOSTAT database</a>, SDG indicator 10.4.1 (series code <code class="docutils literal notranslate"><span class="pre">SDG_1041_NOC_RT_A</span></code>).  The most recent value is 0.38209, so total capital’s share of output is <span class="math notranslate nohighlight">\(1 - 0.38209 = 0.61791\)</span>.  We split this between private capital <span class="math notranslate nohighlight">\(\gamma_m\)</span> and public capital <span class="math notranslate nohighlight">\(\gamma_{g,m}\)</span>, with <span class="math notranslate nohighlight">\(\gamma_m + \gamma_{g,m} = 0.61791\)</span>.</p>
+<p>We set <span class="math notranslate nohighlight">\(\gamma_{g,m} = 0.10\)</span>, the value used for low-income countries in <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../OGETH_references.html#id77" title="Edward F. Buffie, Andrew Berg, Catherine Pattillo, Rafael Portillo, and Luis-Felipe Zanna. Public investment, growth, and debt sustainability: putting together the pieces. IMF Working Paper WP/12/144, International Monetary Fund, June 2012. URL: https://www.imf.org/external/pubs/ft/wp/2012/wp12144.pdf.">Buffie <em>et al.</em>, 2012</a>]</span>.  Private capital share is then <span class="math notranslate nohighlight">\(\gamma_m = 0.51791\)</span>.</p>
+</section>
+<section id="public-investment-efficiency">
+<h3>Public-investment efficiency<a class="headerlink" href="#public-investment-efficiency" title="Link to this heading">#</a></h3>
+<p>OG-Core’s law of motion for public capital is</p>
+<div class="math notranslate nohighlight" id="equation-eqpubliccapitallom">
+<span class="eqno">(2)<a class="headerlink" href="#equation-eqpubliccapitallom" title="Link to this equation">#</a></span>\[K_{g,m,t+1} = (1 - \delta_g)\,K_{g,m,t} + (1 - \phi_g)\,I_{g,m,t}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\delta_g\)</span> is the depreciation rate of public capital (the <code class="docutils literal notranslate"><span class="pre">delta_g_annual</span></code> parameter) and <span class="math notranslate nohighlight">\(\phi_g\)</span> (<code class="docutils literal notranslate"><span class="pre">infra_investment_leakage_rate</span></code>) is the fraction of public investment lost to leakage.  We set <span class="math notranslate nohighlight">\(\phi_g = 0.5\)</span>, meaning half of public investment is lost to inefficiency, matching the value used for the average low-income country in <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../OGETH_references.html#id77" title="Edward F. Buffie, Andrew Berg, Catherine Pattillo, Rafael Portillo, and Luis-Felipe Zanna. Public investment, growth, and debt sustainability: putting together the pieces. IMF Working Paper WP/12/144, International Monetary Fund, June 2012. URL: https://www.imf.org/external/pubs/ft/wp/2012/wp12144.pdf.">Buffie <em>et al.</em>, 2012</a>]</span>.</p>
+<p>Public investment flow is set as a share of GDP, <span class="math notranslate nohighlight">\(I_{g,t} = \alpha_{I,t}\,Y_t\)</span>.  We calibrate <code class="docutils literal notranslate"><span class="pre">alpha_I</span></code> as a five-year linear path from the most recent actual to a long-run value reflecting the pre-consolidation level, then hold constant:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head text-left"><p><span class="math notranslate nohighlight">\(t\)</span></p></th>
+<th class="head text-center"><p>0</p></th>
+<th class="head text-center"><p>1</p></th>
+<th class="head text-center"><p>2</p></th>
+<th class="head text-center"><p>3</p></th>
+<th class="head text-center"><p><span class="math notranslate nohighlight">\(\geq 4\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-left"><p><span class="math notranslate nohighlight">\(\alpha_{I,t}\)</span></p></td>
+<td class="text-center"><p>0.040</p></td>
+<td class="text-center"><p>0.045</p></td>
+<td class="text-center"><p>0.050</p></td>
+<td class="text-center"><p>0.055</p></td>
+<td class="text-center"><p>0.060</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <span class="math notranslate nohighlight">\(t = 0\)</span> value comes from the <a class="reference external" href="https://nbe.gov.et/wp-content/uploads/2025/06/Annual-Report-2023-2024.pdf">National Bank of Ethiopia Annual Report 2023/24</a>, Section 3.5: general government capital expenditure was 467,457.6 million Birr against total expenditure of 1,120,077.3 million Birr, where total expenditure was 9.5% of GDP, giving <span class="math notranslate nohighlight">\(\alpha_I = (467{,}457.6 / 1{,}120{,}077.3) \times 0.095 = 0.0396\)</span>.  The <span class="math notranslate nohighlight">\(t \geq 4\)</span> value of 0.060 reflects Ethiopia’s public investment rate in 2018/19 and 2019/20, prior to the recent fiscal consolidation, and is consistent with the gradual recovery in capital expenditure projected in <a class="reference external" href="https://www.imf.org/en/publications/cr/issues/2025/07/15/the-federal-democratic-republic-of-ethiopia-2025-article-iv-consultation-third-review-under-568611">IMF Country Report 25/188</a>.</p>
+</section>
+<section id="initial-public-capital-to-gdp-ratio">
+<h3>Initial public capital to GDP ratio<a class="headerlink" href="#initial-public-capital-to-gdp-ratio" title="Link to this heading">#</a></h3>
+<p>The parameter <code class="docutils literal notranslate"><span class="pre">initial_Kg_ratio</span></code> sets the ratio of public capital stock to GDP in the model start year.  We set it to 0.40, close to the steady state implied by the law of motion at our calibrated <span class="math notranslate nohighlight">\(\phi_g\)</span>, <span class="math notranslate nohighlight">\(\delta_g\)</span>, <span class="math notranslate nohighlight">\(g_y\)</span>, and the long-run <span class="math notranslate nohighlight">\(\alpha_I = 0.060\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-eqinitialkgss">
+<span class="eqno">(3)<a class="headerlink" href="#equation-eqinitialkgss" title="Link to this equation">#</a></span>\[\bar{K}_g / \bar{Y} = \frac{(1-\phi_g)\,\alpha_I}{\delta_g + g_y} = \frac{0.5 \times 0.06}{0.02 + 0.06} = 0.375\]</div>
+<p>Initializing near the model’s steady-state <span class="math notranslate nohighlight">\(\bar{K}_g/\bar{Y}\)</span> keeps the transition path well-behaved.  This value is also consistent with <a class="reference external" href="https://data.imf.org/en/Data-Explorer?datasetUrn=IMF.FAD:ICSD(1.0.0)">IMF Investment and Capital Stock Dataset</a> (indicator <code class="docutils literal notranslate"><span class="pre">CAPSTCK_S13_Q_POGDP_PT</span></code>) readings for Ethiopia in the late 2000s, before Ethiopia’s infrastructure investment push of the 2010s raised the ratio to 0.667 by 2019.</p>
 </section>
 <section id="total-factor-productivity">
 <h3>Total factor productivity<a class="headerlink" href="#total-factor-productivity" title="Link to this heading">#</a></h3>
@@ -526,6 +565,8 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate-production-function-and-capital-accumulation">Aggregate Production Function and Capital Accumulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#elasticity-of-substitution">Elasticity of substitution</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#factor-shares-of-output">Factor shares of output</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#public-investment-efficiency">Public-investment efficiency</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-public-capital-to-gdp-ratio">Initial public capital to GDP ratio</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#total-factor-productivity">Total factor productivity</a></li>
 </ul>
 </li>
