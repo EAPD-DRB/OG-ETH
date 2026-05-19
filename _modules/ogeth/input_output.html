@@ -363,6 +363,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">ogeth.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_connected</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ogeth.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">CONS_DICT</span><span class="p">,</span> <span class="n">PROD_DICT</span>
 
+
+<span class="k">def</span><span class="w"> </span><span class="nf">norm</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">casefold</span><span class="p">()</span>
+
+
 <span class="n">CUR_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Read in Social Accounting Matrix (SAM) file</span>
@@ -378,10 +383,28 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">read_SAM</span><span class="p">():</span>
     <span class="k">if</span> <span class="n">is_connected</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">SAM</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">SAM_path</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">thousands</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="n">SAM</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                <span class="n">SAM_path</span><span class="p">,</span>
+                <span class="n">index_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">thousands</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Successfully read SAM from Github repository.&quot;</span><span class="p">)</span>
-            <span class="c1"># replace NaN with 0</span>
-            <span class="n">SAM</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># First column is descriptive text, not SAM values</span>
+            <span class="n">label_col</span> <span class="o">=</span> <span class="n">SAM</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">value_cols</span> <span class="o">=</span> <span class="n">SAM</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">label_col</span><span class="p">)</span>
+
+            <span class="c1"># Convert only SAM value columns to numeric</span>
+            <span class="n">SAM</span><span class="p">[</span><span class="n">value_cols</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">SAM</span><span class="p">[</span><span class="n">value_cols</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">))</span>
+                <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">SAM</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> rows and </span><span class="si">{</span><span class="n">SAM</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> columns in the SAM.&quot;</span>
+            <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to read from the GitHub repository: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">SAM</span> <span class="o">=</span> <span class="kc">None</span>
