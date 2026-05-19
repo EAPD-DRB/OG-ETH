@@ -360,7 +360,6 @@
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ogeth.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_connected</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ogeth.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">CONS_DICT</span><span class="p">,</span> <span class="n">PROD_DICT</span>
 
 
@@ -369,52 +368,41 @@
 
 
 <span class="n">CUR_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Read in Social Accounting Matrix (SAM) file</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c1"># Read in SAM file</span>
-<span class="c1"># SAM file:</span>
-<span class="c1"># Read in SAM file</span>
-<span class="n">SAM_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-    <span class="s2">&quot;https://raw.githubusercontent.com/EAPD-DRB/OG-ETH/refs/heads/main/ogeth/data/IFPRI_SAM_ETH_2022_SAM.csv&quot;</span>
-<span class="p">)</span>
+<span class="n">sam_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUR_DIR</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;IFPRI_SAM_ETH_2022_SAM.csv&quot;</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="read_SAM">
+<a class="viewcode-back" href="../../content/api/input_output.html#ogeth.input_output.read_SAM">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">read_SAM</span><span class="p">():</span>
-    <span class="k">if</span> <span class="n">is_connected</span><span class="p">():</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">SAM</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-                <span class="n">SAM_path</span><span class="p">,</span>
-                <span class="n">index_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">thousands</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read the packaged Ethiopia SAM file.</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Successfully read SAM from Github repository.&quot;</span><span class="p">)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame | None: parsed SAM table, or None if unavailable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sam</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">sam_path</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">thousands</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 
-            <span class="c1"># First column is descriptive text, not SAM values</span>
-            <span class="n">label_col</span> <span class="o">=</span> <span class="n">SAM</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">value_cols</span> <span class="o">=</span> <span class="n">SAM</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">label_col</span><span class="p">)</span>
+        <span class="c1"># First column is descriptive text, not SAM values</span>
+        <span class="n">label_col</span> <span class="o">=</span> <span class="n">sam</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">value_cols</span> <span class="o">=</span> <span class="n">sam</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">label_col</span><span class="p">)</span>
 
-            <span class="c1"># Convert only SAM value columns to numeric</span>
-            <span class="n">SAM</span><span class="p">[</span><span class="n">value_cols</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">SAM</span><span class="p">[</span><span class="n">value_cols</span><span class="p">]</span>
-                <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">))</span>
-                <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="p">)</span>
+        <span class="c1"># Convert only SAM value columns to numeric</span>
+        <span class="n">sam</span><span class="p">[</span><span class="n">value_cols</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">sam</span><span class="p">[</span><span class="n">value_cols</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>
 
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">SAM</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> rows and </span><span class="si">{</span><span class="n">SAM</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> columns in the SAM.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to read from the GitHub repository: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">SAM</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="c1"># If both attempts fail, SAM will be None</span>
-        <span class="k">if</span> <span class="n">SAM</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to read SAM from both sources.&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-        <span class="n">SAM</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No internet connection. SAM cannot be read.&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SAM</span>
+        <span class="k">return</span> <span class="n">sam</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to read packaged SAM file: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
 
 
 <div class="viewcode-block" id="get_alpha_c">
@@ -435,13 +423,24 @@
         <span class="n">sam</span> <span class="o">=</span> <span class="n">read_SAM</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">sam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;SAM data is unavailable. Cannot compute alpha_c.&quot;</span><span class="p">)</span>
+
+    <span class="n">hh_cols</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;hhd-r1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hhd-r2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hhd-r3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hhd-r4&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hhd-r5&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hhd-u1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hhd-u2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hhd-u3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hhd-u4&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hhd-u5&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
     <span class="n">alpha_c</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">overall_sum</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">cons_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="c1"># note the subtraction of the row to focus on domestic consumption</span>
         <span class="n">category_total</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">sam</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sam</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="s2">&quot;total&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-            <span class="o">-</span> <span class="n">sam</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sam</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="s2">&quot;row&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">sam</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sam</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">hh_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="p">)</span>
         <span class="n">alpha_c</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">category_total</span>
         <span class="n">overall_sum</span> <span class="o">+=</span> <span class="n">category_total</span>
