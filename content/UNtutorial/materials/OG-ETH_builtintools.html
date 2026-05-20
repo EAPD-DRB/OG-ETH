@@ -1,0 +1,824 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Using Built-in Functions in OG-Core &#8212; OG-ETH</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/exercise.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/proof.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'content/UNtutorial/materials/OG-ETH_builtintools';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../intro/intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/OG-ETH_logo.png" class="logo__image only-light" alt="OG-ETH - Home"/>
+    <img src="../../../_static/OG-ETH_logo.png" class="logo__image only-dark pst-js-only" alt="OG-ETH - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../intro/intro.html">
+                    OG-ETH
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contributing to OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/contributor_guide.html">Contributor Guide</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">OG-ETH API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api/public_api.html">API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/calibrate.html">Main Calibration Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/income.html">Life-cycle productivity profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/input_output.html">Output-Consumption Bridge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/macro_params.html">Macro Parameter Estimation Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/utils.html">Calibration Utilities</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Calibration</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../calibration/households.html">Calibration of Household Preference Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../calibration/firms.html">Calibration of Firm Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../calibration/macro.html">Calibration of Macroeconomic Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../calibration/demographics.html">Demographics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../calibration/earnings.html">Lifetime Earnings Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../calibration/taxes.html">Taxes in OG-ETH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../calibration/UBI.html">Universal Basic Income (UBI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../calibration/matching_lwi.html">Matching Labor, Wealth, and Income Moments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../calibration/exogenous_parameters.html">Exogenous Parameters</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">UN Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../3perOG.html">A “Simple” 3-period-lived agent OG model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../projects.html">Research Projects</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../OGETH_references.html">References</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Citations of OG-ETH</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../citations.html">Citations and use cases of OG-ETH</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH_builtintools.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Colab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Colab logo" src="../../../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/EAPD-DRB/OG-ETH/issues/new?title=Issue%20on%20page%20%2Fcontent/UNtutorial/materials/OG-ETH_builtintools.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../../_sources/content/UNtutorial/materials/OG-ETH_builtintools.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Using Built-in Functions in OG-Core</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output-plots-py">1. Output_plots.py</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#demographics-py">2. demographics.py</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="using-built-in-functions-in-og-core">
+<h1>Using Built-in Functions in OG-Core<a class="headerlink" href="#using-built-in-functions-in-og-core" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import packages</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ogcore.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Specifications</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ogcore.execute</span><span class="w"> </span><span class="kn">import</span> <span class="n">runner</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ogcore.output_plots</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">op</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ogcore.output_tables</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ot</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ogcore.demographics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">demog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ogcore.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">safe_read_pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="c1"># set plot style</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;ogcore.OGcorePlots&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load baseline and reform parameters, steady-state, and transition path</span>
+<span class="c1"># objects</span>
+<span class="n">base_path</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;/Users/richardevans/Docs/Economics/OSE/OG/OG-ETH/examples/&quot;</span> <span class="o">+</span>
+    <span class="s2">&quot;OG-ETH-Example/OUTPUT_BASELINE&quot;</span>
+<span class="p">)</span>
+<span class="n">ref_path</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;/Users/richardevans/Docs/Economics/OSE/OG/OG-ETH/examples/&quot;</span> <span class="o">+</span>
+    <span class="s2">&quot;OG-ETH-Example/OUTPUT_REFORM&quot;</span>
+<span class="p">)</span>
+<span class="n">p_bas</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;model_params.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
+<span class="n">p_ref</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ref_path</span><span class="p">,</span> <span class="s2">&quot;model_params.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
+<span class="n">ss_vars_bas</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;SS&quot;</span><span class="p">,</span> <span class="s2">&quot;SS_vars.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">ss_vars_ref</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ref_path</span><span class="p">,</span> <span class="s2">&quot;SS&quot;</span><span class="p">,</span> <span class="s2">&quot;SS_vars.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">tpi_vars_bas</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;TPI&quot;</span><span class="p">,</span> <span class="s2">&quot;TPI_vars.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">tpi_vars_ref</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ref_path</span><span class="p">,</span> <span class="s2">&quot;TPI&quot;</span><span class="p">,</span> <span class="s2">&quot;TPI_vars.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">FileNotFoundError</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">11</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="n">ref_path</span> <span class="o">=</span> <span class="p">(</span>
+<span class="g g-Whitespace">      </span><span class="mi">8</span>     <span class="s2">&quot;/Users/richardevans/Docs/Economics/OSE/OG/OG-ETH/examples/&quot;</span> <span class="o">+</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span>     <span class="s2">&quot;OG-ETH-Example/OUTPUT_REFORM&quot;</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">11</span> <span class="n">p_bas</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;model_params.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="n">p_ref</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ref_path</span><span class="p">,</span> <span class="s2">&quot;model_params.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="n">ss_vars_bas</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span>     <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;SS&quot;</span><span class="p">,</span> <span class="s2">&quot;SS_vars.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+
+<span class="ne">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;/Users/richardevans/Docs/Economics/OSE/OG/OG-ETH/examples/OG-ETH-Example/OUTPUT_BASELINE/model_params.pkl&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<section id="output-plots-py">
+<h2>1. Output_plots.py<a class="headerlink" href="#output-plots-py" title="Link to this heading">#</a></h2>
+<p>Let’s look at the <a class="reference external" href="https://github.com/PSLmodels/OG-Core/blob/master/ogcore/output_plots.py"><code class="docutils literal notranslate"><span class="pre">ogcore/output_plots.py</span></code></a> module. We have imported this module above with the <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">ogcore.output_plots</span> <span class="pre">as</span> <span class="pre">op</span></code> line.</p>
+<p>The input arguments for the <a class="reference external" href="https://pslmodels.github.io/OG-Core/content/api/output_plots.html"><code class="docutils literal notranslate"><span class="pre">plot_aggregates()</span></code></a> function can be found in the Python API documentation for OG-Core.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_aggregates</span><span class="p">(</span>
+    <span class="n">base_tpi</span><span class="p">,</span>
+    <span class="n">base_params</span><span class="p">,</span>
+    <span class="n">reform_tpi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reform_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">var_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;L&quot;</span><span class="p">],</span>
+    <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;pct_diff&quot;</span><span class="p">,</span>
+    <span class="n">stationarized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">num_years_to_plot</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">DEFAULT_START_YEAR</span><span class="p">,</span>
+    <span class="n">forecast_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">forecast_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">vertical_line_years</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig1</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">plot_aggregates</span><span class="p">(</span>
+    <span class="n">tpi_vars_bas</span><span class="p">,</span> <span class="n">p_bas</span><span class="p">,</span> <span class="n">tpi_vars_ref</span><span class="p">,</span> <span class="n">p_ref</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;L&quot;</span><span class="p">],</span>
+    <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;pct_diff&quot;</span><span class="p">,</span> <span class="n">num_years_to_plot</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">vertical_line_years</span><span class="o">=</span><span class="p">[</span><span class="n">p_bas</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="n">p_bas</span><span class="o">.</span><span class="n">tG1</span><span class="p">,</span> <span class="n">p_bas</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="n">p_bas</span><span class="o">.</span><span class="n">tG2</span><span class="p">],</span>
+    <span class="n">plot_title</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../../_images/9fb7b282c1360bba21e30865fb3e48d8eb8a86c3d328cec1aadc55e261b6a3a7.png" src="../../../_images/9fb7b282c1360bba21e30865fb3e48d8eb8a86c3d328cec1aadc55e261b6a3a7.png" />
+</div>
+</div>
+<p>The <a class="reference external" href="https://pslmodels.github.io/OG-Core/content/api/output_plots.html"><code class="docutils literal notranslate"><span class="pre">ability_bar()</span></code></a> plot shows percentage change in variables in the first number of years.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ability_bar</span><span class="p">(</span>
+    <span class="n">base_tpi</span><span class="p">,</span>
+    <span class="n">base_params</span><span class="p">,</span>
+    <span class="n">reform_tpi</span><span class="p">,</span>
+    <span class="n">reform_params</span><span class="p">,</span>
+    <span class="n">var</span><span class="o">=</span><span class="s2">&quot;n_mat&quot;</span><span class="p">,</span>
+    <span class="n">num_years</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">DEFAULT_START_YEAR</span><span class="p">,</span>
+    <span class="n">plot_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The variable <code class="docutils literal notranslate"><span class="pre">var=</span></code> input needs to be one of the variables in the TPI object that varies by ability (e.g., <code class="docutils literal notranslate"><span class="pre">bmat_splus1</span></code>, <code class="docutils literal notranslate"><span class="pre">bmat_s</span></code>, <code class="docutils literal notranslate"><span class="pre">n_mat</span></code>, <code class="docutils literal notranslate"><span class="pre">c_path</span></code>, <code class="docutils literal notranslate"><span class="pre">bq_path</span></code>, <code class="docutils literal notranslate"><span class="pre">rm_path</span></code>, <code class="docutils literal notranslate"><span class="pre">tr_path</span></code>)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tpi_vars_bas</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dict_keys([&#39;Y&#39;, &#39;B&#39;, &#39;K&#39;, &#39;K_f&#39;, &#39;K_d&#39;, &#39;L&#39;, &#39;C&#39;, &#39;I&#39;, &#39;I_total&#39;, &#39;I_d&#39;, &#39;K_g&#39;, &#39;I_g&#39;, &#39;BQ&#39;, &#39;RM&#39;, &#39;Y_m&#39;, &#39;K_m&#39;, &#39;L_m&#39;, &#39;C_i&#39;, &#39;TR&#39;, &#39;agg_pension_outlays&#39;, &#39;G&#39;, &#39;UBI&#39;, &#39;total_tax_revenue&#39;, &#39;business_tax_revenue&#39;, &#39;iit_payroll_tax_revenue&#39;, &#39;iit_revenue&#39;, &#39;payroll_tax_revenue&#39;, &#39;bequest_tax_revenue&#39;, &#39;wealth_tax_revenue&#39;, &#39;cons_tax_revenue&#39;, &#39;D&#39;, &#39;D_f&#39;, &#39;D_d&#39;, &#39;new_borrowing&#39;, &#39;debt_service&#39;, &#39;new_borrowing_f&#39;, &#39;debt_service_f&#39;, &#39;r&#39;, &#39;r_gov&#39;, &#39;r_p&#39;, &#39;w&#39;, &#39;p_m&#39;, &#39;p_i&#39;, &#39;p_tilde&#39;, &#39;b_sp1&#39;, &#39;b_s&#39;, &#39;n&#39;, &#39;c&#39;, &#39;c_i&#39;, &#39;bq&#39;, &#39;rm&#39;, &#39;tr&#39;, &#39;ubi&#39;, &#39;before_tax_income&#39;, &#39;hh_taxes&#39;, &#39;etr&#39;, &#39;mtrx&#39;, &#39;mtry&#39;, &#39;euler_savings&#39;, &#39;euler_labor_leisure&#39;, &#39;resource_constraint_error&#39;])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig2</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">ability_bar</span><span class="p">(</span>
+    <span class="n">tpi_vars_bas</span><span class="p">,</span> <span class="n">p_bas</span><span class="p">,</span> <span class="n">tpi_vars_ref</span><span class="p">,</span> <span class="n">p_ref</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">num_years</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">p_bas</span><span class="o">.</span><span class="n">start_year</span><span class="o">+</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">plot_title</span><span class="o">=</span><span class="s2">&quot;Average consumption percent change by ability type: 2025-2030&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../../_images/3e3885dac917f8dc7a98c00aa7dc2c2259ce15e6860816fbec8b0f0c7494e970.png" src="../../../_images/3e3885dac917f8dc7a98c00aa7dc2c2259ce15e6860816fbec8b0f0c7494e970.png" />
+</div>
+</div>
+<p>The other main plotting function <a class="reference external" href="https://pslmodels.github.io/OG-Core/content/api/output_plots.html"><code class="docutils literal notranslate"><span class="pre">plot_gdp_ratio()</span></code></a> is for plotting variables as a percent of GDP.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_gdp_ratio</span><span class="p">(</span>
+    <span class="n">base_tpi</span><span class="p">,</span>
+    <span class="n">base_params</span><span class="p">,</span>
+    <span class="n">reform_tpi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reform_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">var_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;D&quot;</span><span class="p">],</span>
+    <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;levels&quot;</span><span class="p">,</span>
+    <span class="n">num_years_to_plot</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">DEFAULT_START_YEAR</span><span class="p">,</span>
+    <span class="n">vertical_line_years</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig3</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">plot_gdp_ratio</span><span class="p">(</span>
+    <span class="n">tpi_vars_bas</span><span class="p">,</span> <span class="n">p_bas</span><span class="p">,</span> <span class="n">tpi_vars_ref</span><span class="p">,</span> <span class="n">p_ref</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;TR&quot;</span><span class="p">],</span> <span class="n">num_years_to_plot</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">p_bas</span><span class="o">.</span><span class="n">start_year</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;diff&quot;</span><span class="p">,</span>
+    <span class="n">vertical_line_years</span><span class="o">=</span><span class="p">[</span><span class="n">p_bas</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="n">p_bas</span><span class="o">.</span><span class="n">tG1</span><span class="p">,</span> <span class="n">p_bas</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="n">p_bas</span><span class="o">.</span><span class="n">tG2</span><span class="p">],</span>
+    <span class="n">plot_title</span><span class="o">=</span><span class="s2">&quot;Debt-to-GDP ratio: 2025-2075&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../../_images/fe25b57b1602505e1b04e4578c15c4048bfc0478abdbd08b12c57a6fa0fd6873.png" src="../../../_images/fe25b57b1602505e1b04e4578c15c4048bfc0478abdbd08b12c57a6fa0fd6873.png" />
+</div>
+</div>
+<p>Inequality time series plot <a class="reference external" href="https://pslmodels.github.io/OG-Core/content/api/output_plots.html"><code class="docutils literal notranslate"><span class="pre">inequality_plot()</span></code></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inequality_plot</span><span class="p">(</span>
+    <span class="n">base_tpi</span><span class="p">,</span>
+    <span class="n">base_params</span><span class="p">,</span>
+    <span class="n">reform_tpi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reform_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">var</span><span class="o">=</span><span class="s2">&quot;c_path&quot;</span><span class="p">,</span>
+    <span class="n">ineq_measure</span><span class="o">=</span><span class="s2">&quot;gini&quot;</span><span class="p">,</span>
+    <span class="n">pctiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;levels&quot;</span><span class="p">,</span>
+    <span class="n">num_years_to_plot</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">DEFAULT_START_YEAR</span><span class="p">,</span>
+    <span class="n">vertical_line_years</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig4</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">inequality_plot</span><span class="p">(</span>
+    <span class="n">tpi_vars_bas</span><span class="p">,</span> <span class="n">p_bas</span><span class="p">,</span> <span class="n">tpi_vars_ref</span><span class="p">,</span> <span class="n">p_ref</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s2">&quot;before_tax_income&quot;</span><span class="p">,</span>
+    <span class="n">ineq_measure</span><span class="o">=</span><span class="s2">&quot;gini&quot;</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;levels&quot;</span><span class="p">,</span> <span class="n">num_years_to_plot</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="n">p_bas</span><span class="o">.</span><span class="n">start_year</span><span class="p">,</span>
+    <span class="n">vertical_line_years</span><span class="o">=</span><span class="p">[</span><span class="n">p_bas</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="n">p_bas</span><span class="o">.</span><span class="n">tG1</span><span class="p">,</span> <span class="n">p_bas</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="n">p_bas</span><span class="o">.</span><span class="n">tG2</span><span class="p">],</span>
+    <span class="n">plot_title</span><span class="o">=</span><span class="s2">&quot;Gini coefficient time series: 2025-2075&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../../_images/faa78408af1449c4b3e071e8e8ec8c0455f738b0e89a2f4bea752838ed8bc666.png" src="../../../_images/faa78408af1449c4b3e071e8e8ec8c0455f738b0e89a2f4bea752838ed8bc666.png" />
+</div>
+</div>
+</section>
+<section id="demographics-py">
+<h2>2. <a class="reference external" href="http://demographics.py">demographics.py</a><a class="headerlink" href="#demographics-py" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fert_rates</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">demog</span><span class="o">.</span><span class="n">get_fert</span><span class="p">(</span>
+    <span class="n">totpers</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">min_age</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_age</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+    <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;360&quot;</span><span class="p">,</span>  <span class="c1"># Indonesia is &quot;360&quot;; South Africa is &quot;710&quot;; USA is &quot;840&quot;</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="mi">2022</span><span class="p">,</span>
+    <span class="n">end_year</span><span class="o">=</span><span class="mi">2022</span><span class="p">,</span>
+    <span class="n">graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">plot_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">download_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/anaconda3/envs/ogidn-dev/lib/python3.12/site-packages/ogcore/parameter_plots.py:417: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+  fig.show()
+</pre></div>
+</div>
+<img alt="../../../_images/85928f06ae2e3cb45f6b5991e3361a012c48db694228fb56f5a539738b9212d7.png" src="../../../_images/85928f06ae2e3cb45f6b5991e3361a012c48db694228fb56f5a539738b9212d7.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fert_rates</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">demog</span><span class="o">.</span><span class="n">get_fert</span><span class="p">(</span>
+    <span class="n">totpers</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">min_age</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_age</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+    <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;840&quot;</span><span class="p">,</span>  <span class="c1"># South Africa is &quot;710&quot;; USA is &quot;840&quot;</span>
+    <span class="n">start_year</span><span class="o">=</span><span class="mi">2022</span><span class="p">,</span>
+    <span class="n">end_year</span><span class="o">=</span><span class="mi">2022</span><span class="p">,</span>
+    <span class="n">graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">plot_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">download_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/anaconda3/envs/ogidn-dev/lib/python3.12/site-packages/ogcore/parameter_plots.py:417: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+  fig.show()
+</pre></div>
+</div>
+<img alt="../../../_images/99fc6a59318c320b675fd45be56b9e09dd79a825e5ede35bd9d52b7d6cb6ece2.png" src="../../../_images/99fc6a59318c320b675fd45be56b9e09dd79a825e5ede35bd9d52b7d6cb6ece2.png" />
+</div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./content/UNtutorial/materials"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output-plots-py">1. Output_plots.py</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#demographics-py">2. demographics.py</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Marcelo LaFleur, Richard W. Evans, and Jason DeBacker
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

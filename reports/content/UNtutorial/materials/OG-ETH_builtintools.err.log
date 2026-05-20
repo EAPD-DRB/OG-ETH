@@ -1,0 +1,71 @@
+Traceback (most recent call last):
+  File "/home/runner/miniconda3/envs/ogeth-dev/lib/python3.13/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+    ~~~~~~~~~^
+        nb,
+        ^^^
+    ...<4 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "/home/runner/miniconda3/envs/ogeth-dev/lib/python3.13/site-packages/nbclient/client.py", line 1323, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/runner/miniconda3/envs/ogeth-dev/lib/python3.13/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/runner/miniconda3/envs/ogeth-dev/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/runner/miniconda3/envs/ogeth-dev/lib/python3.13/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+        cell, index, execution_count=self.code_cells_executed + 1
+    )
+  File "/home/runner/miniconda3/envs/ogeth-dev/lib/python3.13/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/runner/miniconda3/envs/ogeth-dev/lib/python3.13/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+# Load baseline and reform parameters, steady-state, and transition path
+# objects
+base_path = (
+    "/Users/richardevans/Docs/Economics/OSE/OG/OG-ETH/examples/" +
+    "OG-ETH-Example/OUTPUT_BASELINE"
+)
+ref_path = (
+    "/Users/richardevans/Docs/Economics/OSE/OG/OG-ETH/examples/" +
+    "OG-ETH-Example/OUTPUT_REFORM"
+)
+p_bas = pickle.load(open(os.path.join(base_path, "model_params.pkl"), "rb"))
+p_ref = pickle.load(open(os.path.join(ref_path, "model_params.pkl"), "rb"))
+ss_vars_bas = pickle.load(
+    open(os.path.join(base_path, "SS", "SS_vars.pkl"), "rb")
+)
+ss_vars_ref = pickle.load(
+    open(os.path.join(ref_path, "SS", "SS_vars.pkl"), "rb")
+)
+tpi_vars_bas = pickle.load(
+    open(os.path.join(base_path, "TPI", "TPI_vars.pkl"), "rb")
+)
+tpi_vars_ref = pickle.load(
+    open(os.path.join(ref_path, "TPI", "TPI_vars.pkl"), "rb")
+)
+------------------
+
+
+[31m---------------------------------------------------------------------------[39m
+[31mFileNotFoundError[39m                         Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[2][39m[32m, line 11[39m
+[32m      7[39m ref_path = (
+[32m      8[39m     [33m"/Users/richardevans/Docs/Economics/OSE/OG/OG-ETH/examples/"[39m +
+[32m      9[39m     [33m"OG-ETH-Example/OUTPUT_REFORM"[39m
+[32m     10[39m )
+[32m---> [39m[32m11[39m p_bas = pickle.load(open(os.path.join(base_path, [33m"model_params.pkl"[39m), [33m"rb"[39m))
+[32m     12[39m p_ref = pickle.load(open(os.path.join(ref_path, [33m"model_params.pkl"[39m), [33m"rb"[39m))
+[32m     13[39m ss_vars_bas = pickle.load(
+[32m     14[39m     open(os.path.join(base_path, [33m"SS"[39m, [33m"SS_vars.pkl"[39m), [33m"rb"[39m)
+
+[31mFileNotFoundError[39m: [Errno 2] No such file or directory: '/Users/richardevans/Docs/Economics/OSE/OG/OG-ETH/examples/OG-ETH-Example/OUTPUT_BASELINE/model_params.pkl'
+

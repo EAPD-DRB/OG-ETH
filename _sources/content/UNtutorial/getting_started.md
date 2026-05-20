@@ -39,16 +39,16 @@ For the May 11-15, 2026 United Nations `OG-ETH` training in Addis Ababa, Ethiopi
   - <br>  <br> [Git/GitHub slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/WorkingOpenSource_Rick.pdf)
 * -
   - Afternoon
-  - Running OG-ETH, inputs, outputs <br> <br> Calibrating OG-ETH, current state
+  - Running OG-ETH, inputs, outputs <br> <br> Calibrating OG-ETH, current state, still to do
   - [I/O slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-inputoutput.pdf) <br> [I/O Colab notebook](https://colab.research.google.com/drive/1j411kYj0MrRA1sK3t9lHRpfy4F7uQNtx?usp=sharing) <br> [Calibrate slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-CurrentState.pdf)
 * - Wed.
   - Morning
   - Running OG-ETH: Revisit some reforms from 2-day visit <br> Talk about new reforms <br> Create project teams (see "[Research Projects](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/projects.html)" chapter)
-  - %[Reforms slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-PrevAndNewReforms.pdf) <br> [Notebooks](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/PrevReformsNotebooks/notebooks) <br> [Run scripts](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/PrevReformsNotebooks/run_scripts)
+  - [Reforms slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-PrevAndNewReforms.pdf)
 * -
   - Afternoon
-  - OG-ETH output: Tools to visualize/tabulate output <br> OG-ETH built-in calibration help
-  - %[Built-in tools notebook](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH_builtintools.ipynb)
+  - OG-ETH output: Tools to visualize/tabulate output <br> OG-ETH, interpreting output
+  - [Built-in tools notebook](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH_builtintools.ipynb) <br> [Interpreting Output Slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-Interpreting.pdf)
 * - Thu.
   - Morning
   - Calibrating OG-ETH: Issues and hot spots
@@ -64,7 +64,7 @@ For the May 11-15, 2026 United Nations `OG-ETH` training in Addis Ababa, Ethiopi
 * -
   - Afternoon
   - Presentation of projects <br> Future work, research, collaboration, final topics <br> Closing remarks
-  -
+  - [List of presentations](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/projects.html)
 ```
 
 ### Other materials:
