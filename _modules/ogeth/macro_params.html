@@ -31,7 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
-    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
@@ -54,7 +54,7 @@
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../../_static/togglebutton.js?v=b8b12719"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
@@ -437,7 +437,8 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">series_data</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;No dated observations in World Bank response for </span><span class="si">{</span><span class="n">indicator_code</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;No dated observations in World Bank response &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;for </span><span class="si">{</span><span class="n">indicator_code</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
         <span class="n">series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">series_data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
@@ -546,7 +547,8 @@
 
     <span class="k">if</span> <span class="n">available</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;No complete IMF data available for </span><span class="si">{</span><span class="n">country_iso</span><span class="si">}</span><span class="s2"> up to </span><span class="si">{</span><span class="n">target_year</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;No complete IMF data available for </span><span class="si">{</span><span class="n">country_iso</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;up to </span><span class="si">{</span><span class="n">target_year</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
     <span class="n">selected_year</span> <span class="o">=</span> <span class="p">(</span>
@@ -611,7 +613,9 @@
         <span class="s2">&quot;GDP per capita (constant 2015 US$)&quot;</span><span class="p">:</span> <span class="s2">&quot;NY.GDP.PCAP.KD&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Real GDP (constant 2015 US$)&quot;</span><span class="p">:</span> <span class="s2">&quot;NY.GDP.MKTP.KD&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Nominal GDP (current US$)&quot;</span><span class="p">:</span> <span class="s2">&quot;NY.GDP.MKTP.CD&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;General government final consumption expenditure (current US$)&quot;</span><span class="p">:</span> <span class="s2">&quot;NE.CON.GOVT.CD&quot;</span><span class="p">,</span>
+        <span class="p">(</span>
+            <span class="s2">&quot;General government final consumption expenditure (current US$)&quot;</span>
+        <span class="p">):</span> <span class="s2">&quot;NE.CON.GOVT.CD&quot;</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># Quarterly data</span>
     <span class="n">wb_q_variable_dict</span> <span class="o">=</span> <span class="p">{</span>
@@ -636,7 +640,7 @@
                 <span class="n">source</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="c1"># Function to get the latest valid data if baseline_YYYYQ is missing or NaN</span>
+            <span class="c1"># Get the latest valid data if baseline_YYYYQ is missing/NaN</span>
             <span class="k">def</span><span class="w"> </span><span class="nf">get_valid_data</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">baseline_YYYYQ</span><span class="p">):</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">baseline_YYYYQ</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
@@ -645,12 +649,15 @@
 
                     <span class="k">if</span> <span class="n">latest_non_nan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Warning: No data for </span><span class="si">{</span><span class="n">baseline_YYYYQ</span><span class="si">}</span><span class="s2">. Using last available quarter: </span><span class="si">{</span><span class="n">latest_non_nan</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Warning: No data for </span><span class="si">{</span><span class="n">baseline_YYYYQ</span><span class="si">}</span><span class="s2">. &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Using last available quarter: &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">latest_non_nan</span><span class="si">}</span><span class="s2">&quot;</span>
                         <span class="p">)</span>
                         <span class="n">value</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">latest_non_nan</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span>
-                            <span class="s2">&quot;Warning: No historical data available. Skipping update.&quot;</span>
+                            <span class="s2">&quot;Warning: No historical data available. &quot;</span>
+                            <span class="s2">&quot;Skipping update.&quot;</span>
                         <span class="p">)</span>
                         <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -663,7 +670,8 @@
                 <span class="n">baseline_YYYYQ</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;initial_debt_ratio updated from World Bank API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;initial_debt_ratio&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;initial_debt_ratio updated from World Bank API: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;initial_debt_ratio&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
             <span class="c1"># Compute initial_foreign_debt_ratio safely</span>
@@ -671,7 +679,6 @@
                 <span class="s2">&quot;Gross PSD USD - external creditors&quot;</span> <span class="ow">in</span> <span class="n">wb_data_q</span><span class="o">.</span><span class="n">columns</span>
                 <span class="ow">and</span> <span class="s2">&quot;Gross PSD USD - domestic creditors&quot;</span> <span class="ow">in</span> <span class="n">wb_data_q</span><span class="o">.</span><span class="n">columns</span>
             <span class="p">):</span>
-
                 <span class="n">total_debt</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">wb_data_q</span><span class="p">[</span><span class="s2">&quot;Gross PSD USD - domestic creditors&quot;</span><span class="p">]</span>
                     <span class="o">+</span> <span class="n">wb_data_q</span><span class="p">[</span><span class="s2">&quot;Gross PSD USD - external creditors&quot;</span><span class="p">]</span>
@@ -689,11 +696,14 @@
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;Warning: Missing debt variables in World Bank data. Skipping update for initial_foreign_debt_ratio.&quot;</span>
+                    <span class="s2">&quot;Warning: Missing debt variables in World Bank &quot;</span>
+                    <span class="s2">&quot;data. Skipping update for &quot;</span>
+                    <span class="s2">&quot;initial_foreign_debt_ratio.&quot;</span>
                 <span class="p">)</span>
 
             <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;initial_foreign_debt_ratio updated from World Bank API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;initial_foreign_debt_ratio&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;initial_foreign_debt_ratio updated from World Bank &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;initial_foreign_debt_ratio&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
             <span class="c1"># Compute zeta_D safely</span>
@@ -702,7 +712,8 @@
             <span class="p">]</span>  <span class="c1"># Since it&#39;s the same formula, we use the same calculated value</span>
 
             <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;zeta_D updated from World Bank API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;zeta_D&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;zeta_D updated from World Bank API: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;zeta_D&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
             <span class="c1"># Compute annual GDP growth safely</span>
@@ -717,11 +728,13 @@
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;Warning: Missing GDP per capita data in World Bank data. Skipping update for g_y_annual.&quot;</span>
+                    <span class="s2">&quot;Warning: Missing GDP per capita data in World &quot;</span>
+                    <span class="s2">&quot;Bank data. Skipping update for g_y_annual.&quot;</span>
                 <span class="p">)</span>
 
             <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;g_y_annual updated from World Bank API: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;g_y_annual&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;g_y_annual updated from World Bank API: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;g_y_annual&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to retrieve data from World Bank&quot;</span><span class="p">)</span>
@@ -756,7 +769,11 @@
             <span class="p">)</span>
             <span class="c1"># Add headers</span>
             <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36&quot;</span>
+                <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) &quot;</span>
+                    <span class="s2">&quot;AppleWebKit/537.36 (KHTML, like Gecko) &quot;</span>
+                    <span class="s2">&quot;Chrome/91.0.4472.124 Safari/537.36&quot;</span>
+                <span class="p">)</span>
             <span class="p">}</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Attempting to update gamma from ILOSTAT&quot;</span><span class="p">)</span>
@@ -841,10 +858,12 @@
             <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;r_gov_shift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">res</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span><span class="p">]</span>
             <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">&quot;r_gov_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;r_gov_shift updated from IMF data: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;r_gov_shift&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;r_gov_shift updated from IMF data: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;r_gov_shift&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;r_gov_scale updated from IMF data: </span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;r_gov_scale&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;r_gov_scale updated from IMF data: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">&#39;r_gov_scale&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to compute r_gov_shift, r_gov_scale&quot;</span><span class="p">)</span>
