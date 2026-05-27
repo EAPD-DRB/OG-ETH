@@ -264,6 +264,37 @@
 
 
 
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/EAPD-DRB/OG-ETH/blob/main/docs/book/content/calibration/taxes.md" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Colab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Colab logo" src="../../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
 <div class="dropdown dropdown-source-buttons">
   <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
     <i class="fab fa-github"></i>
@@ -316,6 +347,23 @@
     <i class="fas fa-download"></i>
   </button>
   <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/content/calibration/taxes.ipynb" target="_blank"
+   class="btn btn-sm btn-download-notebook-button dropdown-item"
+   title="Download notebook file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
       
       
       
@@ -429,16 +477,16 @@
 <span class="eqno">(17)<a class="headerlink" href="#equation-eqhhbc" title="Link to this equation">#</a></span>\[\begin{split}  c_{j,s,t} + b_{j,s+1,t+1} &amp;= (1 + r_{hh,t})b_{j,s,t} + w_t e_{j,s} n_{j,s,t} + \\
   &amp;\quad\quad\zeta_{j,s}\frac{BQ_t}{\lambda_j\omega_{s,t}} + \eta_{j,s,t}\frac{TR_{t}}{\lambda_j\omega_{s,t}} + ubi_{j,s,t} - T_{s,t}  \\
   &amp;\quad\forall j,t\quad\text{and}\quad s\geq E+1 \quad\text{where}\quad b_{j,E+1,t}=0\quad\forall j,t\end{split}\]</div>
-<p>The total tax function, <span class="math notranslate nohighlight">\(T_{s,t}\)</span>, is a function of personal income taxes, taxes on bequests, and wealth taxes.  In the default calibration, wealth and bequest taxes are set to zero in <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code>. Personal income taxes are modeled as linear taxes and set to average effective and marginal tax rates.  The <a class="reference external" href="https://pslmodels.github.io/OG-Core/content/theory/government.html#taxes">OG-Core documentation</a> details more detailed ways to match the progressivity of the tax system.  But given limited data for Ethiopia, we start with simple linear tax rates of 22% for effective tax rates on personal income, a 25% marginal tax rate on capital income, and a 25% marginal tax rate on labor income.</p>
-<p>We model payroll taxes as a flat 18% rate, consistent with <a class="reference external" href="https://taxsummaries.pwc.com/ethiopia/individual/other-taxes#:~:text=Employers%20are%20required%20to%20contribute,employee's%20contribution%20is%20at%207%25">this PWC report on taxation in Ethiopia</a>.</p>
+<p>The total tax function, <span class="math notranslate nohighlight">\(T_{s,t}\)</span>, is a function of personal income taxes, taxes on bequests, and wealth taxes.  In the default calibration, wealth and bequest taxes are set to zero in <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code>. Personal income taxes are modeled as linear taxes and set to average effective and marginal tax rates.  The <a class="reference external" href="https://pslmodels.github.io/OG-Core/content/theory/government.html#taxes">OG-Core documentation</a> details more detailed ways to match the progressivity of the tax system.  But given limited data for Ethiopia, we start with simple linear tax rates of <span class="pasted-text">3%</span> for effective tax rates on personal income, a <span class="pasted-text">20%</span> marginal tax rate on capital income, and a <span class="pasted-text">20%</span> marginal tax rate on labor income.</p>
+<p>We model payroll taxes as a flat <span class="pasted-text">18%</span> rate, consistent with <a class="reference external" href="https://taxsummaries.pwc.com/ethiopia/individual/other-taxes#:~:text=Employers%20are%20required%20to%20contribute,employee's%20contribution%20is%20at%207%25">this PWC report on taxation in Ethiopia</a>.</p>
 </section>
 <section id="corporate-income-taxes">
 <h2>Corporate income taxes<a class="headerlink" href="#corporate-income-taxes" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> uses the statutory rate of 31% for the corporate income tax rate.</p>
+<p><code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> uses the statutory rate of <span class="pasted-text">30%</span> for the corporate income tax rate.</p>
 </section>
 <section id="value-added-taxes">
 <h2>Value-added taxes<a class="headerlink" href="#value-added-taxes" title="Link to this heading">#</a></h2>
-<p>A value-added tax rate of 15% is applied with the <code class="docutils literal notranslate"><span class="pre">tau_c</span></code> parameter.</p>
+<p>A value-added tax rate of <span class="pasted-text">7%</span> is applied with the <code class="docutils literal notranslate"><span class="pre">tau_c</span></code> parameter.</p>
 </section>
 </section>
 
