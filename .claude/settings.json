@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(break)"
+      "Bash(break)",
+      "Bash(git fetch *)",
+      "Bash(git rev-list *)",
+      "Bash(git ls-remote *)"
     ]
   }
 }
