@@ -30,6 +30,6 @@ OG-ETH is an Ethiopia country calibration of the OG-Core overlapping-generations
 
 ## Repo conventions
 
-- `pyproject.toml` is the source of truth for dependencies. `uv.lock` pins exact versions across machines and is checked in.
+- `pyproject.toml` is the source of truth for dependencies, declared as floors (e.g. `ogcore>=…`). `uv.lock` is not committed (it is git-ignored), so `uv sync` resolves the latest compatible versions — including the latest released `ogcore`.
 - The packaged JSON default parameters are the standard baseline input for offline/default runs.
 - Calibration or data-source changes (macro parameters, demographics, earnings, industry I/O) should be validated with targeted tests and, where feasible, the relevant example flow.

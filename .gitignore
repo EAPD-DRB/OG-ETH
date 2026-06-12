@@ -45,3 +45,4 @@ docs/book/_build/*
 *og*_example_output.csv
 */OG-*-Example/*
 *un_api_token.txt
+uv.lock
