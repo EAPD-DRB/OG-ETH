@@ -15,10 +15,21 @@ from pathlib import Path
 # Public capital elasticity; see firms.md.
 GAMMA_G_LIC = 0.1
 
-# Start year for the g_y_annual average-growth calculation; matches the
-# documented window in macro.md (average annual GDP-per-capita growth
-# 2006-2024 = 6.0%).
-G_Y_START_YEAR = 2006
+# Window for the g_y_annual average-growth calculation: the mean of the
+# year-over-year GDP-per-capita growth rates for G_Y_START_YEAR through
+# G_Y_END_YEAR (inclusive). We use the post-2015 decade rather than the
+# full available history: the 2004-2015 state-led investment boom (which
+# lifted the 2006-2024 average to ~6.0%) is explicitly not expected to
+# repeat (IMF Country Report 26/20 DSA assumes long-run growth "slower
+# than historical rates of around 10 percent"), so this window gives a
+# balanced-growth-path productivity rate that averages over the post-boom
+# normalization, the 2020-2022 conflict/COVID dip, and the recent
+# gold-driven recovery. Average annual GDP-per-capita growth for the ten
+# years 2016-2025 = 4.7% (see macro.md). Computing the growth rate for
+# G_Y_START_YEAR requires the previous year's level, so the level filter
+# below keeps data back to G_Y_START_YEAR - 1.
+G_Y_START_YEAR = 2016
+G_Y_END_YEAR = 2025
 
 
 def _fetch_wb_data(indicators, country_iso, start_year, end_year, source):
@@ -219,7 +230,7 @@ def _get_imf_macro_params(
 
 def get_macro_params(
     data_start_date=datetime.datetime(1947, 1, 1),
-    data_end_date=datetime.datetime(2024, 12, 31),
+    data_end_date=datetime.datetime(2025, 12, 31),
     country_iso="ETH",
     update_from_api=False,
     imf_data_year=None,
@@ -270,13 +281,21 @@ def get_macro_params(
                 source=2,
             )
             # Compute annual GDP-per-capita growth (g_y_annual) from the
-            # World Bank WDI series, averaging pct_change from
-            # G_Y_START_YEAR onward to match the documented window (see
+            # World Bank WDI series, averaging the year-over-year growth
+            # rates over the [G_Y_START_YEAR, G_Y_END_YEAR] window (see
             # macro.md). Debt parameters are not derived here (see note
             # above).
             if "GDP per capita (constant 2015 US$)" in wb_data_a.columns:
                 gdp_pc = wb_data_a["GDP per capita (constant 2015 US$)"]
-                gdp_pc = gdp_pc[gdp_pc.index.astype(int) >= G_Y_START_YEAR]
+                years = gdp_pc.index.astype(int)
+                # Keep one year before G_Y_START_YEAR so the growth rate for
+                # G_Y_START_YEAR itself can be formed; pct_change(-1) on the
+                # descending series then yields the growth rates for
+                # G_Y_START_YEAR..G_Y_END_YEAR (the anchor year becomes NaN
+                # and is dropped by mean()).
+                gdp_pc = gdp_pc[
+                    (years >= G_Y_START_YEAR - 1) & (years <= G_Y_END_YEAR)
+                ]
                 g_y_series = gdp_pc.pct_change(-1)
 
                 # If all values are NaN, return None
@@ -356,57 +375,76 @@ def get_macro_params(
     else:
         print("Not updating from ILOSTAT API")
 
-    """
-    Estimate r_gov_shift and r_gov_scale (Li, Magud, Werner 2021 method).
-    """
-
     # alpha_T and alpha_G are NOT pulled from the IMF API for OG-ETH: the
     # IMF SDMX endpoint returns only 2002-vintage data for Ethiopia, and
     # the documented sources differ (alpha_G -> World Bank NE.CON.GOVT.ZS;
-    # alpha_T -> IMF GFS + IMF Country Report 25/188, hand-combined). Both
+    # alpha_T -> IMF GFS + IMF Country Report 26/20, hand-combined). Both
     # stay at the committed values in macro.md. _get_imf_macro_params is
     # retained (tested independently) for reuse if wired to the right data.
-    if update_from_api:
-        """"
-        Estimate the discount on sovereign yields relative to private debt
-        Follow the methodology in Li, Magud, Werner, Witte (2021)
-        available at:
-        https://www.imf.org/en/Publications/WP/Issues/2021/06/04/The-Long-Run-Impact-of-Sovereign-Yields-on-Corporate-Yields-in-Emerging-Markets-50224
-        discussion is here: https://github.com/EAPD-DRB/OG-ZAF/issues/22
-        Steps:
-        1) Generate modelled corporate yields (corp_yhat) for a range of
-        sovereign yields (sov_y)  using the estimated equation in col 2 of
-        table 8 (and figure 3). 2) Estimate the OLS using sovereign yields
-        as the dependent variable
-        """
-        try:
-            import statsmodels.api as sm
 
-            # # estimate r_gov_shift and r_gov_scale
-            sov_y = np.arange(20, 120) / 10
-            corp_yhat = 8.199 - (2.975 * sov_y) + (0.478 * sov_y**2)
-            corp_yhat = sm.add_constant(corp_yhat)
-            mod = sm.OLS(
-                sov_y,
-                corp_yhat,
-            )
-            res = mod.fit()
-            # First term is the constant and needs to be divided by 100 to have
-            # the correct unit. Second term is the coefficient
-            macro_parameters["r_gov_shift"] = [-res.params[0] / 100]
-            macro_parameters["r_gov_scale"] = [res.params[1]]
-            print(
-                "r_gov_shift computed (LMW 2021 method): "
-                f"{macro_parameters['r_gov_shift']}"
-            )
-            print(
-                "r_gov_scale computed (LMW 2021 method): "
-                f"{macro_parameters['r_gov_scale']}"
-            )
-        except Exception:
-            print("Failed to compute r_gov_shift, r_gov_scale")
-            print("Will not update r_gov_shift, r_gov_scale")
+    # The government-debt interest-rate parameters (r_gov_scale, r_gov_shift,
+    # r_gov_DY, r_gov_DY2) are NOT returned from the live path. r_gov_scale
+    # and the base r_gov_shift come from inverting the Li, Magud, Werner,
+    # Witte (2021) sovereign-vs-corporate yield relationship (a deterministic
+    # calculation reproduced by estimate_r_gov below), but the committed
+    # r_gov_shift is then re-centered for the debt-elastic premium
+    # (r_gov_DY, r_gov_DY2) so the premium is exactly zero at debt_ratio_ss
+    # (see macro.md). Returning the raw LMW shift here would un-center that
+    # premium and silently move the steady state, so all four stay frozen at
+    # the documented values in ogeth_default_parameters.json.
+    if update_from_api:
+        print(
+            "Not updating r_gov_* (frozen, debt-elastic premium re-centered; "
+            "see macro.md and estimate_r_gov)"
+        )
     else:
         print("Not computing r_gov_shift, r_gov_scale")
 
     return macro_parameters
+
+
+def estimate_r_gov(debt_ratio_ss=0.30, r_gov_DY2=0.04):
+    """
+    Reproduce the frozen government-debt interest-rate parameters.
+
+    The base level shift and scale invert the sovereign-vs-corporate yield
+    relationship estimated by Li, Magud, Werner, Witte (2021),
+    https://www.imf.org/en/Publications/WP/Issues/2021/06/04/The-Long-Run-Impact-of-Sovereign-Yields-on-Corporate-Yields-in-Emerging-Markets-50224
+    (discussion at https://github.com/EAPD-DRB/OG-ZAF/issues/22): generate
+    modelled corporate yields for sovereign yields of 2-12% using Table 8
+    column 2, then OLS-regress the sovereign yield on the fitted corporate
+    yield.
+
+    A convex debt-elastic premium ``r_gov_DY2 * (D/Y - debt_ratio_ss)**2`` is
+    then added and re-centered on ``debt_ratio_ss`` so it is exactly zero at
+    the steady-state debt ratio (leaving the steady state unchanged) and only
+    prices the transition-path debt overshoot. Expanding the square gives
+    ``r_gov_DY = -2 * r_gov_DY2 * debt_ratio_ss`` and shifts the level term by
+    ``r_gov_DY2 * debt_ratio_ss**2`` (OG-Core subtracts ``r_gov_shift``, so the
+    constant is folded into the shift). See macro.md for the full derivation.
+
+    Args:
+        debt_ratio_ss (float): steady-state debt-to-GDP ratio the premium is
+            centered on
+        r_gov_DY2 (float): curvature of the debt-elastic premium
+
+    Returns:
+        dict: {r_gov_scale, r_gov_shift, r_gov_DY, r_gov_DY2}
+    """
+    import statsmodels.api as sm
+
+    sov_y = np.arange(20, 120) / 10
+    corp_yhat = 8.199 - (2.975 * sov_y) + (0.478 * sov_y**2)
+    corp_yhat = sm.add_constant(corp_yhat)
+    res = sm.OLS(sov_y, corp_yhat).fit()
+    # First term is the constant (÷100 for the correct unit); second is slope.
+    r_gov_scale = res.params[1]
+    r_gov_shift_base = -res.params[0] / 100
+    r_gov_shift = r_gov_shift_base - r_gov_DY2 * debt_ratio_ss**2
+    r_gov_DY = -2 * r_gov_DY2 * debt_ratio_ss
+    return {
+        "r_gov_scale": [r_gov_scale],
+        "r_gov_shift": [r_gov_shift],
+        "r_gov_DY": r_gov_DY,
+        "r_gov_DY2": r_gov_DY2,
+    }
