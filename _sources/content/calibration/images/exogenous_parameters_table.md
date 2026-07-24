@@ -35,7 +35,7 @@
 | $\alpha^{BS}_{G,t}$           | Proportional adjustment to government consumption expenditures relative to baseline amount when budget balance is true       | [1.000...1.000]                                       |
 | $\alpha^{BS}_{I,t}$           | Proportional adjustment to infrastructure spending relative to baseline amount when budget balance is true                   | [1.000...1.000]                                       |
 | $\rho_{G}$                    | Budget closure rule smoothing parameter                                                                                      | 0.100                                                 |
-| $\alpha_{FA}$                 | Foreign aid as a share of GDP                                                                                                | [0.000...0.000]                                       |
+| $\alpha_{FA,t}$               | Foreign aid as a share of GDP                                                                                                | [0.000...0.000]                                       |
 | $\alpha_{RM,1}$               | Remittances as a share of GDP in initial period                                                                              | 0.00E+00                                              |
 | $\alpha_{RM,T}$               | Remittances as a share of GDP in long run                                                                                    | 0.00E+00                                              |
 | $g_{RM,t}$                    | Growth rate of remittances in initial periods                                                                                | [0.000...0.000]                                       |

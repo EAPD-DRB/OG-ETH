@@ -455,13 +455,9 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#other-materials">Other materials:</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-python">Install Python</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verifying-you-have-already-installed-python-and-conda">Verifying you have already installed Python and Conda</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#for-windows-and-mac">For Windows and Mac</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#for-linux">For Linux</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-anaconda-distribution-of-python">Installing Anaconda distribution of Python</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-uv-which-manages-python-for-you">Install uv (which manages Python for you)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verifying-you-have-already-installed-uv">Verifying you have already installed uv</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-uv">Installing uv</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-git-and-github">Installing Git and GitHub</a><ul class="nav section-nav flex-column">
@@ -476,7 +472,7 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fork-and-clone-og-eth-repository">Fork and clone OG-ETH repository</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-the-ogeth-dev-conda-environment">Create the ogeth-dev conda environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-the-og-eth-environment-with-uv">Create the OG-ETH environment with uv</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-jupyter-notebooks">Using Jupyter notebooks</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#open-jupyter-notebook-from-terminal-or-command-prompt">Open Jupyter notebook from terminal or command prompt</a></li>
 </ul>
@@ -510,7 +506,7 @@
 <tbody>
 <tr class="row-even"><td><p>Mon.</p></td>
 <td><p>Morning</p></td>
-<td><p>Organizer introductions <br> <a class="reference external" href="https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#install-python">Setup Python</a>, <a class="reference external" href="https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#installing-git-and-github">Git, GitHub</a>, and <a class="reference external" href="https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#fork-and-clone-og-eth-repository">OG-ETH</a></p></td>
+<td><p>Organizer introductions <br> <a class="reference external" href="https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#install-uv-which-manages-python-for-you">Setup uv</a>, <a class="reference external" href="https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#installing-git-and-github">Git, GitHub</a>, and <a class="reference external" href="https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#fork-and-clone-og-eth-repository">OG-ETH</a></p></td>
 <td><p><a class="reference external" href="https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-Open.pdf">Intro slides</a></p></td>
 </tr>
 <tr class="row-odd"><td></td>
@@ -569,53 +565,24 @@
 </ul>
 </section>
 </section>
-<section id="install-python">
-<span id="sec-untutor-python"></span><h2>Install Python<a class="headerlink" href="#install-python" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> is a large-scale overlapping generations macroeconomic model of Ethiopian fiscal policy. It is written in the <a class="reference external" href="https://www.python.org/">Python</a> programming language. You will need to have some distribution of Python loaded on your computer to run the code. We recommend installing the <a class="reference external" href="https://www.anaconda.com/download">Anaconda</a> distribution of Python. This is the most widely used Python distribution. And it has package management features, like conda environments, that we will make use of.</p>
-<section id="verifying-you-have-already-installed-python-and-conda">
-<h3>Verifying you have already installed Python and Conda<a class="headerlink" href="#verifying-you-have-already-installed-python-and-conda" title="Link to this heading">#</a></h3>
-<p>If you have already installed the Anaconda distribution of Python, do the following steps to verify your installation.</p>
-<section id="for-windows-and-mac">
-<h4>For Windows and Mac<a class="headerlink" href="#for-windows-and-mac" title="Link to this heading">#</a></h4>
-<p>If you are using computer with a Windows operating system, open your Anaconda prompt. If you are using a Mac operating system, open your terminal.</p>
-<ul class="simple">
-<li><p>To see if you have Python installed, type <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code>. This command should result in output like <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.12.7</span></code>.</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="o">--</span><span class="n">version</span>
-<span class="go">Python 3.12.7</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>To see if you have Anaconda’s conda package installed type <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">--version</span></code>. This command should results in output like <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">24.9.2</span></code>.</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conda</span> <span class="o">--</span><span class="n">version</span>
-<span class="go">conda 24.9.2</span>
+<section id="install-uv-which-manages-python-for-you">
+<span id="sec-untutor-python"></span><h2>Install uv (which manages Python for you)<a class="headerlink" href="#install-uv-which-manages-python-for-you" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> is a large-scale overlapping generations macroeconomic model of Ethiopian fiscal policy. It is written in the <a class="reference external" href="https://www.python.org/">Python</a> programming language, and the project’s Python environments are managed with <a class="reference external" href="https://docs.astral.sh/uv/"><code class="docutils literal notranslate"><span class="pre">uv</span></code></a>. You do not need to install a Python distribution yourself: <code class="docutils literal notranslate"><span class="pre">uv</span></code> downloads a compatible Python interpreter automatically and installs the exact package versions the model is tested against.</p>
+<section id="verifying-you-have-already-installed-uv">
+<h3>Verifying you have already installed uv<a class="headerlink" href="#verifying-you-have-already-installed-uv" title="Link to this heading">#</a></h3>
+<p>Open your terminal (Mac or Linux) or command prompt/PowerShell (Windows) and type <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">--version</span></code>. This command should result in output like <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">0.11.30</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">uv</span> <span class="o">--</span><span class="n">version</span>
+<span class="go">uv 0.11.30</span>
 </pre></div>
 </div>
 </section>
-<section id="for-linux">
-<h4>For Linux<a class="headerlink" href="#for-linux" title="Link to this heading">#</a></h4>
-<p>If you are using a computer with a Linux operating system, open your terminal.</p>
-<ul class="simple">
-<li><p>To see if you have Python installed, type <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-version</span></code>. This command should result in output like <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.12.7</span></code>.</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="o">-</span><span class="n">version</span>
-<span class="go">Python 3.12.7</span>
+<section id="installing-uv">
+<h3>Installing uv<a class="headerlink" href="#installing-uv" title="Link to this heading">#</a></h3>
+<p>Follow the <a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/">installation instructions</a> for your platform. On Mac or Linux:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">LsSf</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">astral</span><span class="o">.</span><span class="n">sh</span><span class="o">/</span><span class="n">uv</span><span class="o">/</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span> <span class="o">|</span> <span class="n">sh</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>To see if you have Anaconda’s conda package installed type <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">-version</span></code>. This command should results in output like <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">24.9.2</span></code>.</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conda</span> <span class="o">-</span><span class="n">version</span>
-<span class="go">conda 24.9.2</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="installing-anaconda-distribution-of-python">
-<h3>Installing Anaconda distribution of Python<a class="headerlink" href="#installing-anaconda-distribution-of-python" title="Link to this heading">#</a></h3>
-<p>To install the Anaconda distribution of Python, go to <a class="reference external" href="https://www.anaconda.com/download">https://www.anaconda.com/download</a> and select “Skip registration” to avoid giving your email address.</p>
-<p><strong>For Windows users</strong>: be sure to click “Add Anaconda3 to my PATH environment variable” when prompted during the installation process. This will allow you to run Anaconda commands from your command prompt.</p>
+<p>On Windows, use the PowerShell command on the installation page. (If you already have any Python with <code class="docutils literal notranslate"><span class="pre">pip</span></code>, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">uv</span></code> also works on every platform.)</p>
 </section>
 </section>
 <section id="installing-git-and-github">
@@ -681,7 +648,7 @@
 </li>
 <li><p>The next step is to clone the repository from its current place in the cloud to your local computer’s hard drive.</p>
 <ul class="simple">
-<li><p>Open your terminal or Anaconda prompt</p></li>
+<li><p>Open your terminal or command prompt</p></li>
 <li><p>Navigate to the folder where you want this repository to reside. Make sure this is not a location on your hard drive that is mapped from the cloud. This file should live on your local computer. You already have the repository in the cloud on your GitHub account.</p></li>
 <li><p>Copy the contents of your repository in the cloud to your hard drive by typing: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/[YourGitHubHandle]/OG-ETH.git</span></code></p></li>
 <li><p>Change directory to this new directory by typing: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">OG-ETH</span></code></p></li>
@@ -697,29 +664,26 @@
 </figcaption>
 </figure>
 </section>
-<section id="create-the-ogeth-dev-conda-environment">
-<h2>Create the ogeth-dev conda environment<a class="headerlink" href="#create-the-ogeth-dev-conda-environment" title="Link to this heading">#</a></h2>
-<p><a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda environments</a> are a functionality that comes with the Anaconda distribution of Python. Conda environments allow the users across operating system platforms and different hardware configurations to run Python code in an environment that has the same packages, functionality, and results. A Conda environment is similar to a Docker image.</p>
-<p>If you have installed the Anaconda distribution of Python and you have cloned your OG-ETH fork of the repository to your local machine, you can create the <code class="docutils literal notranslate"><span class="pre">ogeth-dev</span></code> conda environment by doing the following steps:</p>
+<section id="create-the-og-eth-environment-with-uv">
+<h2>Create the OG-ETH environment with uv<a class="headerlink" href="#create-the-og-eth-environment-with-uv" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">uv</span></code> creates a project <a class="reference external" href="https://docs.astral.sh/uv/concepts/projects/">virtual environment</a> — a local <code class="docutils literal notranslate"><span class="pre">.venv</span></code> folder inside the repository — so that users across operating system platforms and different hardware configurations run the code with the same packages, functionality, and results. The exact package versions are pinned in the repository’s <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code> file.</p>
+<p>If you have installed <code class="docutils literal notranslate"><span class="pre">uv</span></code> and you have cloned your OG-ETH fork of the repository to your local machine, you can create the environment in a single step:</p>
 <ul class="simple">
 <li><p>Open your terminal or command prompt and navigate to the OG-ETH repository folder on your hard drive.</p></li>
-<li><p>Type the following command: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">create</span> <span class="pre">-f</span> <span class="pre">environment.yml</span></code></p></li>
-<li><p>Once the environment has been created, you must activate it: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">ogeth-dev</span></code></p></li>
-<li><p>In the activated <code class="docutils literal notranslate"><span class="pre">ogeth-dev</span></code> conda environment, install the <code class="docutils literal notranslate"><span class="pre">ogeth</span></code> Python package directly from your repository by typing: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code></p></li>
+<li><p>Type the following command: <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--extra</span> <span class="pre">dev</span></code></p></li>
 </ul>
-<p>Now you have the <code class="docutils literal notranslate"><span class="pre">ogeth</span></code> Python package installed in your <code class="docutils literal notranslate"><span class="pre">ogeth-dev</span></code> conda environment. Now you will be able to run the modules of the OG-ETH model from scripts and from Jupyter notebooks.</p>
+<p>This creates the <code class="docutils literal notranslate"><span class="pre">.venv</span></code> environment with the <code class="docutils literal notranslate"><span class="pre">ogeth</span></code> package and its development dependencies installed (downloading a compatible Python interpreter if needed). Now you will be able to run the modules of the OG-ETH model from scripts and from Jupyter notebooks: prefix any command with <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span></code> (for example, <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">python</span> <span class="pre">examples/run_og_eth.py</span></code>), or activate the environment first with <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">.venv/bin/activate</span></code> (Mac/Linux) or <code class="docutils literal notranslate"><span class="pre">.\.venv\Scripts\Activate.ps1</span></code> (Windows PowerShell).</p>
 </section>
 <section id="using-jupyter-notebooks">
 <h2>Using Jupyter notebooks<a class="headerlink" href="#using-jupyter-notebooks" title="Link to this heading">#</a></h2>
-<p>A nice way to execute lines of code on your local computer is to use Jupyter notebooks. The <code class="docutils literal notranslate"><span class="pre">jupyter</span></code> package is installed as part of the <code class="docutils literal notranslate"><span class="pre">ogeth-dev</span></code> conda environment from the previous step. You can open a Jupyter notebook directly in VS Code, or you can open one from your terminal or command prompt.</p>
+<p>A nice way to execute lines of code on your local computer is to use Jupyter notebooks. The <code class="docutils literal notranslate"><span class="pre">jupyter</span></code> package is installed as part of the development dependencies from the previous step. You can open a Jupyter notebook directly in VS Code, or you can open one from your terminal or command prompt.</p>
 <section id="open-jupyter-notebook-from-terminal-or-command-prompt">
 <h3>Open Jupyter notebook from terminal or command prompt<a class="headerlink" href="#open-jupyter-notebook-from-terminal-or-command-prompt" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>If you are using Mac or Linux, open your terminal. If you are using Windows, open your command prompt.</p></li>
 <li><p>Navigate to the folder of the OG-ETH repository on your local machine.</p></li>
-<li><p>Activate the <code class="docutils literal notranslate"><span class="pre">ogeth-dev</span></code> conda environment by typing <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">ogeth-dev</span></code>.</p></li>
-<li><p>Open a Jupyter notebook session by typing <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">notebook</span></code>. This will open a local server page that opens in your browser. This page will show the directory where you are currently working.</p></li>
-<li><p>Either click the “New” button in the upper-right portion of the screen, or select “File” then “New” then “Notebook” from the menu at the upper-right. Make sure to select the <code class="docutils literal notranslate"><span class="pre">ogeth-dev</span></code> kernel.</p></li>
+<li><p>Open a Jupyter notebook session by typing <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">jupyter</span> <span class="pre">notebook</span></code>. This will open a local server page that opens in your browser. This page will show the directory where you are currently working.</p></li>
+<li><p>Either click the “New” button in the upper-right portion of the screen, or select “File” then “New” then “Notebook” from the menu at the upper-right. Make sure to select the kernel from the repository’s <code class="docutils literal notranslate"><span class="pre">.venv</span></code> environment.</p></li>
 </ul>
 <p>Once you have completed these steps, you can interactively write code and execute it in steps using the Python code cells in the Jupyter notebook. You can also write text descriptions in the markdown cells.</p>
 </section>
@@ -800,13 +764,9 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#other-materials">Other materials:</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-python">Install Python</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verifying-you-have-already-installed-python-and-conda">Verifying you have already installed Python and Conda</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#for-windows-and-mac">For Windows and Mac</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#for-linux">For Linux</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-anaconda-distribution-of-python">Installing Anaconda distribution of Python</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-uv-which-manages-python-for-you">Install uv (which manages Python for you)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verifying-you-have-already-installed-uv">Verifying you have already installed uv</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-uv">Installing uv</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-git-and-github">Installing Git and GitHub</a><ul class="nav section-nav flex-column">
@@ -821,7 +781,7 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fork-and-clone-og-eth-repository">Fork and clone OG-ETH repository</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-the-ogeth-dev-conda-environment">Create the ogeth-dev conda environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-the-og-eth-environment-with-uv">Create the OG-ETH environment with uv</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-jupyter-notebooks">Using Jupyter notebooks</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#open-jupyter-notebook-from-terminal-or-command-prompt">Open Jupyter notebook from terminal or command prompt</a></li>
 </ul>

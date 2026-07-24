@@ -430,7 +430,7 @@
 <p>If you have already completed the <a class="reference internal" href="#sec-setuppython"><span class="std std-ref">Setup Python</span></a> and <a class="reference internal" href="#sec-setupgit"><span class="std std-ref">Setup Git</span></a> sections, you can skip to the <a class="reference internal" href="#sec-workflow"><span class="std std-ref">Workflow</span></a> section.</p>
 <section id="setup-python">
 <span id="sec-setuppython"></span><h2>Setup Python<a class="headerlink" href="#setup-python" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> is written in the Python programming language. Download and install the free and most recent Anaconda distribution of Python and associated libraries from <a class="reference external" href="https://www.anaconda.com/products/individual#Downloads">Anaconda.com</a>.<a class="footnote-reference brackets" href="#recent-python" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> You should do this even if you already have Python installed on your computer because the Anaconda distribution contains additional Python packages that are used by <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> (many of which are not included in other Python installations). You can install the Anaconda distribution without having administrative privileges on your computer and the Anaconda distribution will not interfere with any Python installation that came as part of your computer’s operating system.</p>
+<p><code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> is written in the Python programming language, and the project’s environments are managed with <a class="reference external" href="https://docs.astral.sh/uv/"><code class="docutils literal notranslate"><span class="pre">uv</span></code></a>.<a class="footnote-reference brackets" href="#recent-python" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> Install <code class="docutils literal notranslate"><span class="pre">uv</span></code> by following the <a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/">installation instructions</a> for your platform (on macOS/Linux, <code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">-LsSf</span> <span class="pre">https://astral.sh/uv/install.sh</span> <span class="pre">|</span> <span class="pre">sh</span></code>; or simply <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">uv</span></code> if you already have Python). You do not need to install Python separately — <code class="docutils literal notranslate"><span class="pre">uv</span></code> downloads a compatible interpreter automatically, without administrative privileges, and does not interfere with any Python that came with your operating system.</p>
 </section>
 <section id="setup-git">
 <span id="sec-setupgit"></span><h2>Setup Git<a class="headerlink" href="#setup-git" title="Link to this heading">#</a></h2>
@@ -452,22 +452,17 @@
 </pre></div>
 </div>
 </li>
-<li><p>Create a conda environment with all of the necessary packages to execute the source code.
-The process of creating the <code class="docutils literal notranslate"><span class="pre">ogeth-dev</span></code> conda environment can take up to 10 minutes. The pip install of the <code class="docutils literal notranslate"><span class="pre">OG-Core</span></code> dependency from <a class="reference external" href="https://pypi.org/project/ogcore/">pypi.org</a>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  OG-ETH$ conda env create
+<li><p>Create the project environment, with all of the necessary packages to execute the source code, in a single step:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  OG-ETH$ uv sync --extra dev
 </pre></div>
 </div>
+<p>This creates a local <code class="docutils literal notranslate"><span class="pre">.venv</span></code> directory with the <code class="docutils literal notranslate"><span class="pre">ogeth</span></code> package and its development dependencies installed at the exact versions pinned in <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code> (downloading a compatible Python interpreter if needed). For documentation/Jupyter Book work, run <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--extra</span> <span class="pre">dev</span> <span class="pre">--extra</span> <span class="pre">docs</span></code> instead.</p>
 </li>
-<li><p>The prior command will create a conda environment called <code class="docutils literal notranslate"><span class="pre">ogeth-dev</span></code>.
-Activate this environment as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  OG-ETH$ conda activate ogeth-dev
+<li><p>Run commands in the environment by prefixing them with <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span></code> (for example, <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">python</span> <span class="pre">examples/run_og_eth.py</span></code>), or activate the environment first:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  OG-ETH$ source .venv/bin/activate
 </pre></div>
 </div>
-</li>
-<li><p>Once the environment is activated, install the <code class="docutils literal notranslate"><span class="pre">ogeth</span></code> package in the <code class="docutils literal notranslate"><span class="pre">ogeth-dev</span></code> environment with all its modules by executing the following <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> command.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  (ogeth-dev) OG-ETH$ pip install -e .
-</pre></div>
-</div>
+<p>(on Windows PowerShell: <code class="docutils literal notranslate"><span class="pre">.\.venv\Scripts\Activate.ps1</span></code>).</p>
 </li>
 </ol>
 <p>If you have made it this far, you’ve successfully made a remote copy (a
@@ -496,24 +491,24 @@ situations, in which case other contributors are here to help.</p>
 <li><p>Before you edit the <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> source code on your machine,
 make sure you have the latest version of the central OG-USA
 repository by executing the following <strong>four</strong> Git commands:</p>
-<p>a. Tell Git to switch to the master branch in your local repo.
+<p>a. Tell Git to switch to the main branch in your local repo.
 Navigate to your local <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> directory and enter the
 following text at the command line:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    OG-ETH$ git checkout master
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    OG-ETH$ git checkout main
 </pre></div>
 </div>
 <p>b. Download all of the content from the central <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> repo:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    OG-ETH$ git fetch upstream
 </pre></div>
 </div>
-<p>c. Update your local master branch to contain the latest content of
-the central master branch using <a class="reference external" href="https://help.github.com/articles/github-glossary/#merge">merge</a>. This step ensures that
+<p>c. Update your local main branch to contain the latest content of
+the central main branch using <a class="reference external" href="https://help.github.com/articles/github-glossary/#merge">merge</a>. This step ensures that
 you are working with the latest version of OG-ETH:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    OG-ETH$ git merge upstream/master
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    OG-ETH$ git merge upstream/main
 </pre></div>
 </div>
-<p>d. Push the updated master branch in your local repo to your GitHub repo:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    OG-ETH$ git push origin master
+<p>d. Push the updated main branch in your local repo to your GitHub repo:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    OG-ETH$ git push origin main
 </pre></div>
 </div>
 </li>
@@ -524,12 +519,12 @@ you are working with the latest version of OG-ETH:</p>
 </li>
 <li><p>As you make changes, frequently check that your changes do not
 introduce bugs or degrade the accuracy of the <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code>. To do
-this, run the following command from the command line from inside
-the <code class="docutils literal notranslate"><span class="pre">/OG-ETH/ogeth/</span></code> directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> OG-ETH/ogeth$  pytest -m &quot;not needs_puf and not regression&quot;
+this, run the following command from the command line from the
+repository root:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> OG-ETH$ uv run python -m pytest -m &quot;not local&quot; -q
 </pre></div>
 </div>
-<p>Note that running this full suite of tests may take close to 24 hours (depending on your hardware).  To run the small set of tests that run on each pull request (and take about 40 minutes), use  <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-m</span> <span class="pre">&quot;not</span> <span class="pre">needs_puf</span> <span class="pre">and</span> <span class="pre">not</span> <span class="pre">local</span> <span class="pre">and</span> <span class="pre">not</span> <span class="pre">regression&quot;</span></code>.  If the tests do not pass, try to fix the issue by using the information provided by the error message. If this isn’t possible or doesn’t work, the core maintainers are here to help via a <a class="reference external" href="https://github.com/EAPD-DRB/OG-ETH/issues">GitHub Issue</a>.</p>
+<p>This is the same fast test set that runs on each pull request; it completes in about a minute. Tests marked <code class="docutils literal notranslate"><span class="pre">local</span></code> run the full example end to end and can take hours — run those with plain <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pytest</span></code> only when your change affects the model solution. If the tests do not pass, try to fix the issue by using the information provided by the error message. If this isn’t possible or doesn’t work, the core maintainers are here to help via a <a class="reference external" href="https://github.com/EAPD-DRB/OG-ETH/issues">GitHub Issue</a>.</p>
 </li>
 <li><p>Now you’re ready to <a class="reference external" href="https://help.github.com/articles/github-glossary/#commit">commit</a> your changes to your local repo using the code below. The first line of code tells <code class="docutils literal notranslate"><span class="pre">Git</span></code> to track a file. Use “git status” to find all the files you’ve edited, and “git add” each of the files that you’d like <code class="docutils literal notranslate"><span class="pre">Git</span></code> to track. As a rule, do not add large files. If you’d like to add a file that is larger than 25 MB, please contact the other contributors and ask how to proceed. The second line of code commits your changes to your local repo and allows you to create a commit message; this should be a short description of your changes.</p>
 <p><em>Tip</em>: Committing often is a good idea as <code class="docutils literal notranslate"><span class="pre">Git</span></code> keeps a record of your changes. This means that you can always revert to a previous version of your work if you need to. Do this to commit:</p>
@@ -538,9 +533,9 @@ the <code class="docutils literal notranslate"><span class="pre">/OG-ETH/ogeth/<
 </pre></div>
 </div>
 </li>
-<li><p>Periodically, make sure that the branch you created in step 2 is in sync with the changes other contributors are making to the central master branch by fetching upstream and merging upstream/master into your branch:</p>
+<li><p>Periodically, make sure that the branch you created in step 2 is in sync with the changes other contributors are making to the central main branch by fetching upstream and merging upstream/main into your branch:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  OG-ETH$ git fetch upstream
-  OG-ETH$ git merge upstream/master
+  OG-ETH$ git merge upstream/main
 </pre></div>
 </div>
 <p>You may need to resolve conflicts that arise when another contributor changed the same section of code that you are changing. Feel free to ask other contributors for guidance if this happens to you. If you do need to fix a merge conflict, re-run the test suite afterwards (step 4.)</p>
@@ -551,7 +546,7 @@ the <code class="docutils literal notranslate"><span class="pre">/OG-ETH/ogeth/<
 </div>
 </li>
 <li><p>From the <a class="reference external" href="http://GitHub.com">GitHub.com</a> user interface, <a class="reference external" href="https://help.github.com/articles/creating-a-pull-request/#creating-the-pull-request">open a pull request</a>.</p></li>
-<li><p>When you open a GitHub pull request, a code coverage report will be automatically generated. If your branch adds new code that is not tested, the code coverage percent will decline and the number of untested statements (“misses” in the report) will increase. If this happens, you need to add to your branch one or more tests of your newly added code. Add tests so that the number of untested statements is the same as it is on the master branch.</p></li>
+<li><p>When you open a GitHub pull request, a code coverage report will be automatically generated. If your branch adds new code that is not tested, the code coverage percent will decline and the number of untested statements (“misses” in the report) will increase. If this happens, you need to add to your branch one or more tests of your newly added code. Add tests so that the number of untested statements is the same as it is on the main branch.</p></li>
 </ol>
 </section>
 </section>
@@ -565,7 +560,7 @@ the <code class="docutils literal notranslate"><span class="pre">/OG-ETH/ogeth/<
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="recent-python" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
-<p>The most recent version of Python from Anaconda is Python 3.12. <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> is currently tested to run on Python 3.11 and 3.12.</p>
+<p><code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> is currently tested to run on Python 3.12 and 3.13. You do not need to manage the Python version yourself: <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span></code> reads the project’s requirements and downloads a compatible interpreter automatically.</p>
 </aside>
 <aside class="footnote brackets" id="commandline-note" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>

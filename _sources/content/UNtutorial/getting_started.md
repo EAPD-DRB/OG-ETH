@@ -27,7 +27,7 @@ For the May 11-15, 2026 United Nations `OG-ETH` training in Addis Ababa, Ethiopi
   - Materials
 * - Mon.
   - Morning
-  - Organizer introductions <br> [Setup Python](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#install-python), [Git, GitHub](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#installing-git-and-github), and [OG-ETH](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#fork-and-clone-og-eth-repository)
+  - Organizer introductions <br> [Setup uv](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#install-uv-which-manages-python-for-you), [Git, GitHub](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#installing-git-and-github), and [OG-ETH](https://eapd-drb.github.io/OG-ETH/content/UNtutorial/getting_started.html#fork-and-clone-og-eth-repository)
   - [Intro slides](https://github.com/EAPD-DRB/OG-ETH/blob/main/docs/book/content/UNtutorial/materials/OG-ETH-Open.pdf)
 * -
   - Afternoon
@@ -73,42 +73,22 @@ For the May 11-15, 2026 United Nations `OG-ETH` training in Addis Ababa, Ethiopi
   * [UN OG Online Training Materials](https://eapd-drb.github.io/UN-OG-Training/)
 
 (Sec_UNtutor_python)=
-## Install Python
-`OG-ETH` is a large-scale overlapping generations macroeconomic model of Ethiopian fiscal policy. It is written in the [Python](https://www.python.org/) programming language. You will need to have some distribution of Python loaded on your computer to run the code. We recommend installing the [Anaconda](https://www.anaconda.com/download) distribution of Python. This is the most widely used Python distribution. And it has package management features, like conda environments, that we will make use of.
+## Install uv (which manages Python for you)
+`OG-ETH` is a large-scale overlapping generations macroeconomic model of Ethiopian fiscal policy. It is written in the [Python](https://www.python.org/) programming language, and the project's Python environments are managed with [`uv`](https://docs.astral.sh/uv/). You do not need to install a Python distribution yourself: `uv` downloads a compatible Python interpreter automatically and installs the exact package versions the model is tested against.
 
-### Verifying you have already installed Python and Conda
-If you have already installed the Anaconda distribution of Python, do the following steps to verify your installation.
-
-#### For Windows and Mac
-If you are using computer with a Windows operating system, open your Anaconda prompt. If you are using a Mac operating system, open your terminal.
-- To see if you have Python installed, type `python --version`. This command should result in output like `Python 3.12.7`.
+### Verifying you have already installed uv
+Open your terminal (Mac or Linux) or command prompt/PowerShell (Windows) and type `uv --version`. This command should result in output like `uv 0.11.30`.
 ```{code}
->>> python --version
-Python 3.12.7
-```
-- To see if you have Anaconda's conda package installed type `conda --version`. This command should results in output like `conda 24.9.2`.
-```{code}
->>> conda --version
-conda 24.9.2
+>>> uv --version
+uv 0.11.30
 ```
 
-#### For Linux
-If you are using a computer with a Linux operating system, open your terminal.
-- To see if you have Python installed, type `python -version`. This command should result in output like `Python 3.12.7`.
+### Installing uv
+Follow the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/) for your platform. On Mac or Linux:
 ```{code}
->>> python -version
-Python 3.12.7
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
-- To see if you have Anaconda's conda package installed type `conda -version`. This command should results in output like `conda 24.9.2`.
-```{code}
->>> conda -version
-conda 24.9.2
-```
-
-### Installing Anaconda distribution of Python
-To install the Anaconda distribution of Python, go to https://www.anaconda.com/download and select "Skip registration" to avoid giving your email address.
-
-**For Windows users**: be sure to click "Add Anaconda3 to my PATH environment variable" when prompted during the installation process. This will allow you to run Anaconda commands from your command prompt.
+On Windows, use the PowerShell command on the installation page. (If you already have any Python with `pip`, `pip install uv` also works on every platform.)
 
 ## Installing Git and GitHub
 
@@ -166,7 +146,7 @@ Most likely, the free organization account will be the right place to start for 
     - In the upper-right area of the browser page, click the "Fork" button and select "Create fork". This will create an exact copy of the OG-ETH repository on your account. When you do this, you should see that the URL to the page has changed to `https://github.com/[YourGitHubHandle]/OG-ETH`.
 
 2. The next step is to clone the repository from its current place in the cloud to your local computer's hard drive.
-    - Open your terminal or Anaconda prompt
+    - Open your terminal or command prompt
     - Navigate to the folder where you want this repository to reside. Make sure this is not a location on your hard drive that is mapped from the cloud. This file should live on your local computer. You already have the repository in the cloud on your GitHub account.
     - Copy the contents of your repository in the cloud to your hard drive by typing: `git clone https://github.com/[YourGitHubHandle]/OG-ETH.git`
     - Change directory to this new directory by typing: `cd OG-ETH`
@@ -181,26 +161,23 @@ name: GitFlowDiag
 Flow diagram of Git and GitHub workflow
 ```
 
-## Create the ogeth-dev conda environment
-[Conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) are a functionality that comes with the Anaconda distribution of Python. Conda environments allow the users across operating system platforms and different hardware configurations to run Python code in an environment that has the same packages, functionality, and results. A Conda environment is similar to a Docker image.
+## Create the OG-ETH environment with uv
+`uv` creates a project [virtual environment](https://docs.astral.sh/uv/concepts/projects/) — a local `.venv` folder inside the repository — so that users across operating system platforms and different hardware configurations run the code with the same packages, functionality, and results. The exact package versions are pinned in the repository's `uv.lock` file.
 
-If you have installed the Anaconda distribution of Python and you have cloned your OG-ETH fork of the repository to your local machine, you can create the `ogeth-dev` conda environment by doing the following steps:
+If you have installed `uv` and you have cloned your OG-ETH fork of the repository to your local machine, you can create the environment in a single step:
 - Open your terminal or command prompt and navigate to the OG-ETH repository folder on your hard drive.
-- Type the following command: `conda env create -f environment.yml`
-- Once the environment has been created, you must activate it: `conda activate ogeth-dev`
-- In the activated `ogeth-dev` conda environment, install the `ogeth` Python package directly from your repository by typing: `pip install -e .`
+- Type the following command: `uv sync --extra dev`
 
-Now you have the `ogeth` Python package installed in your `ogeth-dev` conda environment. Now you will be able to run the modules of the OG-ETH model from scripts and from Jupyter notebooks.
+This creates the `.venv` environment with the `ogeth` package and its development dependencies installed (downloading a compatible Python interpreter if needed). Now you will be able to run the modules of the OG-ETH model from scripts and from Jupyter notebooks: prefix any command with `uv run` (for example, `uv run python examples/run_og_eth.py`), or activate the environment first with `source .venv/bin/activate` (Mac/Linux) or `.\.venv\Scripts\Activate.ps1` (Windows PowerShell).
 
 ## Using Jupyter notebooks
-A nice way to execute lines of code on your local computer is to use Jupyter notebooks. The `jupyter` package is installed as part of the `ogeth-dev` conda environment from the previous step. You can open a Jupyter notebook directly in VS Code, or you can open one from your terminal or command prompt.
+A nice way to execute lines of code on your local computer is to use Jupyter notebooks. The `jupyter` package is installed as part of the development dependencies from the previous step. You can open a Jupyter notebook directly in VS Code, or you can open one from your terminal or command prompt.
 
 ### Open Jupyter notebook from terminal or command prompt
 - If you are using Mac or Linux, open your terminal. If you are using Windows, open your command prompt.
 - Navigate to the folder of the OG-ETH repository on your local machine.
-- Activate the `ogeth-dev` conda environment by typing `conda activate ogeth-dev`.
-- Open a Jupyter notebook session by typing `jupyter notebook`. This will open a local server page that opens in your browser. This page will show the directory where you are currently working.
-- Either click the "New" button in the upper-right portion of the screen, or select "File" then "New" then "Notebook" from the menu at the upper-right. Make sure to select the `ogeth-dev` kernel.
+- Open a Jupyter notebook session by typing `uv run jupyter notebook`. This will open a local server page that opens in your browser. This page will show the directory where you are currently working.
+- Either click the "New" button in the upper-right portion of the screen, or select "File" then "New" then "Notebook" from the menu at the upper-right. Make sure to select the kernel from the repository's `.venv` environment.
 
 Once you have completed these steps, you can interactively write code and execute it in steps using the Python code cells in the Jupyter notebook. You can also write text descriptions in the markdown cells.
 
