@@ -89,6 +89,7 @@ class Calibration:
                 country_id="231",
                 initial_data_year=p.start_year - 1,
                 final_data_year=p.start_year + 1,
+                income_percentiles=p.lambdas.flatten(),
                 GraphDiag=False,
                 download_path=demographic_data_path,
             )
@@ -103,6 +104,7 @@ class Calibration:
                 country_id="231",
                 initial_data_year=p.start_year - 1,
                 final_data_year=p.start_year + 1,
+                income_percentiles=p.lambdas.flatten(),
                 GraphDiag=False,
             )
 

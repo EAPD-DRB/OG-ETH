@@ -104,3 +104,16 @@ testpaths = ["tests"]
 markers = [
     "local: marks tests that are run locally only and not on GH Actions",
 ]
+
+[tool.uv.workspace]
+members = [
+    ".",
+]
+
+[tool.uv.sources]
+ogeth = { workspace = true, editable = true }
+
+[dependency-groups]
+dev = [
+    "ogeth",
+]

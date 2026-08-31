@@ -116,14 +116,7 @@ def get_e_interp(
     )
     a = x.root
     e_new = usa_params.e[0, :, :] * np.exp(a * usa_params.e[0, :, :])
-    emat_new_scaled = (
-        e_new
-        / (
-            e_new
-            * usa_params.omega_SS.reshape(usa_params.S, 1)
-            * usa_params.lambdas.reshape(1, usa_params.J)
-        ).sum()
-    )
+    emat_new_scaled = e_new / (e_new * usa_params.omega_SS).sum()
     # Now interpolate for the cases where S and/or J not the same in the
     # country parameterization as in the default USA parameterization
     if (
@@ -182,10 +175,7 @@ def get_e_interp(
             (new_s_mesh, new_j_mesh),
             method="linear",
         )
-        emat_new_scaled = (
-            emat_new
-            / (emat_new * age_wgts.reshape(S, 1) * lambdas.reshape(1, J)).sum()
-        )
+        emat_new_scaled = emat_new / (emat_new * age_wgts).sum()
 
         if plot_path is not None:
             kwargs = {"path": plot_path, "filesuffix": "_intrp_scaled"}
