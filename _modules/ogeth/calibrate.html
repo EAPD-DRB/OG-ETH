@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
@@ -40,10 +40,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
@@ -62,26 +62,33 @@
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ogeth/calibrate';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -107,7 +114,47 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
     </header>
   
 
@@ -368,7 +415,7 @@
 <div class="viewcode-block" id="Calibration">
 <a class="viewcode-back" href="../../content/api/calibrate.html#ogeth.calibrate.Calibration">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Calibration</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;OG-ETH calibration class&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""OG-ETH calibration class"""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -380,7 +427,7 @@
         <span class="c1"># Set True to update from World Bank and UN APIs</span>
         <span class="n">update_from_api</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Constructor for the Calibration class.</span>
 
 <span class="sd">        Args:</span>
@@ -393,8 +440,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Create output_path if it doesn&#39;t exist</span>
+<span class="sd">        """</span>
+        <span class="c1"># Create output_path if it doesn't exist</span>
         <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_path</span><span class="p">):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
@@ -419,7 +466,7 @@
                 <span class="n">update_from_api</span><span class="o">=</span><span class="n">update_from_api</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Macro params update failed: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Macro params update failed: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># io matrix and alpha_c (multi-sector only)</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">I</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -428,14 +475,14 @@
                 <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">I</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">alpha_c_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">alpha_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">alpha_c_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alpha_c update failed: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"alpha_c update failed: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">M</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">io_df</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">get_io_matrix</span><span class="p">()</span>
                 <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">M</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">io_df</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">io_matrix</span> <span class="o">=</span> <span class="n">io_df</span><span class="o">.</span><span class="n">values</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;io_matrix update failed: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"io_matrix update failed: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># Demographics + income (atomic — e depends on demographic output)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -447,9 +494,10 @@
                 <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
                 <span class="mi">0</span><span class="p">,</span>
                 <span class="mi">99</span><span class="p">,</span>
-                <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;231&quot;</span><span class="p">,</span>
+                <span class="n">country_id</span><span class="o">=</span><span class="s2">"231"</span><span class="p">,</span>
                 <span class="n">initial_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
                 <span class="n">final_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">income_percentiles</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
                 <span class="n">GraphDiag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">download_path</span><span class="o">=</span><span class="n">demographic_data_path</span><span class="p">,</span>
             <span class="p">)</span>
@@ -461,9 +509,10 @@
                 <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
                 <span class="mi">0</span><span class="p">,</span>
                 <span class="mi">99</span><span class="p">,</span>
-                <span class="n">country_id</span><span class="o">=</span><span class="s2">&quot;231&quot;</span><span class="p">,</span>
+                <span class="n">country_id</span><span class="o">=</span><span class="s2">"231"</span><span class="p">,</span>
                 <span class="n">initial_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
                 <span class="n">final_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">income_percentiles</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
                 <span class="n">GraphDiag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -473,12 +522,12 @@
                 <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
                 <span class="n">p</span><span class="o">.</span><span class="n">J</span><span class="p">,</span>
                 <span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span>
-                <span class="n">demog80</span><span class="p">[</span><span class="s2">&quot;omega_SS&quot;</span><span class="p">],</span>
+                <span class="n">demog80</span><span class="p">[</span><span class="s2">"omega_SS"</span><span class="p">],</span>
                 <span class="n">plot_path</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Demographics/income update failed: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span>
+                <span class="sa">f</span><span class="s2">"Demographics/income update failed: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">e</span> <span class="o">=</span> <span class="kc">None</span>
@@ -489,11 +538,11 @@
         <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">macro_params</span><span class="p">)</span>
         <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">e</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">e</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">"e"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">e</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;alpha_c&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_c</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">"alpha_c"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_c</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">io_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;io_matrix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">io_matrix</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">"io_matrix"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">io_matrix</span>
         <span class="k">return</span> <span class="n">d</span></div>
 
 </pre></div>
@@ -558,8 +607,8 @@ By Marcelo LaFleur, Richard W. Evans, and Jason DeBacker
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
   </footer>

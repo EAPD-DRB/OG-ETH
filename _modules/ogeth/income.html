@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
@@ -40,10 +40,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
@@ -62,26 +62,33 @@
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ogeth/income';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -107,7 +114,47 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
     </header>
   
 
@@ -368,7 +415,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
 
 <span class="n">CUR_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-<span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUR_PATH</span><span class="p">,</span> <span class="s2">&quot;OUTPUT&quot;</span><span class="p">,</span> <span class="s2">&quot;ability&quot;</span><span class="p">)</span>
+<span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUR_PATH</span><span class="p">,</span> <span class="s2">"OUTPUT"</span><span class="p">,</span> <span class="s2">"ability"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="get_e_interp">
@@ -376,7 +423,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">get_e_interp</span><span class="p">(</span>
     <span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">,</span> <span class="n">gini_to_match</span><span class="o">=</span><span class="mf">31.1</span><span class="p">,</span> <span class="n">plot_path</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This function takes the calibrated lifetime earnings profiles</span>
 <span class="sd">    (abilities, e matrix) from OG-USA and then adjusts the shape of those</span>
 <span class="sd">    profiles to match the Gini coefficient for another economy. The</span>
@@ -409,7 +456,7 @@
 <span class="sd">        emat_new_scaled (Numpy array): interpolated ability matrix scaled</span>
 <span class="sd">            so that population-weighted average is 1, size SxJ</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">assert</span> <span class="n">lambdas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">J</span>
     <span class="k">assert</span> <span class="n">age_wgts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">S</span>
     <span class="c1"># Load USA e matrix as a baseline</span>
@@ -417,16 +464,16 @@
     <span class="n">usa_params</span><span class="o">.</span><span class="n">update_specifications</span><span class="p">(</span>
         <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
             <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span>
-                <span class="s2">&quot;https://raw.githubusercontent.com/PSLmodels/OG-USA/master/ogusa/ogusa_default_parameters.json&quot;</span>
+                <span class="s2">"https://raw.githubusercontent.com/PSLmodels/OG-USA/master/ogusa/ogusa_default_parameters.json"</span>
             <span class="p">)</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="c1"># Define a function that will find the &quot;a&quot; in the equation:</span>
+    <span class="c1"># Define a function that will find the "a" in the equation:</span>
     <span class="c1"># e_Y = e_USA * exp(a * e_USA)</span>
     <span class="c1"># such that the e_Y produces a gini coefficient in the model that</span>
-    <span class="c1"># gives the same ratio between the model implied Gini&#39;s in the USA</span>
-    <span class="c1"># and the target country and the empirical Gini&#39;s in the USA and given</span>
+    <span class="c1"># gives the same ratio between the model implied Gini's in the USA</span>
+    <span class="c1"># and the target country and the empirical Gini's in the USA and given</span>
     <span class="c1"># by gin_to_match for the target country</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span>
         <span class="n">a</span><span class="p">,</span>
@@ -471,20 +518,13 @@
             <span class="n">gini_usa_data</span><span class="p">,</span>
             <span class="n">gini_usa_model</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;bisect&quot;</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">"bisect"</span><span class="p">,</span>
         <span class="n">bracket</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
         <span class="n">xtol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">root</span>
     <span class="n">e_new</span> <span class="o">=</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
-    <span class="n">emat_new_scaled</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">e_new</span>
-        <span class="o">/</span> <span class="p">(</span>
-            <span class="n">e_new</span>
-            <span class="o">*</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">omega_SS</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">usa_params</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="o">*</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">lambdas</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">J</span><span class="p">)</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="p">)</span>
+    <span class="n">emat_new_scaled</span> <span class="o">=</span> <span class="n">e_new</span> <span class="o">/</span> <span class="p">(</span><span class="n">e_new</span> <span class="o">*</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="c1"># Now interpolate for the cases where S and/or J not the same in the</span>
     <span class="c1"># country parameterization as in the default USA parameterization</span>
     <span class="k">if</span> <span class="p">(</span>
@@ -517,8 +557,8 @@
             <span class="mi">1</span> <span class="o">-</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">lambdas</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">):</span>
             <span class="n">err</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">&quot;One or more entries in abilities vector (lambdas) &quot;</span>
-                <span class="s2">&quot;is outside the allowable bounds for interpolation.&quot;</span>
+                <span class="s2">"One or more entries in abilities vector (lambdas) "</span>
+                <span class="s2">"is outside the allowable bounds for interpolation."</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
         <span class="n">usa_step</span> <span class="o">=</span> <span class="mi">80</span> <span class="o">/</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">S</span>
@@ -541,15 +581,12 @@
             <span class="n">newcoords</span><span class="p">,</span>
             <span class="n">emat_new_scaled</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
             <span class="p">(</span><span class="n">new_s_mesh</span><span class="p">,</span> <span class="n">new_j_mesh</span><span class="p">),</span>
-            <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="s2">"linear"</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">emat_new_scaled</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">emat_new</span>
-            <span class="o">/</span> <span class="p">(</span><span class="n">emat_new</span> <span class="o">*</span> <span class="n">age_wgts</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">lambdas</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">emat_new_scaled</span> <span class="o">=</span> <span class="n">emat_new</span> <span class="o">/</span> <span class="p">(</span><span class="n">emat_new</span> <span class="o">*</span> <span class="n">age_wgts</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">plot_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">plot_path</span><span class="p">,</span> <span class="s2">&quot;filesuffix&quot;</span><span class="p">:</span> <span class="s2">&quot;_intrp_scaled&quot;</span><span class="p">}</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"path"</span><span class="p">:</span> <span class="n">plot_path</span><span class="p">,</span> <span class="s2">"filesuffix"</span><span class="p">:</span> <span class="s2">"_intrp_scaled"</span><span class="p">}</span>
             <span class="n">pp</span><span class="o">.</span><span class="n">plot_income_data</span><span class="p">(</span>
                 <span class="n">new_s_midp</span><span class="p">,</span>
                 <span class="n">abil_midp</span><span class="p">,</span>
@@ -623,8 +660,8 @@ By Marcelo LaFleur, Richard W. Evans, and Jason DeBacker
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
   </footer>

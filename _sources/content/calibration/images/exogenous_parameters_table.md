@@ -78,7 +78,7 @@
 | $\texttt{mindist_SS}$         | SS solution tolerance                                                                                                        | 1.00E-09                                              |
 | $\texttt{mindist_TPI}$        | TPI solution tolerance                                                                                                       | 1.00E-05                                              |
 | $\omega_{s,t}$                | Population by age over time                                                                                                  | Too large to report here, see default parameters JSON |
-| $\bar{\omega}_s$              | Steady-state population distribution                                                                                         | [0.032...0.000]                                       |
+| $\bar{\omega}_s$              | Steady-state population distribution                                                                                         | Too large to report here, see default parameters JSON |
 | $g_{n,t}$                     | Population growth rate over the time path                                                                                    | [0.035...0.020]                                       |
 | $\bar{g}_n$                   | Population growth rate in the steady-state                                                                                   | 0.020                                                 |
 | $i_{s,t}$                     | Immigration rates by age                                                                                                     | Too large to report here, see default parameters JSON |
