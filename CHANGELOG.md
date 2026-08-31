@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-08-31 14:00:00
 
 ### Changed
+* Require `ogcore>=0.18.0` and migrate the calibration to its income-group-varying demographics (PSLmodels/OG-Core#1165): the packaged demographic arrays (`omega`, `omega_SS`, `rho`, `imm_rates` and their preTP seeds) are regenerated in the new age-by-income shape with the new `update_baseline_demographics` tool (macro parameters untouched, enforced by the tool's clobber guard), and both `get_pop_objs` call sites pass `income_percentiles=p.lambdas.flatten()` as 0.18 requires. OG-ETH's demographics do not vary by income group, so the new arrays are the old ones spread across groups by `lambdas`: the age distribution and the regenerated earnings matrix reproduce the previous values to machine precision, and model results are unchanged. `income.get_e_interp` now reads the OG-USA snapshot's raw JSON values instead of loading them through a `Specifications` object, which decouples it from the installed ogcore's array schema (the 0.18 schema rejects OG-USA's not-yet-migrated shapes) and accepts age weights in either the 1-D or the new age-by-income shape. The multisector JSON's demographic arrays (an older data vintage than the single-industry file) are expanded to the new shape mechanically — distributions scaled by `lambdas`, rates replicated across groups — so their values are bit-for-bit preserved rather than re-downloaded.
 * Raised the Python floor to `>=3.12` (matching CI and ogcore's own `>=3.12` requirement; classifiers and the ruff target follow) and relocked to a single `ogcore 0.16.3`, matching OG-ZAF and OG-IDN. This removes the stale Python 3.11 resolution branch that pinned an older ogcore.
 * Regenerated the baseline demographics in `ogeth_default_parameters.json` under ogcore 0.16.3, which reworks the pre-time-path population distribution (PSLmodels/OG-Core#1073): the transition-path arrays (`omega`, `g_n`, `imm_rates`, `rho`) shift by one period and three period-0 seeds (`g_n_preTP`, `imm_rates_preTP`, `rho_preTP`) are added.
 * Limited the `update_from_api` macro calibration to the sources that are authoritative for Ethiopia: `g_y_annual` (World Bank WDI) and `gamma` (UN ILOSTAT) still update, while the World Bank QPSD debt pull and the IMF `alpha_T`/`alpha_G` pull are switched off (QPSD has no Ethiopia data; the IMF series returns only 2002 values). Debt ratios, `alpha_G`, `alpha_T`, and `r_gov_*` stay at the documented values in `calibration/macro.md`. This refreshes `g_y_annual` (0.060 → 0.0595) and `gamma` (0.518 → 0.517).
@@ -97,6 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This version is a pre-release alpha. The example run script OG-ETH/examples/run_og_eth.py runs, but the model is not currently calibrated to represent the Ethiopian economy and population.
 
 
+[0.2.0]: https://github.com/EAPD-DRB/OG-ETH/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/EAPD-DRB/OG-ETH/compare/v0.0.8...v0.1.0
 [0.0.8]: https://github.com/EAPD-DRB/OG-ETH/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/EAPD-DRB/OG-ETH/compare/v0.0.6...v0.0.7
