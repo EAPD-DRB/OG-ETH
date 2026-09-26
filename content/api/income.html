@@ -474,42 +474,46 @@
 <p><strong>income.py modules</strong></p>
 <section id="module-ogeth.income">
 <span id="ogeth-income"></span><h2>ogeth.income<a class="headerlink" href="#module-ogeth.income" title="Link to this heading">#</a></h2>
+<p>Lifetime earnings profiles for OG-ETH.</p>
+<p>The ability matrix e starts from the OG-USA profiles, which are estimated
+on US micro data, and is reshaped with Ethiopian data along its two
+dimensions: over age with the National Transfer Accounts (NTA) labor
+income profile per worker, as an Ethiopia-to-United-States ratio; and
+across lifetime-income groups so that the income shares the matrix
+implies equal the World Inequality Database (WID) pre-tax income shares
+for Ethiopia. A caller can pass other target shares, or a single Gini
+coefficient to tilt the groups to instead.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ogeth.income.get_e_interp">
-<span class="sig-prename descclassname"><span class="pre">ogeth.income.</span></span><span class="sig-name descname"><span class="pre">get_e_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambdas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_wgts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gini_to_match</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">31.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ogeth/income.html#get_e_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ogeth.income.get_e_interp" title="Link to this definition">#</a></dt>
-<dd><p>This function takes the calibrated lifetime earnings profiles
-(abilities, e matrix) from OG-USA and then adjusts the shape of those
-profiles to match the Gini coefficient for another economy. The
-Gini coefficient to match is given in the argument gini_to_match.
-Note that the calibrated OG-USA e matrix is of size (80, 10), where
-80 is the number of ages and 10 is the number of ability types.
-Users of this function specify their own number of age groups (S)
-and ability types (J). The function will map the fitted functions
-into these dimensions so long as the percentiles of the ability types
-given in lambdas is not more refined at the top end than those in
-OG-USA (which identifies up to the top 0.1%).</p>
+<span class="sig-prename descclassname"><span class="pre">ogeth.income.</span></span><span class="sig-name descname"><span class="pre">get_e_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambdas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_wgts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_shares</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gini_to_match</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ogeth/income.html#get_e_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ogeth.income.get_e_interp" title="Link to this definition">#</a></dt>
+<dd><p>Build the OG-ETH ability matrix from the OG-USA profiles.</p>
+<p>The OG-USA matrix is interpolated onto the model’s age and group grid
+and multiplied by the NTA-based age factor. The gaps between the
+lifetime-income groups are then set in one of two ways: to reproduce
+target income shares by group (by default the WID pre-tax income
+shares for Ethiopia), or to reproduce a single target Gini
+coefficient. The result is scaled so that the population-weighted
+average ability is one.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>E</strong> (<em>int</em>) – the age agents become economically active</p></li>
-<li><p><strong>S</strong> (<em>int</em>) – number of ages to interpolate. This method assumes that
-ages are evenly spaced between the beginning of age E
-up to E+S, &gt;= 3</p></li>
-<li><p><strong>J</strong> (<em>int</em>) – number of ability types to interpolate</p></li>
-<li><p><strong>lambdas</strong> (<em>Numpy array</em>) – distribution of population in each
-ability group, length J</p></li>
-<li><p><strong>age_wgts</strong> (<em>Numpy array</em>) – distribution of population in each age
-group, length S</p></li>
-<li><p><strong>gini_to_match</strong> (<em>float</em>) – Gini coefficient to match, default is
-31.1, the Gini coefficient for ETH in 2021
-<a class="reference external" href="https://data.worldbank.org/indicator/SI.POV.GINI?locations=ET">https://data.worldbank.org/indicator/SI.POV.GINI?locations=ET</a></p></li>
-<li><p><strong>plot</strong> (<em>bool</em>) – if True, creates plots of emat_orig and the new
-interpolated emat_new</p></li>
+<li><p><strong>E</strong> (<em>int</em>) – age at which agents become economically active</p></li>
+<li><p><strong>S</strong> (<em>int</em>) – number of model periods in a lifetime</p></li>
+<li><p><strong>J</strong> (<em>int</em>) – number of lifetime-income groups</p></li>
+<li><p><strong>lambdas</strong> (<em>Numpy array</em>) – population share of each group, length J</p></li>
+<li><p><strong>age_wgts</strong> (<em>Numpy array</em>) – steady-state population distribution,
+either the joint distribution over age and group, size (S, J),
+or the age distribution alone, length S</p></li>
+<li><p><strong>group_shares</strong> (<em>Numpy array</em>) – target income share of each group,
+length J; None uses the WID shares for Ethiopia</p></li>
+<li><p><strong>gini_to_match</strong> (<em>float</em>) – target Gini coefficient; when given, the
+groups are tilted to this Gini instead of to income shares</p></li>
+<li><p><strong>plot_path</strong> (<em>str</em>) – directory to save a plot of the profiles to</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>interpolated ability matrix scaled</dt><dd><p>so that population-weighted average is 1, size SxJ</p>
+<dt>ability matrix scaled so that the</dt><dd><p>population-weighted average is 1, size (S, J)</p>
 </dd>
 </dl>
 </p>

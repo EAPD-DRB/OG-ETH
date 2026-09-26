@@ -408,8 +408,488 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">ogeth</span><span class="w"> </span><span class="kn">import</span> <span class="n">input_output</span> <span class="k">as</span> <span class="n">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="n">CUR_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<span class="c1"># UN M49 code for Ethiopia, used for the UN population data</span>
+<span class="n">UN_COUNTRY_CODE</span> <span class="o">=</span> <span class="s2">"231"</span>
+<span class="c1"># Ethiopia's rows of the EAPD-DRB/Demographic-Gradients library: DHS</span>
+<span class="c1"># wealth-quintile tilts for fertility and infant mortality (2024 survey) and</span>
+<span class="c1"># the 2007 census household-deaths gradient for adult mortality by age band</span>
+<span class="n">GRADIENT_FILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUR_PATH</span><span class="p">,</span> <span class="s2">"data"</span><span class="p">,</span> <span class="s2">"demographic_gradients_ETH.csv"</span><span class="p">)</span>
+<span class="c1"># the library's tilt is the change in the log rate from the bottom to the</span>
+<span class="c1"># top of the wealth distribution; OG-Core's gradient is per centered</span>
+<span class="c1"># percentile point</span>
+<span class="n">TILT_PER_PERCENTILE</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">100</span>
+<span class="c1"># the census bands from this age on measure higher mortality in wealthier</span>
+<span class="c1"># households, which the library flags as at least partly a reporting</span>
+<span class="c1"># artefact (the 15-59 summary is flat), so no tilt is applied there</span>
+<span class="n">OLDEST_MEASURED_MORTALITY_AGE</span> <span class="o">=</span> <span class="mi">45</span>
+<span class="c1"># ages 1-4 take the under-five tilt; age 0 is handled by infmort_gradient</span>
+<span class="n">UNDER_FIVE_AGES</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="c1"># The adult-mortality gradient steepens as a country gets richer. The</span>
+<span class="c1"># library's income rule (general_gradient.csv, fitted on 17 censuses between</span>
+<span class="c1"># about $200 and $10,000 of GNI per head, r = -0.88) is</span>
+<span class="c1">#     tilt(45q15) = 1.291 - 0.2443 ln(GNI per capita, current US$),</span>
+<span class="c1"># and Ethiopia's census measurement is from 2007, when GNI per head was a</span>
+<span class="c1"># fifth of today's. The measured tilts are therefore shifted by the rule's</span>
+<span class="c1"># change since the census year, and keep shifting along the model's own</span>
+<span class="c1"># per-capita growth, capped where the rule's fit ends.</span>
+<span class="n">INCOME_RULE_SLOPE</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.2443</span>
+<span class="n">INCOME_RULE_MAX_GNI</span> <span class="o">=</span> <span class="mf">10000.0</span>
+<span class="c1"># World Bank Atlas GNI per capita, current US$ (NY.GNP.PCAP.CD)</span>
+<span class="n">GNI_PER_CAPITA</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2007</span><span class="p">:</span> <span class="mf">210.0</span><span class="p">,</span> <span class="mi">2024</span><span class="p">:</span> <span class="mf">1100.0</span><span class="p">}</span>
+<span class="n">CENSUS_YEAR</span> <span class="o">=</span> <span class="mi">2007</span>
+<span class="n">GNI_LATEST_YEAR</span> <span class="o">=</span> <span class="mi">2024</span>
+<span class="c1"># the rule describes mortality between 15 and 60, so the shift is applied</span>
+<span class="c1"># at those ages only</span>
+<span class="n">INCOME_RULE_AGES</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">measured_mortality_gradient</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    The census adult-mortality tilts by single age, at the census year.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        E (int): age at which agents become economically active</span>
+<span class="sd">        S (int): number of model periods in a lifetime</span>
+<span class="sd">        df (Pandas DataFrame): the library's Ethiopian rows</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        mort (Numpy array): gradient by age, length E+S, on OG-Core's scale</span>
+
+<span class="sd">    """</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">E</span> <span class="o">+</span> <span class="n">S</span><span class="p">)</span>
+    <span class="n">mort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">E</span> <span class="o">+</span> <span class="n">S</span><span class="p">)</span>
+    <span class="n">u5</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">indicator</span> <span class="o">==</span> <span class="s2">"U5MR"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">u5</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">mort</span><span class="p">[(</span><span class="n">ages</span> <span class="o">&gt;=</span> <span class="n">UNDER_FIVE_AGES</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&lt;</span> <span class="n">UNDER_FIVE_AGES</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">u5</span><span class="o">.</span><span class="n">slope</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">TILT_PER_PERCENTILE</span>
+        <span class="p">)</span>
+    <span class="n">bands</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">indicator</span> <span class="o">==</span> <span class="s2">"AMR"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">measure</span> <span class="o">==</span> <span class="s2">"mx"</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">bands</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">age_lo</span> <span class="o">&gt;=</span> <span class="n">OLDEST_MEASURED_MORTALITY_AGE</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&gt;=</span> <span class="n">row</span><span class="o">.</span><span class="n">age_lo</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&lt;=</span> <span class="n">row</span><span class="o">.</span><span class="n">age_hi</span><span class="p">)</span>
+        <span class="n">mort</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">slope</span><span class="p">)</span> <span class="o">*</span> <span class="n">TILT_PER_PERCENTILE</span>
+    <span class="k">return</span> <span class="n">mort</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mortality_gradient_path</span><span class="p">(</span><span class="n">mort</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">start_year</span><span class="p">,</span> <span class="n">g_y_annual</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Spread the census-year mortality gradient over the model's time path,</span>
+<span class="sd">    steepening it with income per head along the library's income rule.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mort (Numpy array): gradient by age at the census year, length E+S</span>
+<span class="sd">        T (int): number of periods in the transition path</span>
+<span class="sd">        S (int): number of model periods in a lifetime</span>
+<span class="sd">        start_year (int): calendar year of the first model period</span>
+<span class="sd">        g_y_annual (float): annual growth of income per head</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        path (Numpy array): gradient by period and age, size (T+S, E+S)</span>
+
+<span class="sd">    """</span>
+    <span class="n">years</span> <span class="o">=</span> <span class="n">start_year</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span> <span class="o">+</span> <span class="n">S</span><span class="p">)</span>
+    <span class="n">gni</span> <span class="o">=</span> <span class="n">GNI_PER_CAPITA</span><span class="p">[</span><span class="n">GNI_LATEST_YEAR</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">g_y_annual</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span>
+        <span class="n">years</span> <span class="o">-</span> <span class="n">GNI_LATEST_YEAR</span>
+    <span class="p">)</span>
+    <span class="n">gni</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">gni</span><span class="p">,</span> <span class="n">INCOME_RULE_MAX_GNI</span><span class="p">)</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">INCOME_RULE_SLOPE</span>
+        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">gni</span> <span class="o">/</span> <span class="n">GNI_PER_CAPITA</span><span class="p">[</span><span class="n">CENSUS_YEAR</span><span class="p">])</span>
+        <span class="o">*</span> <span class="n">TILT_PER_PERCENTILE</span>
+    <span class="p">)</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">mort</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">adult</span> <span class="o">=</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&gt;=</span> <span class="n">INCOME_RULE_AGES</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&lt;</span> <span class="n">INCOME_RULE_AGES</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">mort</span><span class="p">,</span> <span class="p">(</span><span class="n">T</span> <span class="o">+</span> <span class="n">S</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">path</span><span class="p">[:,</span> <span class="n">adult</span><span class="p">]</span> <span class="o">+=</span> <span class="n">shift</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">demographic_gradients</span><span class="p">(</span>
+    <span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_year</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">g_y_annual</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">GRADIENT_FILE</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Income gradients in fertility and mortality for OG-Core's demographics,</span>
+<span class="sd">    read from the packaged Ethiopian rows of the Demographic-Gradients</span>
+<span class="sd">    library and converted to OG-Core's per-percentile-point scale.</span>
+
+<span class="sd">    Model periods are years, so the mortality gradient is built by single</span>
+<span class="sd">    age from 0 to E+S-1. When T, start_year and g_y_annual are given it is</span>
+<span class="sd">    also spread over the T+S periods of the population path, steepening</span>
+<span class="sd">    with income per head; otherwise it is the census-year gradient.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        E (int): age at which agents become economically active</span>
+<span class="sd">        S (int): number of model periods in a lifetime</span>
+<span class="sd">        T (int): number of periods in the transition path</span>
+<span class="sd">        start_year (int): calendar year of the first model period</span>
+<span class="sd">        g_y_annual (float): annual growth of income per head</span>
+<span class="sd">        path (str): CSV with the library's rows for Ethiopia</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        gradients (dict): fert_gradient and infmort_gradient (scalars) and</span>
+<span class="sd">            mort_gradient (length E+S, or size (T+S, E+S) with a time</span>
+<span class="sd">            path), ready for get_pop_objs</span>
+
+<span class="sd">    """</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">tilt</span><span class="p">(</span><span class="n">indicator</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">indicator</span> <span class="o">==</span> <span class="n">indicator</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rows</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"No </span><span class="si">{</span><span class="n">indicator</span><span class="si">}</span><span class="s2"> gradient in </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">rows</span><span class="o">.</span><span class="n">slope</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">TILT_PER_PERCENTILE</span>
+
+    <span class="n">mort</span> <span class="o">=</span> <span class="n">measured_mortality_gradient</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mort</span> <span class="o">=</span> <span class="n">mortality_gradient_path</span><span class="p">(</span>
+            <span class="n">mort</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="n">S</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_year</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">g_y_annual</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"fert_gradient"</span><span class="p">:</span> <span class="n">tilt</span><span class="p">(</span><span class="s2">"TFR"</span><span class="p">),</span>
+        <span class="s2">"infmort_gradient"</span><span class="p">:</span> <span class="n">tilt</span><span class="p">(</span><span class="s2">"IMR"</span><span class="p">),</span>
+        <span class="s2">"mort_gradient"</span><span class="p">:</span> <span class="n">mort</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="c1"># Steady-state matching: the largest relative gap accepted on every target,</span>
+<span class="c1"># the damping of the bequest-weight update (its effect on wealth shares is</span>
+<span class="c1"># less than one for one), and the number of solves allowed</span>
+<span class="n">MATCH_TOL</span> <span class="o">=</span> <span class="mf">0.02</span>
+<span class="n">MATCH_MAX_ITER</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="c1"># the discount factor by lifetime-income group is the instrument for the</span>
+<span class="c1"># wealth shares (OG-USA's convention) and its level for the wealth-to-GDP</span>
+<span class="c1"># anchor; a group's steady-state wealth is very elastic to its beta, so the</span>
+<span class="c1"># update is heavily damped and each step bounded</span>
+<span class="n">BETA_DAMPING</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">BETA_STEP</span> <span class="o">=</span> <span class="mf">1.03</span>
+<span class="n">BETA_BOUNDS</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.995</span><span class="p">)</span>
+<span class="c1"># OG-USA's bequest weight, kept for every group</span>
+<span class="n">CHI_B_DEFAULT</span> <span class="o">=</span> <span class="mf">80.0</span>
+<span class="c1"># no parameter moves by more than this factor between two solves (chi_n</span>
+<span class="c1"># takes its full first-order step, which converges in a solve or two once</span>
+<span class="c1"># the other parameters stop moving), and a solve that fails is retried from</span>
+<span class="c1"># halfway back to the last solved point</span>
+<span class="n">MATCH_STEP_BOUNDS</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+<span class="n">MATCH_RETRIES</span> <span class="o">=</span> <span class="mi">3</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">steady_state_moments</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">compliance_start</span><span class="p">,</span> <span class="n">compliance_end</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    The moments the steady-state matching works with, from a solved steady</span>
+<span class="sd">    state.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ss (dict): output of ogcore.SS.run_SS</span>
+<span class="sd">        p (OG-Core Specifications object): the parameters it was solved with</span>
+<span class="sd">        compliance_start (Numpy array): FY2024/25 compliance by group</span>
+<span class="sd">        compliance_end (Numpy array): long-run compliance by group</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        moments (dict): n_model (labor supply by age), wealth_shares (by</span>
+<span class="sd">            group), pension_outlays (share of GDP), pit_start (personal</span>
+<span class="sd">            income tax in FY2024/25 as a share of GDP, approximated from</span>
+<span class="sd">            the steady-state incidence)</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ogeth</span><span class="w"> </span><span class="kn">import</span> <span class="n">income</span><span class="p">,</span> <span class="n">labor</span>
+
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">omega_SS</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"Y"</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">inc</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"before_tax_income"</span><span class="p">])</span> <span class="o">*</span> <span class="n">omega</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">pit_ss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"iit_revenue"</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">/</span> <span class="n">Y</span>
+    <span class="n">base_end</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">compliance_end</span> <span class="o">*</span> <span class="n">inc</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">pit_start</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">pit_ss</span> <span class="o">*</span> <span class="nb">float</span><span class="p">((</span><span class="n">compliance_start</span> <span class="o">*</span> <span class="n">inc</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">/</span> <span class="n">base_end</span>
+        <span class="k">if</span> <span class="n">base_end</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"n_model"</span><span class="p">:</span> <span class="n">labor</span><span class="o">.</span><span class="n">average_labor_supply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"n"</span><span class="p">]),</span> <span class="n">omega</span><span class="p">),</span>
+        <span class="s2">"wealth_ratio"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"B"</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">/</span> <span class="n">Y</span><span class="p">,</span>
+        <span class="s2">"wealth_shares"</span><span class="p">:</span> <span class="n">income</span><span class="o">.</span><span class="n">implied_wealth_shares</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"b_s"</span><span class="p">]),</span> <span class="n">omega</span>
+        <span class="p">),</span>
+        <span class="s2">"pension_outlays"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"agg_pension_outlays"</span><span class="p">]))</span> <span class="o">/</span> <span class="n">Y</span><span class="p">,</span>
+        <span class="s2">"pit_start"</span><span class="p">:</span> <span class="n">pit_start</span><span class="p">,</span>
+        <span class="s2">"r"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"r"</span><span class="p">]),</span>
+        <span class="s2">"TR"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"TR"</span><span class="p">]),</span>
+        <span class="s2">"factor"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">"factor"</span><span class="p">]),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">match_steady_state</span><span class="p">(</span>
+    <span class="n">p</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_iter</span><span class="o">=</span><span class="n">MATCH_MAX_ITER</span><span class="p">,</span>
+    <span class="n">tol</span><span class="o">=</span><span class="n">MATCH_TOL</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">checkpoint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calibrate together, by repeated steady-state solves, the parameters</span>
+<span class="sd">    whose targets are steady-state moments: chi_n to LFMS hours by age,</span>
+<span class="sd">    the discount factors beta_j to WID wealth shares by group and their</span>
+<span class="sd">    level to the household-wealth anchor, the pension coverage scale to</span>
+<span class="sd">    pension outlays as a share of GDP, and the compliance scale to</span>
+<span class="sd">    personal-income-tax collections in the first period.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        p (OG-Core Specifications object): model parameters</span>
+<span class="sd">        client (Dask client object): client for parallel computation</span>
+<span class="sd">        max_iter (int): maximum number of steady-state solves</span>
+<span class="sd">        tol (float): largest relative gap accepted on every target</span>
+<span class="sd">        verbose (bool): print the gaps after each solve</span>
+<span class="sd">        checkpoint (callable): called after every solve with the</span>
+<span class="sd">            parameters just solved and the moments, e.g. to save progress</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        params (dict): the calibrated parameters, ready for the JSON</span>
+<span class="sd">        history (list): one dict per solve with the moments and the values</span>
+<span class="sd">            used</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ogcore</span><span class="w"> </span><span class="kn">import</span> <span class="n">SS</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ogeth</span><span class="w"> </span><span class="kn">import</span> <span class="n">income</span><span class="p">,</span> <span class="n">labor</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">lambdas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">n_target</span> <span class="o">=</span> <span class="n">labor</span><span class="o">.</span><span class="n">labor_supply_target</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">ltilde</span><span class="p">)</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="n">income</span><span class="o">.</span><span class="n">model_ages</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
+    <span class="n">fit</span> <span class="o">=</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&gt;=</span> <span class="n">labor</span><span class="o">.</span><span class="n">FIT_AGES</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&lt;</span> <span class="n">labor</span><span class="o">.</span><span class="n">FIT_AGES</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">wealth_target</span> <span class="o">=</span> <span class="n">income</span><span class="o">.</span><span class="n">wealth_share_targets</span><span class="p">(</span><span class="n">lambdas</span><span class="p">)</span>
+    <span class="c1"># a group at the floor is asked to hold less than a no-borrowing</span>
+    <span class="c1"># household saves for retirement anyway, so it is not part of the fit</span>
+    <span class="n">wealth_fit</span> <span class="o">=</span> <span class="n">wealth_target</span> <span class="o">&gt;</span> <span class="n">income</span><span class="o">.</span><span class="n">WEALTH_SHARE_FLOOR</span>
+    <span class="n">wealth_level_target</span> <span class="o">=</span> <span class="n">macro_params</span><span class="o">.</span><span class="n">INITIAL_WEALTH_RATIO</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">tie_floored</span><span class="p">(</span><span class="n">beta</span><span class="p">):</span>
+        <span class="c1"># a group at the floor cannot reach its target however impatient it</span>
+        <span class="c1"># is made, so it takes the discount factor of the nearest fitted group</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">fitted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">wealth_fit</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="o">~</span><span class="n">wealth_fit</span><span class="p">):</span>
+            <span class="n">beta</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta</span><span class="p">[</span><span class="n">fitted</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fitted</span> <span class="o">-</span> <span class="n">j</span><span class="p">))]]</span>
+        <span class="k">return</span> <span class="n">beta</span>
+
+    <span class="n">pension_target</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">macro_params</span><span class="o">.</span><span class="n">PENSIONS_SHARE_OF_GDP</span>
+        <span class="o">/</span> <span class="mi">100</span>
+        <span class="o">*</span> <span class="n">macro_params</span><span class="o">.</span><span class="n">PENSION_OUTLAYS_SS_TO_START</span>
+    <span class="p">)</span>
+    <span class="n">pit_target</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">macro_params</span><span class="o">.</span><span class="n">PIT_REVENUE_TARGET</span> <span class="o">*</span> <span class="n">macro_params</span><span class="o">.</span><span class="n">PIT_START_CORRECTION</span>
+    <span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"chi_n"</span><span class="p">:</span> <span class="n">labor</span><span class="o">.</span><span class="n">steady_state_chi_n</span><span class="p">(</span><span class="n">p</span><span class="p">),</span>
+        <span class="s2">"beta"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">beta_annual</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+        <span class="c1"># start from the scales the parameters already carry, so that a run</span>
+        <span class="c1"># resumes from its own checkpoint rather than from the constants</span>
+        <span class="s2">"compliance_scale"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span>
+            <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">labor_income_tax_noncompliance_rate</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">),</span>
+        <span class="s2">"pension_scale"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">replacement_rate_adjust</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="o">/</span> <span class="n">macro_params</span><span class="o">.</span><span class="n">PENSION_COVERAGE</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_params</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"chi_n"</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"chi_n"</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">"beta_annual"</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"beta"</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">"chi_b"</span><span class="p">:</span> <span class="p">[</span><span class="n">CHI_B_DEFAULT</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"beta"</span><span class="p">]),</span>
+            <span class="o">**</span><span class="n">macro_params</span><span class="o">.</span><span class="n">compliance_paths</span><span class="p">(</span>
+                <span class="n">macro_params</span><span class="o">.</span><span class="n">DEFAULT_SCENARIO</span><span class="p">,</span>
+                <span class="n">s</span><span class="p">[</span><span class="s2">"compliance_scale"</span><span class="p">],</span>
+                <span class="n">s</span><span class="p">[</span><span class="s2">"pension_scale"</span><span class="p">],</span>
+            <span class="p">),</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">halfway</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">old</span><span class="p">):</span>
+        <span class="c1"># geometric midpoint: the updates are multiplicative</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">old</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">"compliance_scale"</span>
+            <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">old</span><span class="p">[</span><span class="n">k</span><span class="p">])))</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">new</span>
+        <span class="p">}</span>
+
+    <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">solved</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># per-group damping of the beta step: halved for a group whenever the</span>
+    <span class="c1"># sign of its wealth-share gap flips between solves, because the share</span>
+    <span class="c1"># of the most patient groups is very elastic to beta once beta(1 + r)</span>
+    <span class="c1"># nears one and a fixed step overshoots and oscillates</span>
+    <span class="n">beta_damping</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"beta"</span><span class="p">]),</span> <span class="n">BETA_DAMPING</span><span class="p">)</span>
+    <span class="n">prev_sign</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iter</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">MATCH_RETRIES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">update_specifications</span><span class="p">(</span><span class="n">as_params</span><span class="p">(</span><span class="n">state</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ss</span> <span class="o">=</span> <span class="n">SS</span><span class="o">.</span><span class="n">run_SS</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">solved</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">MATCH_RETRIES</span><span class="p">:</span>
+                    <span class="k">raise</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"steady state did not solve (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">); halving the step"</span><span class="p">,</span>
+                    <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">halfway</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">solved</span><span class="p">)</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="n">as_params</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="n">c_start</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="s2">"labor_income_tax_noncompliance_rate"</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">c_end</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="s2">"labor_income_tax_noncompliance_rate"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">steady_state_moments</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">c_start</span><span class="p">,</span> <span class="n">c_end</span><span class="p">)</span>
+        <span class="n">gaps</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c1"># ages where chi_n sits at OG-Core's cap cannot be fitted</span>
+            <span class="s2">"hours"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">"n_model"</span><span class="p">]</span> <span class="o">/</span> <span class="n">n_target</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)[</span>
+                <span class="n">fit</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"chi_n"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">labor</span><span class="o">.</span><span class="n">MAX_CHI_N</span><span class="p">)</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+            <span class="s2">"wealth"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">"wealth_shares"</span><span class="p">]</span> <span class="o">/</span> <span class="n">wealth_target</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)[</span>
+                <span class="n">wealth_fit</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+            <span class="s2">"wealth_level"</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">"wealth_ratio"</span><span class="p">]</span> <span class="o">/</span> <span class="n">wealth_level_target</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="s2">"pensions"</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">"pension_outlays"</span><span class="p">]</span> <span class="o">/</span> <span class="n">pension_target</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">macro_params</span><span class="o">.</span><span class="n">PENSIONS_ON</span>
+            <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s2">"pit"</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">"pit_start"</span><span class="p">]</span> <span class="o">/</span> <span class="n">pit_target</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">solved</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s2">"copy"</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"iteration"</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span> <span class="s2">"gaps"</span><span class="p">:</span> <span class="n">gaps</span><span class="p">,</span> <span class="o">**</span><span class="n">solved</span><span class="p">,</span> <span class="o">**</span><span class="n">m</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"match iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">: gaps "</span>
+                <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">gaps</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">"; r </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">'r'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, wealth shares "</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">"wealth_shares"</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">", B/Y </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">'wealth_ratio'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, beta "</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"beta"</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">", pension outlays </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">'pension_outlays'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, "</span>
+                <span class="sa">f</span><span class="s2">"PIT t0 </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">'pit_start'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, compliance scale "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="s1">'compliance_scale'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, pension scale "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="s1">'pension_scale'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">checkpoint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">checkpoint</span><span class="p">(</span><span class="n">as_params</span><span class="p">(</span><span class="n">solved</span><span class="p">),</span> <span class="n">m</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">gaps</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">MATCH_STEP_BOUNDS</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">wealth_target</span> <span class="o">-</span> <span class="n">m</span><span class="p">[</span><span class="s2">"wealth_shares"</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">prev_sign</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">beta_damping</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="n">sign</span> <span class="o">*</span> <span class="n">prev_sign</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">beta_damping</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">beta_damping</span>
+            <span class="p">)</span>
+        <span class="n">prev_sign</span> <span class="o">=</span> <span class="n">sign</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">BETA_STEP</span> <span class="o">**</span> <span class="p">(</span><span class="n">beta_damping</span> <span class="o">/</span> <span class="n">BETA_DAMPING</span><span class="p">)</span>
+        <span class="n">share_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">wealth_target</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="s2">"wealth_shares"</span><span class="p">])</span> <span class="o">**</span> <span class="n">beta_damping</span><span class="p">,</span>
+            <span class="mi">1</span> <span class="o">/</span> <span class="n">step</span><span class="p">,</span>
+            <span class="n">step</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">level_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">wealth_level_target</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="s2">"wealth_ratio"</span><span class="p">])</span> <span class="o">**</span> <span class="n">BETA_DAMPING</span><span class="p">,</span>
+            <span class="mi">1</span> <span class="o">/</span> <span class="n">BETA_STEP</span><span class="p">,</span>
+            <span class="n">BETA_STEP</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"chi_n"</span><span class="p">:</span> <span class="n">labor</span><span class="o">.</span><span class="n">chi_n_step</span><span class="p">(</span>
+                <span class="n">state</span><span class="p">[</span><span class="s2">"chi_n"</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="s2">"n_model"</span><span class="p">],</span> <span class="n">n_target</span><span class="p">,</span> <span class="n">p</span>
+            <span class="p">),</span>
+            <span class="s2">"beta"</span><span class="p">:</span> <span class="n">tie_floored</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                    <span class="n">state</span><span class="p">[</span><span class="s2">"beta"</span><span class="p">]</span> <span class="o">*</span> <span class="n">share_ratio</span> <span class="o">*</span> <span class="n">level_ratio</span><span class="p">,</span> <span class="o">*</span><span class="n">BETA_BOUNDS</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="s2">"compliance_scale"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span>
+                <span class="mf">1.0</span><span class="p">,</span>
+                <span class="n">state</span><span class="p">[</span><span class="s2">"compliance_scale"</span><span class="p">]</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">pit_target</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="s2">"pit_start"</span><span class="p">],</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="s2">"pit_start"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="n">state</span><span class="p">[</span><span class="s2">"compliance_scale"</span><span class="p">],</span>
+            <span class="s2">"pension_scale"</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="s2">"pension_scale"</span><span class="p">]</span>
+            <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">pension_target</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="s2">"pension_outlays"</span><span class="p">],</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">macro_params</span><span class="o">.</span><span class="n">PENSIONS_ON</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="s2">"pension_outlays"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="n">state</span><span class="p">[</span><span class="s2">"pension_scale"</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">update_specifications</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"initial_guess_r_SS"</span><span class="p">:</span> <span class="n">labor</span><span class="o">.</span><span class="n">R_GUESS_MARGIN</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="s2">"r"</span><span class="p">],</span>
+                <span class="s2">"initial_guess_TR_SS"</span><span class="p">:</span> <span class="n">m</span><span class="p">[</span><span class="s2">"TR"</span><span class="p">],</span>
+                <span class="s2">"initial_guess_factor_SS"</span><span class="p">:</span> <span class="n">labor</span><span class="o">.</span><span class="n">factor_guess</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">"factor"</span><span class="p">]),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"steady-state matching did not converge in </span><span class="si">{</span><span class="n">max_iter</span><span class="si">}</span><span class="s2"> solves; "</span>
+            <span class="s2">"keeping the last solved values"</span><span class="p">,</span>
+            <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">as_params</span><span class="p">(</span><span class="n">solved</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">"initial_guess_r_SS"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">labor</span><span class="o">.</span><span class="n">R_GUESS_MARGIN</span> <span class="o">*</span> <span class="n">last</span><span class="p">[</span><span class="s2">"r"</span><span class="p">],</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="s2">"initial_guess_TR_SS"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">last</span><span class="p">[</span><span class="s2">"TR"</span><span class="p">],</span> <span class="mi">5</span><span class="p">),</span>
+            <span class="s2">"initial_guess_factor_SS"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span>
+                <span class="n">labor</span><span class="o">.</span><span class="n">factor_guess</span><span class="p">(</span><span class="n">last</span><span class="p">[</span><span class="s2">"factor"</span><span class="p">]),</span> <span class="mi">0</span>
+            <span class="p">),</span>
+            <span class="s2">"compliance_scale"</span><span class="p">:</span> <span class="n">solved</span><span class="p">[</span><span class="s2">"compliance_scale"</span><span class="p">],</span>
+            <span class="s2">"pension_coverage_scale"</span><span class="p">:</span> <span class="n">solved</span><span class="p">[</span><span class="s2">"pension_scale"</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">history</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Run the steady-state matching on the packaged parameters and write the</span>
+<span class="sd">    result into the packaged JSON; the two calibrated scales are printed so</span>
+<span class="sd">    that macro_params.COMPLIANCE_SCALE and PENSION_COVERAGE_SCALE can be</span>
+<span class="sd">    set to them.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ogcore.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Specifications</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ogeth</span><span class="w"> </span><span class="kn">import</span> <span class="n">income</span>
+
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUR_PATH</span><span class="p">,</span> <span class="s2">"ogeth_default_parameters.json"</span><span class="p">)</span>
+    <span class="n">num_workers</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span> <span class="mi">7</span><span class="p">)</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">n_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">threads_per_worker</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Specifications</span><span class="p">(</span><span class="n">baseline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">update_specifications</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">moments</span><span class="p">):</span>
+        <span class="n">income</span><span class="o">.</span><span class="n">write_json_parameters</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+    <span class="n">params</span><span class="p">,</span> <span class="n">history</span> <span class="o">=</span> <span class="n">match_steady_state</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span> <span class="n">checkpoint</span><span class="o">=</span><span class="n">save</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">scales</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"compliance_scale"</span><span class="p">,</span> <span class="s2">"pension_coverage_scale"</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"calibrated scales:"</span><span class="p">,</span> <span class="n">scales</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">"beta_annual by group:"</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">"beta_annual"</span><span class="p">]),</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">income</span><span class="o">.</span><span class="n">write_json_parameters</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"wrote the matched parameters to </span><span class="si">{</span><span class="n">json_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Calibration">
@@ -486,51 +966,76 @@
 
         <span class="c1"># Demographics + income (atomic — e depends on demographic output)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">ogcore</span><span class="w"> </span><span class="kn">import</span> <span class="n">demographics</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span> <span class="o">=</span> <span class="n">demographics</span><span class="o">.</span><span class="n">get_pop_objs</span><span class="p">(</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
-                <span class="mi">0</span><span class="p">,</span>
-                <span class="mi">99</span><span class="p">,</span>
-                <span class="n">country_id</span><span class="o">=</span><span class="s2">"231"</span><span class="p">,</span>
-                <span class="n">initial_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="n">final_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="n">income_percentiles</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
-                <span class="n">GraphDiag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">download_path</span><span class="o">=</span><span class="n">demographic_data_path</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="c1"># demographics for 80 period lives (needed for getting e below)</span>
-            <span class="n">demog80</span> <span class="o">=</span> <span class="n">demographics</span><span class="o">.</span><span class="n">get_pop_objs</span><span class="p">(</span>
-                <span class="mi">20</span><span class="p">,</span>
-                <span class="mi">80</span><span class="p">,</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
-                <span class="mi">0</span><span class="p">,</span>
-                <span class="mi">99</span><span class="p">,</span>
-                <span class="n">country_id</span><span class="o">=</span><span class="s2">"231"</span><span class="p">,</span>
-                <span class="n">initial_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="n">final_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="n">income_percentiles</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
-                <span class="n">GraphDiag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="c1"># earnings profiles</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">e</span> <span class="o">=</span> <span class="n">income</span><span class="o">.</span><span class="n">get_e_interp</span><span class="p">(</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">J</span><span class="p">,</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span>
-                <span class="n">demog80</span><span class="p">[</span><span class="s2">"omega_SS"</span><span class="p">],</span>
-                <span class="n">plot_path</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_demographics</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">demographic_data_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">"Demographics/income update failed: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">e</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_demographics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">demographic_data_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Rebuild the demographics from the UN data, with Ethiopia's income</span>
+<span class="sd">        gradients in fertility and mortality, and everything derived from</span>
+<span class="sd">        them: the earnings matrix, the remittance growth path and</span>
+<span class="sd">        allocation, and the transfer allocation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            p (OG-Core Specifications object): model parameters</span>
+<span class="sd">            demographic_data_path (str): path to save demographic data</span>
+<span class="sd">            output_path (str): path to save plots to</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">ogcore</span><span class="w"> </span><span class="kn">import</span> <span class="n">demographics</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span> <span class="o">=</span> <span class="n">demographics</span><span class="o">.</span><span class="n">get_pop_objs</span><span class="p">(</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">99</span><span class="p">,</span>
+            <span class="n">country_id</span><span class="o">=</span><span class="n">UN_COUNTRY_CODE</span><span class="p">,</span>
+            <span class="n">initial_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">final_data_year</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">start_year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">income_percentiles</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+            <span class="n">GraphDiag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">download_path</span><span class="o">=</span><span class="n">demographic_data_path</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">demographic_gradients</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">start_year</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">g_y_annual</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># earnings profiles, reshaped with Ethiopian data and scaled on</span>
+        <span class="c1"># the model's own joint age-by-group population distribution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e</span> <span class="o">=</span> <span class="n">income</span><span class="o">.</span><span class="n">get_e_interp</span><span class="p">(</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">J</span><span class="p">,</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span><span class="p">[</span><span class="s2">"omega_SS"</span><span class="p">],</span>
+            <span class="n">plot_path</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># the remittance growth path and allocation matrix are derived</span>
+        <span class="c1"># from these demographics, so they travel with them</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="n">macro_params</span><span class="o">.</span><span class="n">derive_remittance_params</span><span class="p">(</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">g_y</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span><span class="p">[</span><span class="s2">"g_n"</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span><span class="p">[</span><span class="s2">"omega_SS"</span><span class="p">],</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># so is the transfer allocation matrix (per capita within the</span>
+        <span class="c1"># targeted groups, pensions to the retired)</span>
+        <span class="n">retire_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">retirement_age</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span><span class="p">[</span><span class="s2">"eta"</span><span class="p">]</span> <span class="o">=</span> <span class="n">macro_params</span><span class="o">.</span><span class="n">transfer_eta</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">demographic_params</span><span class="p">[</span><span class="s2">"omega_SS"</span><span class="p">],</span> <span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span> <span class="n">retire_idx</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
     <span class="c1"># method to return all newly calibrated parameters in a dictionary</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -545,6 +1050,10 @@
             <span class="n">d</span><span class="p">[</span><span class="s2">"io_matrix"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">io_matrix</span>
         <span class="k">return</span> <span class="n">d</span></div>
 
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
                 </article>

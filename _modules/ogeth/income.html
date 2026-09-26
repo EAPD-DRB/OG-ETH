@@ -404,200 +404,617 @@
                 <article class="bd-article">
                   
   <h1>Source code for ogeth.income</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">opt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">si</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ogcore</span><span class="w"> </span><span class="kn">import</span> <span class="n">parameter_plots</span> <span class="k">as</span> <span class="n">pp</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ogcore</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ogcore.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Specifications</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span></span><span class="sd">"""</span>
+<span class="sd">Lifetime earnings profiles for OG-ETH.</span>
+
+<span class="sd">The ability matrix e starts from the OG-USA profiles, which are estimated</span>
+<span class="sd">on US micro data, and is reshaped with Ethiopian data along its two</span>
+<span class="sd">dimensions: over age with the National Transfer Accounts (NTA) labor</span>
+<span class="sd">income profile per worker, as an Ethiopia-to-United-States ratio; and</span>
+<span class="sd">across lifetime-income groups so that the income shares the matrix</span>
+<span class="sd">implies equal the World Inequality Database (WID) pre-tax income shares</span>
+<span class="sd">for Ethiopia. A caller can pass other target shares, or a single Gini</span>
+<span class="sd">coefficient to tilt the groups to instead.</span>
+<span class="sd">"""</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">si</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">opt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ogcore</span><span class="w"> </span><span class="kn">import</span> <span class="n">parameter_plots</span> <span class="k">as</span> <span class="n">pp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ogcore</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
+
 <span class="n">CUR_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-<span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUR_PATH</span><span class="p">,</span> <span class="s2">"OUTPUT"</span><span class="p">,</span> <span class="s2">"ability"</span><span class="p">)</span>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUR_PATH</span><span class="p">,</span> <span class="s2">"data"</span><span class="p">)</span>
+<span class="n">OGUSA_PARAMS_URL</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"https://raw.githubusercontent.com/PSLmodels/OG-USA/master/"</span>
+    <span class="s2">"ogusa/ogusa_default_parameters.json"</span>
+<span class="p">)</span>
+<span class="c1"># the OG-USA profiles cover ages 20 to 99 in one-year steps</span>
+<span class="n">OGUSA_E</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">OGUSA_S</span> <span class="o">=</span> <span class="mi">80</span>
+
+<span class="c1"># WID pre-tax national income (equal-split adults), the latest year with</span>
+<span class="c1"># an Ethiopian estimate; the same year is used for the United States</span>
+<span class="n">WID_YEAR</span> <span class="o">=</span> <span class="mi">2021</span>
+<span class="n">WID_SHARE_VARIABLE</span> <span class="o">=</span> <span class="s2">"sptincj992"</span>
+<span class="n">WID_GINI_VARIABLE</span> <span class="o">=</span> <span class="s2">"gptincj992"</span>
+<span class="c1"># WID net personal wealth shares (equal-split adults), the target for the</span>
+<span class="c1"># distribution of wealth across the groups; the bottom quarter's share is</span>
+<span class="c1"># negative in the data, which the model's no-borrowing households cannot</span>
+<span class="c1"># reproduce, hence the floor</span>
+<span class="n">WID_WEALTH_VARIABLE</span> <span class="o">=</span> <span class="s2">"shwealj992"</span>
+<span class="n">WEALTH_SHARE_FLOOR</span> <span class="o">=</span> <span class="mf">0.005</span>
+<span class="c1"># NTA labor income per capita: Ethiopia's only profile is 2005, and 2006</span>
+<span class="c1"># is the US profile closest to it</span>
+<span class="n">NTA_YEAR</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"ETH"</span><span class="p">:</span> <span class="mi">2005</span><span class="p">,</span> <span class="s2">"US"</span><span class="p">:</span> <span class="mi">2006</span><span class="p">}</span>
+<span class="c1"># ILOSTAT employment ratios come in five-year bands, placed at the band</span>
+<span class="c1"># midpoint; the open 65+ band is placed at 70</span>
+<span class="n">EMPLOYMENT_BAND_MIDPOINTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"15-19"</span><span class="p">:</span> <span class="mi">17</span><span class="p">,</span>
+    <span class="s2">"20-24"</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+    <span class="s2">"25-29"</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+    <span class="s2">"30-34"</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="s2">"35-39"</span><span class="p">:</span> <span class="mi">37</span><span class="p">,</span>
+    <span class="s2">"40-44"</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="s2">"45-49"</span><span class="p">:</span> <span class="mi">47</span><span class="p">,</span>
+    <span class="s2">"50-54"</span><span class="p">:</span> <span class="mi">52</span><span class="p">,</span>
+    <span class="s2">"55-59"</span><span class="p">:</span> <span class="mi">57</span><span class="p">,</span>
+    <span class="s2">"60-64"</span><span class="p">:</span> <span class="mi">62</span><span class="p">,</span>
+    <span class="s2">"65+"</span><span class="p">:</span> <span class="mi">70</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="c1"># window over which the two per-worker profiles are normalized before</span>
+<span class="c1"># taking their ratio</span>
+<span class="n">REFERENCE_AGES</span> <span class="o">=</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">65</span><span class="p">)</span>
+<span class="c1"># beyond 65 the employment ratio is a single open band in both countries,</span>
+<span class="c1"># so per-worker earnings cannot be measured by age; the age factor is held</span>
+<span class="c1"># at its 60-64 mean from this age on</span>
+<span class="n">OLDEST_MEASURED_AGE</span> <span class="o">=</span> <span class="mi">65</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">load_ogusa_e</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Download the OG-USA default parameters and return its ability matrix.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        e_usa (Numpy array): OG-USA ability matrix, size (80, 10)</span>
+<span class="sd">        lambdas_usa (Numpy array): OG-USA lifetime-income group shares</span>
+
+<span class="sd">    """</span>
+    <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">OGUSA_PARAMS_URL</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+        <span class="n">usa</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+    <span class="n">e_usa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">usa</span><span class="p">[</span><span class="s2">"e"</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">e_usa</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">e_usa</span> <span class="o">=</span> <span class="n">e_usa</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">e_usa</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">usa</span><span class="p">[</span><span class="s2">"lambdas"</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">group_midpoints</span><span class="p">(</span><span class="n">lambdas</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Percentile midpoints of the lifetime-income groups.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lambdas (Numpy array): population share of each group, length J</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        midpoints (Numpy array): midpoint of each group in (0, 1)</span>
+
+<span class="sd">    """</span>
+    <span class="n">upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">lambdas</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">upper</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lambdas</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">model_ages</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Midpoint age of each model period.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        E (int): age at which agents become economically active</span>
+<span class="sd">        S (int): number of model periods in a lifetime</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ages (Numpy array): midpoint age of each period, length S</span>
+
+<span class="sd">    """</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="n">OGUSA_S</span> <span class="o">/</span> <span class="n">S</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">E</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">step</span><span class="p">,</span> <span class="n">E</span> <span class="o">+</span> <span class="n">S</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">step</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">interpolate_usa_e</span><span class="p">(</span><span class="n">e_usa</span><span class="p">,</span> <span class="n">lambdas_usa</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Map the OG-USA ability matrix onto the model's age and group grid.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        e_usa (Numpy array): OG-USA ability matrix, size (80, 10)</span>
+<span class="sd">        lambdas_usa (Numpy array): OG-USA group shares, length 10</span>
+<span class="sd">        E (int): age at which agents become economically active</span>
+<span class="sd">        S (int): number of model periods in a lifetime</span>
+<span class="sd">        lambdas (Numpy array): model group shares, length J</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        e_base (Numpy array): OG-USA profiles on the model grid, size (S, J)</span>
+
+<span class="sd">    """</span>
+    <span class="n">lambdas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lambdas</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">S</span> <span class="o">==</span> <span class="n">OGUSA_S</span>
+        <span class="ow">and</span> <span class="n">E</span> <span class="o">==</span> <span class="n">OGUSA_E</span>
+        <span class="ow">and</span> <span class="n">lambdas</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">lambdas_usa</span><span class="o">.</span><span class="n">shape</span>
+        <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">lambdas</span><span class="p">,</span> <span class="n">lambdas_usa</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">e_usa</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">midp</span> <span class="o">=</span> <span class="n">group_midpoints</span><span class="p">(</span><span class="n">lambdas</span><span class="p">)</span>
+    <span class="n">midp_usa</span> <span class="o">=</span> <span class="n">group_midpoints</span><span class="p">(</span><span class="n">lambdas_usa</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">midp</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">midp_usa</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="ow">or</span> <span class="n">midp</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">midp_usa</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">"One or more entries in abilities vector (lambdas) is outside "</span>
+            <span class="s2">"the allowable bounds for interpolation."</span>
+        <span class="p">)</span>
+    <span class="n">ages_usa</span> <span class="o">=</span> <span class="n">model_ages</span><span class="p">(</span><span class="n">OGUSA_E</span><span class="p">,</span> <span class="n">OGUSA_S</span><span class="p">)</span>
+    <span class="n">j_mesh</span><span class="p">,</span> <span class="n">s_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">midp_usa</span><span class="p">,</span> <span class="n">ages_usa</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">s_mesh</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">j_mesh</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+    <span class="n">new_j_mesh</span><span class="p">,</span> <span class="n">new_s_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">midp</span><span class="p">,</span> <span class="n">model_ages</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">si</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
+        <span class="n">points</span><span class="p">,</span> <span class="n">e_usa</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="p">(</span><span class="n">new_s_mesh</span><span class="p">,</span> <span class="n">new_j_mesh</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s2">"linear"</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">employment_ratio</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">ages</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    ILOSTAT employment-to-population ratio interpolated to single ages.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        country (str): "ETH" or "US"</span>
+<span class="sd">        year (int): data year</span>
+<span class="sd">        ages (Numpy array): ages to interpolate to</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ratio (Numpy array): employed share of the population at each age</span>
+
+<span class="sd">    """</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">"ilostat_employment_ratio_by_age.csv"</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">country</span> <span class="o">==</span> <span class="n">country</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="n">year</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"No ILOSTAT employment ratio for </span><span class="si">{</span><span class="n">country</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">age_band</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">EMPLOYMENT_BAND_MIDPOINTS</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">ages</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="n">df</span><span class="o">.</span><span class="n">emp_pop_ratio</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">order</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">nta_labor_income</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">ages</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    NTA smoothed mean labor income per capita interpolated to single ages.</span>
+
+<span class="sd">    Ages beyond the last reported age take its value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        country (str): "ETH" or "US"</span>
+<span class="sd">        ages (Numpy array): ages to interpolate to</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        income (Numpy array): labor income per capita at each age</span>
+
+<span class="sd">    """</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">"nta_labor_income_by_age.csv"</span><span class="p">))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">country</span> <span class="o">==</span> <span class="n">country</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="n">NTA_YEAR</span><span class="p">[</span><span class="n">country</span><span class="p">])]</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"No NTA labor income profile for </span><span class="si">{</span><span class="n">country</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+        <span class="n">ages</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">age</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span> <span class="n">df</span><span class="o">.</span><span class="n">labor_income</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">per_worker_earnings</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">ages</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Labor income per worker by age: the NTA per-capita profile divided by</span>
+<span class="sd">    the employment ratio of the same year.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        country (str): "ETH" or "US"</span>
+<span class="sd">        ages (Numpy array): ages to evaluate at</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        earnings (Numpy array): labor income per employed person by age</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">nta_labor_income</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">ages</span><span class="p">)</span> <span class="o">/</span> <span class="n">employment_ratio</span><span class="p">(</span>
+        <span class="n">country</span><span class="p">,</span> <span class="n">NTA_YEAR</span><span class="p">[</span><span class="n">country</span><span class="p">],</span> <span class="n">ages</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">earnings_age_factor</span><span class="p">(</span><span class="n">ages</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Ethiopia-to-US ratio of per-worker labor income by age.</span>
+
+<span class="sd">    Each country's profile is normalized to its mean over REFERENCE_AGES</span>
+<span class="sd">    before the ratio is taken, so the factor reshapes the age profile</span>
+<span class="sd">    without changing its level. From OLDEST_MEASURED_AGE on the factor is</span>
+<span class="sd">    held at its mean over the five preceding ages, because the employment</span>
+<span class="sd">    ratios that turn per-capita into per-worker income are a single open</span>
+<span class="sd">    band beyond 65.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ages (Numpy array): model ages, length S</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        factor (Numpy array): multiplicative age factor, length S</span>
+
+<span class="sd">    """</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ages</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&gt;=</span> <span class="n">REFERENCE_AGES</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&lt;</span> <span class="n">REFERENCE_AGES</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">eth</span> <span class="o">=</span> <span class="n">per_worker_earnings</span><span class="p">(</span><span class="s2">"ETH"</span><span class="p">,</span> <span class="n">ages</span><span class="p">)</span>
+    <span class="n">usa</span> <span class="o">=</span> <span class="n">per_worker_earnings</span><span class="p">(</span><span class="s2">"US"</span><span class="p">,</span> <span class="n">ages</span><span class="p">)</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="p">(</span><span class="n">eth</span> <span class="o">/</span> <span class="n">eth</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">usa</span> <span class="o">/</span> <span class="n">usa</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="n">old</span> <span class="o">=</span> <span class="n">ages</span> <span class="o">&gt;=</span> <span class="n">OLDEST_MEASURED_AGE</span>
+    <span class="n">hold</span> <span class="o">=</span> <span class="p">(</span><span class="n">ages</span> <span class="o">&gt;=</span> <span class="n">OLDEST_MEASURED_AGE</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">old</span>
+    <span class="k">if</span> <span class="n">old</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> <span class="n">hold</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">factor</span><span class="p">[</span><span class="n">old</span><span class="p">]</span> <span class="o">=</span> <span class="n">factor</span><span class="p">[</span><span class="n">hold</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">factor</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">wid_cumulative_shares</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="n">WID_SHARE_VARIABLE</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Cumulative shares at the percentile bounds WID reports.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        country (str): "ETH" or "US"</span>
+<span class="sd">        variable (str): WID series, pre-tax income shares by default or</span>
+<span class="sd">            WID_WEALTH_VARIABLE for net personal wealth</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        cumulative (dict): share received by the bottom fraction of adults,</span>
+<span class="sd">            keyed by that fraction (0.25, 0.5, 0.7, 0.8, 0.9, 0.99 and 1.0)</span>
+
+<span class="sd">    """</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">"wid_pretax_income_2021.csv"</span><span class="p">))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">country</span> <span class="o">==</span> <span class="n">country</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="n">WID_YEAR</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">variable</span> <span class="o">==</span> <span class="n">variable</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"No WID </span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2"> shares for </span><span class="si">{</span><span class="n">country</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">"percentile"</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">bottom_70</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p0p50"</span><span class="p">]</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p50p90"</span><span class="p">]</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p70p80"</span><span class="p">]</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p80p90"</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="mf">0.25</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p0p25"</span><span class="p">],</span>
+        <span class="mf">0.50</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p0p50"</span><span class="p">],</span>
+        <span class="mf">0.70</span><span class="p">:</span> <span class="n">bottom_70</span><span class="p">,</span>
+        <span class="mf">0.80</span><span class="p">:</span> <span class="n">bottom_70</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p70p80"</span><span class="p">],</span>
+        <span class="mf">0.90</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p0p50"</span><span class="p">]</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p50p90"</span><span class="p">],</span>
+        <span class="mf">0.99</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p0p50"</span><span class="p">]</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p50p90"</span><span class="p">]</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p90p100"</span><span class="p">]</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="s2">"p99p100"</span><span class="p">],</span>
+        <span class="mf">1.00</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">wid_group_shares</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="n">WID_SHARE_VARIABLE</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    WID share of each lifetime-income group, of pre-tax income by default.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        country (str): "ETH" or "US"</span>
+<span class="sd">        lambdas (Numpy array): population share of each group, length J</span>
+<span class="sd">        variable (str): WID series (see wid_cumulative_shares)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        shares (Numpy array): share of each group, length J</span>
+
+<span class="sd">    """</span>
+    <span class="n">cumulative</span> <span class="o">=</span> <span class="n">wid_cumulative_shares</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">variable</span><span class="p">)</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">lambdas</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span> <span class="k">if</span> <span class="n">b</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cumulative</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"WID shares are available at the cumulative percentiles "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">cumulative</span><span class="p">)</span><span class="si">}</span><span class="s2">; lambdas imply </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+    <span class="n">cum_shares</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cumulative</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="mf">0.0</span><span class="p">],</span> <span class="n">cum_shares</span><span class="p">)))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">wid_gini</span><span class="p">(</span><span class="n">country</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    WID pre-tax income Gini coefficient.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        country (str): "ETH" or "US"</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        gini (float): Gini coefficient in (0, 1)</span>
+
+<span class="sd">    """</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">"wid_pretax_income_2021.csv"</span><span class="p">))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">country</span> <span class="o">==</span> <span class="n">country</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="n">WID_YEAR</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">variable</span> <span class="o">==</span> <span class="n">WID_GINI_VARIABLE</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">wealth_share_targets</span><span class="p">(</span><span class="n">lambdas</span><span class="p">,</span> <span class="n">country</span><span class="o">=</span><span class="s2">"ETH"</span><span class="p">,</span> <span class="n">floor</span><span class="o">=</span><span class="n">WEALTH_SHARE_FLOOR</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Target share of household wealth for each lifetime-income group, from</span>
+<span class="sd">    WID's net personal wealth shares. Households in the model cannot borrow,</span>
+<span class="sd">    so a group whose WID share is negative or below the floor is given the</span>
+<span class="sd">    floor and the rest is rescaled to sum to one.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lambdas (Numpy array): population share of each group, length J</span>
+<span class="sd">        country (str): "ETH" or "US"</span>
+<span class="sd">        floor (float): smallest share any group is asked to hold</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        shares (Numpy array): target wealth share of each group, length J</span>
+
+<span class="sd">    """</span>
+    <span class="n">shares</span> <span class="o">=</span> <span class="n">wid_group_shares</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">WID_WEALTH_VARIABLE</span><span class="p">)</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="n">shares</span> <span class="o">&lt;</span> <span class="n">floor</span>
+    <span class="n">shares</span> <span class="o">=</span> <span class="n">shares</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">shares</span><span class="p">[</span><span class="n">low</span><span class="p">]</span> <span class="o">=</span> <span class="n">floor</span>
+    <span class="n">shares</span><span class="p">[</span><span class="o">~</span><span class="n">low</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">floor</span> <span class="o">*</span> <span class="n">low</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">/</span> <span class="n">shares</span><span class="p">[</span><span class="o">~</span><span class="n">low</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">shares</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">implied_wealth_shares</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Share of aggregate household wealth held by each group.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        b (Numpy array): savings by age and group, size (S, J)</span>
+<span class="sd">        age_wgts (Numpy array): joint population distribution, size (S, J)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        shares (Numpy array): wealth share of each group, length J</span>
+
+<span class="sd">    """</span>
+    <span class="n">wealth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">age_wgts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wealth</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">wealth</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">implied_group_shares</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Share of total ability-weighted labor accruing to each group when</span>
+<span class="sd">    every household supplies the same labor.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        e (Numpy array): ability matrix, size (S, J)</span>
+<span class="sd">        age_wgts (Numpy array): joint population distribution, size (S, J)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        shares (Numpy array): implied income share of each group, length J</span>
+
+<span class="sd">    """</span>
+    <span class="n">income</span> <span class="o">=</span> <span class="n">e</span> <span class="o">*</span> <span class="n">age_wgts</span>
+    <span class="k">return</span> <span class="n">income</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">income</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">implied_gini</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Gini coefficient of the ability matrix over the population.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        e (Numpy array): ability matrix, size (S, J)</span>
+<span class="sd">        age_wgts (Numpy array): joint population distribution, size (S, J)</span>
+<span class="sd">        lambdas (Numpy array): population share of each group, length J</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        gini (float): Gini coefficient in (0, 1)</span>
+
+<span class="sd">    """</span>
+    <span class="n">S</span><span class="p">,</span> <span class="n">J</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">Inequality</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lambdas</span><span class="p">),</span> <span class="n">S</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span><span class="o">.</span><span class="n">gini</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">scale_groups_to_shares</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">,</span> <span class="n">group_shares</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Rescale each lifetime-income group's profile so that the income shares</span>
+<span class="sd">    implied by the matrix equal the target shares.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        e (Numpy array): ability matrix, size (S, J)</span>
+<span class="sd">        age_wgts (Numpy array): joint population distribution, size (S, J)</span>
+<span class="sd">        group_shares (Numpy array): target income share of each group,</span>
+<span class="sd">            length J; they are normalized to sum to one</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        e_scaled (Numpy array): rescaled ability matrix, size (S, J)</span>
+
+<span class="sd">    """</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">group_shares</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">e</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="p">(</span><span class="n">target</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"group_shares must be J positive income shares"</span><span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">target</span> <span class="o">/</span> <span class="n">target</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">target</span> <span class="o">/</span> <span class="n">implied_group_shares</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">e</span> <span class="o">*</span> <span class="n">scale</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">tilt_to_gini</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">gini_to_match</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Tilt the matrix, e * exp(a * e), so that its Gini coefficient over the</span>
+<span class="sd">    population equals the target. The tilt keeps every profile's shape</span>
+<span class="sd">    over age and stretches or compresses the gaps between groups.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        e (Numpy array): ability matrix, size (S, J)</span>
+<span class="sd">        age_wgts (Numpy array): joint population distribution, size (S, J)</span>
+<span class="sd">        lambdas (Numpy array): population share of each group, length J</span>
+<span class="sd">        gini_to_match (float): target Gini coefficient, in (0, 1) or in</span>
+<span class="sd">            percent</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        e_tilted (Numpy array): tilted ability matrix, size (S, J)</span>
+
+<span class="sd">    """</span>
+    <span class="n">gini</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">gini_to_match</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gini</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">gini</span> <span class="o">=</span> <span class="n">gini</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">gini</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"gini_to_match must be between 0 and 1"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">gap</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">implied_gini</span><span class="p">(</span><span class="n">e</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">e</span><span class="p">),</span> <span class="n">age_wgts</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">)</span> <span class="o">-</span> <span class="n">gini</span>
+
+    <span class="c1"># the tilt is measured against the largest ability so that the bracket</span>
+    <span class="c1"># means the same thing whatever the scale of e; widen it until the</span>
+    <span class="c1"># target is straddled</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">width</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">):</span>
+        <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="o">-</span><span class="n">width</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span> <span class="n">width</span> <span class="o">*</span> <span class="n">scale</span>
+        <span class="k">if</span> <span class="n">gap</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">gap</span><span class="p">(</span><span class="n">hi</span><span class="p">):</span>
+            <span class="n">sol</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">root_scalar</span><span class="p">(</span>
+                <span class="n">gap</span><span class="p">,</span> <span class="n">bracket</span><span class="o">=</span><span class="p">[</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s2">"bisect"</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="mf">1e-12</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">e</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">root</span> <span class="o">*</span> <span class="n">e</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cannot tilt the ability matrix to a Gini of </span><span class="si">{</span><span class="n">gini</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="get_e_interp">
 <a class="viewcode-back" href="../../content/api/income.html#ogeth.income.get_e_interp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_e_interp</span><span class="p">(</span>
-    <span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">,</span> <span class="n">gini_to_match</span><span class="o">=</span><span class="mf">31.1</span><span class="p">,</span> <span class="n">plot_path</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">E</span><span class="p">,</span>
+    <span class="n">S</span><span class="p">,</span>
+    <span class="n">J</span><span class="p">,</span>
+    <span class="n">lambdas</span><span class="p">,</span>
+    <span class="n">age_wgts</span><span class="p">,</span>
+    <span class="n">group_shares</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">gini_to_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    This function takes the calibrated lifetime earnings profiles</span>
-<span class="sd">    (abilities, e matrix) from OG-USA and then adjusts the shape of those</span>
-<span class="sd">    profiles to match the Gini coefficient for another economy. The</span>
-<span class="sd">    Gini coefficient to match is given in the argument gini_to_match.</span>
-<span class="sd">    Note that the calibrated OG-USA e matrix is of size (80, 10), where</span>
-<span class="sd">    80 is the number of ages and 10 is the number of ability types.</span>
-<span class="sd">    Users of this function specify their own number of age groups (S)</span>
-<span class="sd">    and ability types (J). The function will map the fitted functions</span>
-<span class="sd">    into these dimensions so long as the percentiles of the ability types</span>
-<span class="sd">    given in lambdas is not more refined at the top end than those in</span>
-<span class="sd">    OG-USA (which identifies up to the top 0.1%).</span>
+<span class="sd">    Build the OG-ETH ability matrix from the OG-USA profiles.</span>
+
+<span class="sd">    The OG-USA matrix is interpolated onto the model's age and group grid</span>
+<span class="sd">    and multiplied by the NTA-based age factor. The gaps between the</span>
+<span class="sd">    lifetime-income groups are then set in one of two ways: to reproduce</span>
+<span class="sd">    target income shares by group (by default the WID pre-tax income</span>
+<span class="sd">    shares for Ethiopia), or to reproduce a single target Gini</span>
+<span class="sd">    coefficient. The result is scaled so that the population-weighted</span>
+<span class="sd">    average ability is one.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        E (int): the age agents become economically active</span>
-<span class="sd">        S (int): number of ages to interpolate. This method assumes that</span>
-<span class="sd">            ages are evenly spaced between the beginning of age E</span>
-<span class="sd">            up to E+S, &gt;= 3</span>
-<span class="sd">        J (int): number of ability types to interpolate</span>
-<span class="sd">        lambdas (Numpy array): distribution of population in each</span>
-<span class="sd">            ability group, length J</span>
-<span class="sd">        age_wgts (Numpy array): distribution of population in each age</span>
-<span class="sd">            group, length S</span>
-<span class="sd">        gini_to_match (float): Gini coefficient to match, default is</span>
-<span class="sd">            31.1, the Gini coefficient for ETH in 2021</span>
-<span class="sd">            https://data.worldbank.org/indicator/SI.POV.GINI?locations=ET</span>
-<span class="sd">        plot (bool): if True, creates plots of emat_orig and the new</span>
-<span class="sd">            interpolated emat_new</span>
+<span class="sd">        E (int): age at which agents become economically active</span>
+<span class="sd">        S (int): number of model periods in a lifetime</span>
+<span class="sd">        J (int): number of lifetime-income groups</span>
+<span class="sd">        lambdas (Numpy array): population share of each group, length J</span>
+<span class="sd">        age_wgts (Numpy array): steady-state population distribution,</span>
+<span class="sd">            either the joint distribution over age and group, size (S, J),</span>
+<span class="sd">            or the age distribution alone, length S</span>
+<span class="sd">        group_shares (Numpy array): target income share of each group,</span>
+<span class="sd">            length J; None uses the WID shares for Ethiopia</span>
+<span class="sd">        gini_to_match (float): target Gini coefficient; when given, the</span>
+<span class="sd">            groups are tilted to this Gini instead of to income shares</span>
+<span class="sd">        plot_path (str): directory to save a plot of the profiles to</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        emat_new_scaled (Numpy array): interpolated ability matrix scaled</span>
-<span class="sd">            so that population-weighted average is 1, size SxJ</span>
+<span class="sd">        emat_new_scaled (Numpy array): ability matrix scaled so that the</span>
+<span class="sd">            population-weighted average is 1, size (S, J)</span>
 
 <span class="sd">    """</span>
+    <span class="n">lambdas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lambdas</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">age_wgts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">age_wgts</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">lambdas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">J</span>
-    <span class="k">assert</span> <span class="n">age_wgts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">S</span>
-    <span class="c1"># Load USA e matrix as a baseline</span>
-    <span class="n">usa_params</span> <span class="o">=</span> <span class="n">Specifications</span><span class="p">()</span>
-    <span class="n">usa_params</span><span class="o">.</span><span class="n">update_specifications</span><span class="p">(</span>
-        <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-            <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span>
-                <span class="s2">"https://raw.githubusercontent.com/PSLmodels/OG-USA/master/ogusa/ogusa_default_parameters.json"</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Define a function that will find the "a" in the equation:</span>
-    <span class="c1"># e_Y = e_USA * exp(a * e_USA)</span>
-    <span class="c1"># such that the e_Y produces a gini coefficient in the model that</span>
-    <span class="c1"># gives the same ratio between the model implied Gini's in the USA</span>
-    <span class="c1"># and the target country and the empirical Gini's in the USA and given</span>
-    <span class="c1"># by gin_to_match for the target country</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span>
-        <span class="n">a</span><span class="p">,</span>
-        <span class="n">emat_orig</span><span class="p">,</span>
-        <span class="n">age_wgts</span><span class="p">,</span>
-        <span class="n">abil_wgts</span><span class="p">,</span>
-        <span class="n">gini_to_match</span><span class="p">,</span>
-        <span class="n">gini_usa_data</span><span class="p">,</span>
-        <span class="n">gini_usa_model</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="n">gini_target_model</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Inequality</span><span class="p">(</span>
-            <span class="n">emat_orig</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">emat_orig</span><span class="p">),</span>
-            <span class="n">age_wgts</span><span class="p">,</span>
-            <span class="n">abil_wgts</span><span class="p">,</span>
-            <span class="nb">len</span><span class="p">(</span><span class="n">age_wgts</span><span class="p">),</span>
-            <span class="nb">len</span><span class="p">(</span><span class="n">abil_wgts</span><span class="p">),</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">gini</span><span class="p">()</span>
-        <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="n">gini_to_match</span> <span class="o">/</span> <span class="n">gini_usa_data</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span>
-            <span class="n">gini_target_model</span> <span class="o">/</span> <span class="n">gini_usa_model</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">error</span>
-
-    <span class="c1"># Note, USA gini in the World Bank data is 41.5</span>
-    <span class="c1"># See https://data.worldbank.org/indicator/SI.POV.GINI</span>
-    <span class="n">gini_usa_data</span> <span class="o">=</span> <span class="mf">41.5</span>
-    <span class="c1"># Find the model implied Gini for the USA</span>
-    <span class="n">gini_usa_model</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Inequality</span><span class="p">(</span>
-        <span class="n">usa_params</span><span class="o">.</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
-        <span class="n">usa_params</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">,</span>
-        <span class="n">usa_params</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span>
-        <span class="n">usa_params</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
-        <span class="n">usa_params</span><span class="o">.</span><span class="n">J</span><span class="p">,</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">gini</span><span class="p">()</span>
-
-    <span class="n">x</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">root_scalar</span><span class="p">(</span>
-        <span class="n">f</span><span class="p">,</span>
-        <span class="n">args</span><span class="o">=</span><span class="p">(</span>
-            <span class="n">usa_params</span><span class="o">.</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
-            <span class="n">usa_params</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">,</span>
-            <span class="n">usa_params</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span>
-            <span class="n">gini_to_match</span><span class="p">,</span>
-            <span class="n">gini_usa_data</span><span class="p">,</span>
-            <span class="n">gini_usa_model</span><span class="p">,</span>
-        <span class="p">),</span>
-        <span class="n">method</span><span class="o">=</span><span class="s2">"bisect"</span><span class="p">,</span>
-        <span class="n">bracket</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-        <span class="n">xtol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">root</span>
-    <span class="n">e_new</span> <span class="o">=</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
-    <span class="n">emat_new_scaled</span> <span class="o">=</span> <span class="n">e_new</span> <span class="o">/</span> <span class="p">(</span><span class="n">e_new</span> <span class="o">*</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="c1"># Now interpolate for the cases where S and/or J not the same in the</span>
-    <span class="c1"># country parameterization as in the default USA parameterization</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">S</span> <span class="o">==</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">S</span>
-        <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span>
-            <span class="n">usa_params</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span>
-            <span class="n">lambdas</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="ow">is</span> <span class="kc">True</span>
-    <span class="p">):</span>
-        <span class="k">pass</span>  <span class="c1"># will return the e_new_scaled found above since dims the same</span>
+    <span class="k">if</span> <span class="n">age_wgts</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">age_wgts</span> <span class="o">=</span> <span class="n">age_wgts</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">lambdas</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">age_wgts</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gini_to_match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">group_shares</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"pass either group_shares or gini_to_match, not both"</span><span class="p">)</span>
+    <span class="n">e_usa</span><span class="p">,</span> <span class="n">lambdas_usa</span> <span class="o">=</span> <span class="n">load_ogusa_e</span><span class="p">()</span>
+    <span class="n">e_base</span> <span class="o">=</span> <span class="n">interpolate_usa_e</span><span class="p">(</span><span class="n">e_usa</span><span class="p">,</span> <span class="n">lambdas_usa</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">)</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="n">model_ages</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+    <span class="n">e_age</span> <span class="o">=</span> <span class="n">e_base</span> <span class="o">*</span> <span class="n">earnings_age_factor</span><span class="p">(</span><span class="n">ages</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gini_to_match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">e_new</span> <span class="o">=</span> <span class="n">tilt_to_gini</span><span class="p">(</span><span class="n">e_age</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">gini_to_match</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># generate vector of mid points for the Filipino ability groups</span>
-        <span class="n">abil_midp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-        <span class="n">pct_lb</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="p">):</span>
-            <span class="n">abil_midp</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">pct_lb</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">lambdas</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-            <span class="n">pct_lb</span> <span class="o">+=</span> <span class="n">lambdas</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-        <span class="c1"># generate vector of mid points for the USA ability groups</span>
-        <span class="n">M</span> <span class="o">=</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">lambdas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">emat_j_midp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
-        <span class="n">pct_lb</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
-            <span class="n">emat_j_midp</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">pct_lb</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">lambdas</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
-            <span class="n">pct_lb</span> <span class="o">+=</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">lambdas</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
-
-        <span class="c1"># Make sure that values in abil_midp are within interpolating</span>
-        <span class="c1"># bounds</span>
-        <span class="k">if</span> <span class="n">abil_midp</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">emat_j_midp</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="ow">or</span> <span class="n">abil_midp</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="p">(</span>
-            <span class="mi">1</span> <span class="o">-</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">lambdas</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="p">):</span>
-            <span class="n">err</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">"One or more entries in abilities vector (lambdas) "</span>
-                <span class="s2">"is outside the allowable bounds for interpolation."</span>
-            <span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-        <span class="n">usa_step</span> <span class="o">=</span> <span class="mi">80</span> <span class="o">/</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">S</span>
-        <span class="n">emat_s_midp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
-            <span class="n">usa_params</span><span class="o">.</span><span class="n">E</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">usa_step</span><span class="p">,</span>
-            <span class="n">usa_params</span><span class="o">.</span><span class="n">E</span> <span class="o">+</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">S</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">usa_step</span><span class="p">,</span>
-            <span class="n">usa_params</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
+        <span class="k">if</span> <span class="n">group_shares</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">group_shares</span> <span class="o">=</span> <span class="n">wid_group_shares</span><span class="p">(</span><span class="s2">"ETH"</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">)</span>
+        <span class="n">e_new</span> <span class="o">=</span> <span class="n">scale_groups_to_shares</span><span class="p">(</span><span class="n">e_age</span><span class="p">,</span> <span class="n">age_wgts</span><span class="p">,</span> <span class="n">group_shares</span><span class="p">)</span>
+    <span class="n">emat_new_scaled</span> <span class="o">=</span> <span class="n">e_new</span> <span class="o">/</span> <span class="p">(</span><span class="n">e_new</span> <span class="o">*</span> <span class="n">age_wgts</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">plot_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pp</span><span class="o">.</span><span class="n">plot_income_data</span><span class="p">(</span>
+            <span class="n">ages</span><span class="p">,</span>
+            <span class="n">group_midpoints</span><span class="p">(</span><span class="n">lambdas</span><span class="p">),</span>
+            <span class="n">lambdas</span><span class="p">,</span>
+            <span class="n">emat_new_scaled</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">plot_path</span><span class="p">,</span>
+            <span class="n">filesuffix</span><span class="o">=</span><span class="s2">"_eth"</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">emat_j_mesh</span><span class="p">,</span> <span class="n">emat_s_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">emat_j_midp</span><span class="p">,</span> <span class="n">emat_s_midp</span><span class="p">)</span>
-        <span class="n">newstep</span> <span class="o">=</span> <span class="mi">80</span> <span class="o">/</span> <span class="n">S</span>
-        <span class="n">new_s_midp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">E</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">newstep</span><span class="p">,</span> <span class="n">E</span> <span class="o">+</span> <span class="n">S</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">newstep</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
-        <span class="n">new_j_mesh</span><span class="p">,</span> <span class="n">new_s_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">abil_midp</span><span class="p">,</span> <span class="n">new_s_midp</span><span class="p">)</span>
-        <span class="n">newcoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="n">emat_s_mesh</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">usa_params</span><span class="o">.</span><span class="n">S</span> <span class="o">*</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">J</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
-                <span class="n">emat_j_mesh</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">usa_params</span><span class="o">.</span><span class="n">S</span> <span class="o">*</span> <span class="n">usa_params</span><span class="o">.</span><span class="n">J</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-        <span class="n">emat_new</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
-            <span class="n">newcoords</span><span class="p">,</span>
-            <span class="n">emat_new_scaled</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
-            <span class="p">(</span><span class="n">new_s_mesh</span><span class="p">,</span> <span class="n">new_j_mesh</span><span class="p">),</span>
-            <span class="n">method</span><span class="o">=</span><span class="s2">"linear"</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">emat_new_scaled</span> <span class="o">=</span> <span class="n">emat_new</span> <span class="o">/</span> <span class="p">(</span><span class="n">emat_new</span> <span class="o">*</span> <span class="n">age_wgts</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">plot_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"path"</span><span class="p">:</span> <span class="n">plot_path</span><span class="p">,</span> <span class="s2">"filesuffix"</span><span class="p">:</span> <span class="s2">"_intrp_scaled"</span><span class="p">}</span>
-            <span class="n">pp</span><span class="o">.</span><span class="n">plot_income_data</span><span class="p">(</span>
-                <span class="n">new_s_midp</span><span class="p">,</span>
-                <span class="n">abil_midp</span><span class="p">,</span>
-                <span class="n">abil_wgts</span><span class="p">,</span>  <span class="c1"># noqa: F821</span>
-                <span class="n">emat_new_scaled</span><span class="p">,</span>
-                <span class="n">plot_path</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-
     <span class="k">return</span> <span class="n">emat_new_scaled</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">write_json_parameters</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="n">updates</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Replace parameters in a packaged JSON file, leaving every other entry</span>
+<span class="sd">    exactly as it is.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        json_path (str): path to the JSON file</span>
+<span class="sd">        updates (dict): parameter name -&gt; JSON-serializable value</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    """</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">updates</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Regenerate the packaged ability matrix from the packaged demographics</span>
+<span class="sd">    and print how it compares with the WID shares.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ogcore.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Specifications</span>
+
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUR_PATH</span><span class="p">,</span> <span class="s2">"ogeth_default_parameters.json"</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Specifications</span><span class="p">(</span><span class="n">baseline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">update_specifications</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+    <span class="n">lambdas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">get_e_interp</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">J</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">)</span>
+    <span class="n">shares</span> <span class="o">=</span> <span class="n">implied_group_shares</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">)</span>
+    <span class="n">wid_eth</span> <span class="o">=</span> <span class="n">wid_group_shares</span><span class="p">(</span><span class="s2">"ETH"</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">)</span>
+    <span class="n">wid_us</span> <span class="o">=</span> <span class="n">wid_group_shares</span><span class="p">(</span><span class="s2">"US"</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"group      lambda   e mean   model share   WID ETH   WID US"</span><span class="p">)</span>
+    <span class="n">means</span> <span class="o">=</span> <span class="n">shares</span> <span class="o">/</span> <span class="n">lambdas</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">J</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">j</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">:</span><span class="s2">&gt;5</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">lambdas</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s2">&gt;9.3f</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">means</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}</span><span class="s2">  "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shares</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s2">&gt;12.3f</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">wid_eth</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s2">&gt;8.3f</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">wid_us</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+    <span class="n">gini</span> <span class="o">=</span> <span class="n">implied_gini</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"model Gini </span><span class="si">{</span><span class="n">gini</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">; WID Ethiopia </span><span class="si">{</span><span class="n">wid_gini</span><span class="p">(</span><span class="s1">'ETH'</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, "</span>
+        <span class="sa">f</span><span class="s2">"WID US </span><span class="si">{</span><span class="n">wid_gini</span><span class="p">(</span><span class="s1">'US'</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span>
+    <span class="p">)</span>
+    <span class="n">e_gini</span> <span class="o">=</span> <span class="n">get_e_interp</span><span class="p">(</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">J</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">,</span> <span class="n">gini_to_match</span><span class="o">=</span><span class="n">wid_gini</span><span class="p">(</span><span class="s2">"ETH"</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">"for comparison, matching the WID Gini alone gives group means "</span>
+        <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">m</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">implied_group_shares</span><span class="p">(</span><span class="n">e_gini</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">)</span> <span class="o">/</span> <span class="n">lambdas</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">write_json_parameters</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="p">{</span><span class="s2">"e"</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">tolist</span><span class="p">()})</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"wrote e to </span><span class="si">{</span><span class="n">json_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
                 </article>

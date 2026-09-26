@@ -418,13 +418,35 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
+<span class="c1"># Solver settings used by the example scripts: the damping of OG-Core's</span>
+<span class="c1"># outer loops (nu, the weight on the new iterate) and Anderson acceleration</span>
+<span class="c1"># of the time-path outer loop (PSLmodels/OG-Core master; the example applies</span>
+<span class="c1"># it only where the installed OG-Core has the parameters). With discount</span>
+<span class="c1"># factors that differ by lifetime-income group the plain damped iteration</span>
+<span class="c1"># converges slowly, and a smaller step with acceleration is both faster and</span>
+<span class="c1"># more robust.</span>
+<span class="n">NU</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">TPI_ANDERSON_M</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">TPI_ANDERSON_BETA</span> <span class="o">=</span> <span class="mf">1.0</span>
+
 <span class="c1"># Public capital elasticity; see firms.md.</span>
 <span class="n">GAMMA_G_LIC</span> <span class="o">=</span> <span class="mf">0.1</span>
 
-<span class="c1"># Start year for the g_y_annual average-growth calculation; matches the</span>
-<span class="c1"># documented window in macro.md (average annual GDP-per-capita growth</span>
-<span class="c1"># 2006-2024 = 6.0%).</span>
-<span class="n">G_Y_START_YEAR</span> <span class="o">=</span> <span class="mi">2006</span>
+<span class="c1"># Window for the g_y_annual average-growth calculation: the mean of the</span>
+<span class="c1"># year-over-year GDP-per-capita growth rates for G_Y_START_YEAR through</span>
+<span class="c1"># G_Y_END_YEAR (inclusive). We use the post-2015 decade rather than the</span>
+<span class="c1"># full available history: the 2004-2015 state-led investment boom (which</span>
+<span class="c1"># lifted the 2006-2024 average to ~6.0%) is explicitly not expected to</span>
+<span class="c1"># repeat (IMF Country Report 26/20 DSA assumes long-run growth "slower</span>
+<span class="c1"># than historical rates of around 10 percent"), so this window gives a</span>
+<span class="c1"># balanced-growth-path productivity rate that averages over the post-boom</span>
+<span class="c1"># normalization, the 2020-2022 conflict/COVID dip, and the recent</span>
+<span class="c1"># gold-driven recovery. Average annual GDP-per-capita growth for the ten</span>
+<span class="c1"># years 2016-2025 = 4.7% (see macro.md). Computing the growth rate for</span>
+<span class="c1"># G_Y_START_YEAR requires the previous year's level, so the level filter</span>
+<span class="c1"># below keeps data back to G_Y_START_YEAR - 1.</span>
+<span class="n">G_Y_START_YEAR</span> <span class="o">=</span> <span class="mi">2016</span>
+<span class="n">G_Y_END_YEAR</span> <span class="o">=</span> <span class="mi">2025</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_wb_data</span><span class="p">(</span><span class="n">indicators</span><span class="p">,</span> <span class="n">country_iso</span><span class="p">,</span> <span class="n">start_year</span><span class="p">,</span> <span class="n">end_year</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
@@ -627,7 +649,7 @@
 <a class="viewcode-back" href="../../content/api/macro_params.html#ogeth.macro_params.get_macro_params">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_macro_params</span><span class="p">(</span>
     <span class="n">data_start_date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1947</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="n">data_end_date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+    <span class="n">data_end_date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="n">country_iso</span><span class="o">=</span><span class="s2">"ETH"</span><span class="p">,</span>
     <span class="n">update_from_api</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">imf_data_year</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -678,13 +700,21 @@
                 <span class="n">source</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="c1"># Compute annual GDP-per-capita growth (g_y_annual) from the</span>
-            <span class="c1"># World Bank WDI series, averaging pct_change from</span>
-            <span class="c1"># G_Y_START_YEAR onward to match the documented window (see</span>
+            <span class="c1"># World Bank WDI series, averaging the year-over-year growth</span>
+            <span class="c1"># rates over the [G_Y_START_YEAR, G_Y_END_YEAR] window (see</span>
             <span class="c1"># macro.md). Debt parameters are not derived here (see note</span>
             <span class="c1"># above).</span>
             <span class="k">if</span> <span class="s2">"GDP per capita (constant 2015 US$)"</span> <span class="ow">in</span> <span class="n">wb_data_a</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                 <span class="n">gdp_pc</span> <span class="o">=</span> <span class="n">wb_data_a</span><span class="p">[</span><span class="s2">"GDP per capita (constant 2015 US$)"</span><span class="p">]</span>
-                <span class="n">gdp_pc</span> <span class="o">=</span> <span class="n">gdp_pc</span><span class="p">[</span><span class="n">gdp_pc</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">G_Y_START_YEAR</span><span class="p">]</span>
+                <span class="n">years</span> <span class="o">=</span> <span class="n">gdp_pc</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="c1"># Keep one year before G_Y_START_YEAR so the growth rate for</span>
+                <span class="c1"># G_Y_START_YEAR itself can be formed; pct_change(-1) on the</span>
+                <span class="c1"># descending series then yields the growth rates for</span>
+                <span class="c1"># G_Y_START_YEAR..G_Y_END_YEAR (the anchor year becomes NaN</span>
+                <span class="c1"># and is dropped by mean()).</span>
+                <span class="n">gdp_pc</span> <span class="o">=</span> <span class="n">gdp_pc</span><span class="p">[</span>
+                    <span class="p">(</span><span class="n">years</span> <span class="o">&gt;=</span> <span class="n">G_Y_START_YEAR</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">years</span> <span class="o">&lt;=</span> <span class="n">G_Y_END_YEAR</span><span class="p">)</span>
+                <span class="p">]</span>
                 <span class="n">g_y_series</span> <span class="o">=</span> <span class="n">gdp_pc</span><span class="o">.</span><span class="n">pct_change</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
                 <span class="c1"># If all values are NaN, return None</span>
@@ -764,61 +794,1273 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">"Not updating from ILOSTAT API"</span><span class="p">)</span>
 
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Estimate r_gov_shift and r_gov_scale (Li, Magud, Werner 2021 method).</span>
-<span class="sd">    """</span>
-
     <span class="c1"># alpha_T and alpha_G are NOT pulled from the IMF API for OG-ETH: the</span>
     <span class="c1"># IMF SDMX endpoint returns only 2002-vintage data for Ethiopia, and</span>
     <span class="c1"># the documented sources differ (alpha_G -&gt; World Bank NE.CON.GOVT.ZS;</span>
-    <span class="c1"># alpha_T -&gt; IMF GFS + IMF Country Report 25/188, hand-combined). Both</span>
+    <span class="c1"># alpha_T -&gt; IMF GFS + IMF Country Report 26/20, hand-combined). Both</span>
     <span class="c1"># stay at the committed values in macro.md. _get_imf_macro_params is</span>
     <span class="c1"># retained (tested independently) for reuse if wired to the right data.</span>
-    <span class="k">if</span> <span class="n">update_from_api</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">""""</span>
-<span class="sd">        Estimate the discount on sovereign yields relative to private debt</span>
-<span class="sd">        Follow the methodology in Li, Magud, Werner, Witte (2021)</span>
-<span class="sd">        available at:</span>
-<span class="sd">        https://www.imf.org/en/Publications/WP/Issues/2021/06/04/The-Long-Run-Impact-of-Sovereign-Yields-on-Corporate-Yields-in-Emerging-Markets-50224</span>
-<span class="sd">        discussion is here: https://github.com/EAPD-DRB/OG-ZAF/issues/22</span>
-<span class="sd">        Steps:</span>
-<span class="sd">        1) Generate modelled corporate yields (corp_yhat) for a range of</span>
-<span class="sd">        sovereign yields (sov_y)  using the estimated equation in col 2 of</span>
-<span class="sd">        table 8 (and figure 3). 2) Estimate the OLS using sovereign yields</span>
-<span class="sd">        as the dependent variable</span>
-<span class="sd">        """</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
 
-            <span class="c1"># # estimate r_gov_shift and r_gov_scale</span>
-            <span class="n">sov_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span>
-            <span class="n">corp_yhat</span> <span class="o">=</span> <span class="mf">8.199</span> <span class="o">-</span> <span class="p">(</span><span class="mf">2.975</span> <span class="o">*</span> <span class="n">sov_y</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.478</span> <span class="o">*</span> <span class="n">sov_y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">corp_yhat</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">corp_yhat</span><span class="p">)</span>
-            <span class="n">mod</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span>
-                <span class="n">sov_y</span><span class="p">,</span>
-                <span class="n">corp_yhat</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">res</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-            <span class="c1"># First term is the constant and needs to be divided by 100 to have</span>
-            <span class="c1"># the correct unit. Second term is the coefficient</span>
-            <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">"r_gov_shift"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">res</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span><span class="p">]</span>
-            <span class="n">macro_parameters</span><span class="p">[</span><span class="s2">"r_gov_scale"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">"r_gov_shift computed (LMW 2021 method): "</span>
-                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">'r_gov_shift'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
-            <span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">"r_gov_scale computed (LMW 2021 method): "</span>
-                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">macro_parameters</span><span class="p">[</span><span class="s1">'r_gov_scale'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
-            <span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">"Failed to compute r_gov_shift, r_gov_scale"</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">"Will not update r_gov_shift, r_gov_scale"</span><span class="p">)</span>
+    <span class="c1"># The government-debt interest-rate parameters (r_gov_scale, r_gov_shift,</span>
+    <span class="c1"># r_gov_DY, r_gov_DY2) are NOT returned from the live path. r_gov_scale</span>
+    <span class="c1"># and the base r_gov_shift come from inverting the Li, Magud, Werner,</span>
+    <span class="c1"># Witte (2021) sovereign-vs-corporate yield relationship (a deterministic</span>
+    <span class="c1"># calculation reproduced by estimate_r_gov below), but the committed</span>
+    <span class="c1"># r_gov_shift is then re-centered for the debt-elastic premium</span>
+    <span class="c1"># (r_gov_DY, r_gov_DY2) so the premium is exactly zero at debt_ratio_ss</span>
+    <span class="c1"># (see macro.md). Returning the raw LMW shift here would un-center that</span>
+    <span class="c1"># premium and silently move the steady state, so all four stay frozen at</span>
+    <span class="c1"># the documented values in ogeth_default_parameters.json.</span>
+    <span class="k">if</span> <span class="n">update_from_api</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">"Not updating r_gov_* (frozen, debt-elastic premium re-centered; "</span>
+            <span class="s2">"see macro.md and estimate_r_gov)"</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">"Not computing r_gov_shift, r_gov_scale"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">macro_parameters</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">estimate_r_gov</span><span class="p">(</span><span class="n">debt_ratio_ss</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span> <span class="n">r_gov_DY2</span><span class="o">=</span><span class="mf">0.04</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Reproduce the frozen government-debt interest-rate parameters.</span>
+
+<span class="sd">    The base level shift and scale invert the sovereign-vs-corporate yield</span>
+<span class="sd">    relationship estimated by Li, Magud, Werner, Witte (2021),</span>
+<span class="sd">    https://www.imf.org/en/Publications/WP/Issues/2021/06/04/The-Long-Run-Impact-of-Sovereign-Yields-on-Corporate-Yields-in-Emerging-Markets-50224</span>
+<span class="sd">    (discussion at https://github.com/EAPD-DRB/OG-ZAF/issues/22): generate</span>
+<span class="sd">    modelled corporate yields for sovereign yields of 2-12% using Table 8</span>
+<span class="sd">    column 2, then OLS-regress the sovereign yield on the fitted corporate</span>
+<span class="sd">    yield.</span>
+
+<span class="sd">    A convex debt-elastic premium ``r_gov_DY2 * (D/Y - debt_ratio_ss)**2`` is</span>
+<span class="sd">    then added and re-centered on ``debt_ratio_ss`` so it is exactly zero at</span>
+<span class="sd">    the steady-state debt ratio (leaving the steady state unchanged) and only</span>
+<span class="sd">    prices the transition-path debt overshoot. Expanding the square gives</span>
+<span class="sd">    ``r_gov_DY = -2 * r_gov_DY2 * debt_ratio_ss`` and shifts the level term by</span>
+<span class="sd">    ``r_gov_DY2 * debt_ratio_ss**2`` (OG-Core subtracts ``r_gov_shift``, so the</span>
+<span class="sd">    constant is folded into the shift). See macro.md for the full derivation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        debt_ratio_ss (float): steady-state debt-to-GDP ratio the premium is</span>
+<span class="sd">            centered on</span>
+<span class="sd">        r_gov_DY2 (float): curvature of the debt-elastic premium</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: {r_gov_scale, r_gov_shift, r_gov_DY, r_gov_DY2}</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+    <span class="n">sov_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span>
+    <span class="n">corp_yhat</span> <span class="o">=</span> <span class="mf">8.199</span> <span class="o">-</span> <span class="p">(</span><span class="mf">2.975</span> <span class="o">*</span> <span class="n">sov_y</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.478</span> <span class="o">*</span> <span class="n">sov_y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">corp_yhat</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">corp_yhat</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="n">sov_y</span><span class="p">,</span> <span class="n">corp_yhat</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+    <span class="c1"># First term is the constant (÷100 for the correct unit); second is slope.</span>
+    <span class="n">r_gov_scale</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">r_gov_shift_base</span> <span class="o">=</span> <span class="o">-</span><span class="n">res</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">r_gov_shift</span> <span class="o">=</span> <span class="n">r_gov_shift_base</span> <span class="o">-</span> <span class="n">r_gov_DY2</span> <span class="o">*</span> <span class="n">debt_ratio_ss</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">r_gov_DY</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r_gov_DY2</span> <span class="o">*</span> <span class="n">debt_ratio_ss</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"r_gov_scale"</span><span class="p">:</span> <span class="p">[</span><span class="n">r_gov_scale</span><span class="p">],</span>
+        <span class="s2">"r_gov_shift"</span><span class="p">:</span> <span class="p">[</span><span class="n">r_gov_shift</span><span class="p">],</span>
+        <span class="s2">"r_gov_DY"</span><span class="p">:</span> <span class="n">r_gov_DY</span><span class="p">,</span>
+        <span class="s2">"r_gov_DY2"</span><span class="p">:</span> <span class="n">r_gov_DY2</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Remittances</span>
+<span class="c1">#</span>
+<span class="c1"># Remittances enter OG-Core as an exogenous share of GDP (alpha_RM_1 in the</span>
+<span class="c1"># first period, alpha_RM_T in the long run) distributed across households by</span>
+<span class="c1"># eta_RM. Two of the shipped values are derived from the packaged</span>
+<span class="c1"># demographics rather than hand-set, so they are rebuilt whenever the</span>
+<span class="c1"># demographics are (update_baseline.py):</span>
+<span class="c1">#</span>
+<span class="c1"># * g_RM -- aggregates.get_RM advances detrended remittances by the factor</span>
+<span class="c1">#   (1 + g_RM[t]) / (exp(g_y) * (1 + g_n[t-1])) between the first period and</span>
+<span class="c1">#   tG1, independently of that period's output, so remittances keep pace with</span>
+<span class="c1">#   trend GDP (a constant share on the balanced growth path) only when that</span>
+<span class="c1">#   factor is one. g_n moves along the transition, so the growth rate that</span>
+<span class="c1">#   does this is a path, not a scalar (flat_share_g_RM). The shipped path</span>
+<span class="c1">#   (program_share_g_RM) scales that factor by the ratio of consecutive</span>
+<span class="c1">#   program-year shares, so RM/Y follows the IMF projection from 5.6 to 4.1</span>
+<span class="c1">#   percent of GDP over the program and then holds; alpha_RM_T is the</span>
+<span class="c1">#   program endpoint (remittance_level_params). Along the transition RM/Y</span>
+<span class="c1">#   then moves inversely with output's deviation from trend.</span>
+<span class="c1"># * eta_RM -- the share of aggregate remittances each household receives,</span>
+<span class="c1">#   shaped (S, J). OG-Core's default hands every lifetime-income group</span>
+<span class="c1">#   exactly its population share; remittance_eta instead maps a data</span>
+<span class="c1">#   distribution of remittance value across income quintiles onto the</span>
+<span class="c1">#   model's J groups and spreads it per capita across ages within a group.</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="c1"># Share of total remittance VALUE received by each household income</span>
+<span class="c1"># quintile, poorest to richest. World Bank / Bendixen &amp; Amandi, "Remittances</span>
+<span class="c1"># to Ethiopia" (Future of African Remittances national survey, 2010; 2,412</span>
+<span class="c1"># adults): recipients' monthly household income was 9% below ETB 1,000, 47%</span>
+<span class="c1"># at ETB 1,000-3,500 and 37% above ETB 3,500 (7% no answer). Against 2010</span>
+<span class="c1"># GDP per capita of ETB 4,262 (about ETB 1,600 a month for a 4.6-person</span>
+<span class="c1"># household) those brackets map to the bottom two, middle two and top</span>
+<span class="c1"># quintile; renormalized over respondents and split evenly within each</span>
+<span class="c1"># pair. See docs/book/content/calibration/macro.md (Remittances).</span>
+<span class="n">RM_QUINTILE_VALUE_SHARES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mi">9</span> <span class="o">/</span> <span class="mi">93</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="mi">9</span> <span class="o">/</span> <span class="mi">93</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="mi">47</span> <span class="o">/</span> <span class="mi">93</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="mi">47</span> <span class="o">/</span> <span class="mi">93</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="mi">37</span> <span class="o">/</span> <span class="mi">93</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">flat_share_g_RM</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Remittance growth path that keeps aggregate remittances growing with</span>
+<span class="sd">    trend GDP, so their share is constant on the balanced growth path.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        g_y (scalar): model-period productivity growth rate</span>
+<span class="sd">        g_n (array_like): population growth path, length T + S</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        g_RM (Numpy array): growth rate of remittances, length T + S, such</span>
+<span class="sd">            that ``(1 + g_RM[t]) / (exp(g_y) * (1 + g_n[t - 1])) == 1`` for</span>
+<span class="sd">            every t &gt;= 1 (the factor ``get_RM`` applies)</span>
+<span class="sd">    """</span>
+    <span class="n">g_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">g_n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">g_RM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">g_y</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">g_n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mf">1.0</span>
+    <span class="c1"># get_RM never reads g_RM[0]; keep it consistent with period 0 anyway</span>
+    <span class="n">g_RM</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">g_y</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">g_n</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mf">1.0</span>
+    <span class="k">return</span> <span class="n">g_RM</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">program_remittance_shares</span><span class="p">(</span><span class="n">shares</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Remittance share of GDP in each program year as the model follows it: a</span>
+<span class="sd">    geometric glide from the measured first-year share to the program's</span>
+<span class="sd">    last-year share.</span>
+
+<span class="sd">    The IMF's year-by-year projection (5.6, 6.0, 5.9, 5.3, 4.8, 4.6, 4.1</span>
+<span class="sd">    percent of GDP) peaks in FY2025/26 and then falls by up to 0.6 points</span>
+<span class="sd">    a year; following it exactly would need remittance growth rates of</span>
+<span class="sd">    +16 and -4 percent in consecutive periods, outside the [-2%, 15%]</span>
+<span class="sd">    bounds OG-Core places on ``g_RM``. The glide keeps the two values the</span>
+<span class="sd">    calibration anchors on -- the measured level and the program endpoint</span>
+<span class="sd">    -- and spreads the decline evenly between them.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shares (array_like): program projection of the remittance share of</span>
+<span class="sd">            GDP, percent; defaults to ``IMF_PRIVATE_TRANSFERS``</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Numpy array: smoothed shares, percent, same length as ``shares``</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">shares</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">shares</span> <span class="o">=</span> <span class="n">IMF_PRIVATE_TRANSFERS</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">shares</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">program_share_g_RM</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">,</span> <span class="n">shares</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Remittance growth path that moves the remittance share of trend GDP</span>
+<span class="sd">    from the measured level to the IMF program's endpoint over the program</span>
+<span class="sd">    years and holds it flat afterwards.</span>
+
+<span class="sd">    Multiplying the flat-share factor by the ratio of consecutive shares</span>
+<span class="sd">    along ``program_remittance_shares`` makes ``get_RM`` carry RM/Y (with</span>
+<span class="sd">    output on trend) from ``shares[0]`` in the first period to</span>
+<span class="sd">    ``shares[-1]`` in the last program year; from then on the path is</span>
+<span class="sd">    ``flat_share_g_RM``, so the share stays where the program leaves it.</span>
+<span class="sd">    Pair it with ``alpha_RM_T = shares[-1]`` so that OG-Core's blend</span>
+<span class="sd">    toward the long-run share after ``tG1`` is a no-op.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        g_y (scalar): model-period productivity growth rate</span>
+<span class="sd">        g_n (array_like): population growth path, length T + S</span>
+<span class="sd">        shares (array_like): program projection of the remittance share of</span>
+<span class="sd">            GDP, percent; defaults to ``IMF_PRIVATE_TRANSFERS``</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        g_RM (Numpy array): growth rate of remittances, length T + S</span>
+<span class="sd">    """</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">program_remittance_shares</span><span class="p">(</span><span class="n">shares</span><span class="p">)</span>
+    <span class="n">g_RM</span> <span class="o">=</span> <span class="n">flat_share_g_RM</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">)</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">/</span> <span class="n">s</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">g_RM</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">g_RM</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">size</span><span class="p">])</span> <span class="o">*</span> <span class="n">ratio</span> <span class="o">-</span> <span class="mf">1.0</span>
+    <span class="k">return</span> <span class="n">g_RM</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">remittance_level_params</span><span class="p">(</span><span class="n">shares</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scenario</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    The remittance share of GDP in the first period and in the long run.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shares (array_like): remittance share of GDP in each program year,</span>
+<span class="sd">            percent; defaults to ``IMF_PRIVATE_TRANSFERS``</span>
+<span class="sd">        scenario (str): ``"history"`` holds the measured FY2024/25 share</span>
+<span class="sd">            for the long run; ``"program"`` takes the last program-year</span>
+<span class="sd">            share, held like the other program series; defaults to</span>
+<span class="sd">            DEFAULT_SCENARIO</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: ``{"alpha_RM_1", "alpha_RM_T"}``</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">shares</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">shares</span> <span class="o">=</span> <span class="n">IMF_PRIVATE_TRANSFERS</span>
+    <span class="n">scenario</span> <span class="o">=</span> <span class="n">check_scenario</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
+    <span class="n">long_run</span> <span class="o">=</span> <span class="n">shares</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">scenario</span> <span class="o">==</span> <span class="s2">"program"</span> <span class="k">else</span> <span class="n">shares</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"alpha_RM_1"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">shares</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="s2">"alpha_RM_T"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">long_run</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">remittance_eta</span><span class="p">(</span><span class="n">omega_SS</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">quintile_value_shares</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Allocation matrix distributing aggregate remittances across households.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        omega_SS (array_like): steady-state population distribution, (S, J),</span>
+<span class="sd">            with ``omega_SS.sum(axis=0) == lambdas``</span>
+<span class="sd">        lambdas (array_like): population shares of the J lifetime-income</span>
+<span class="sd">            groups, poorest to richest</span>
+<span class="sd">        quintile_value_shares (array_like): share of total remittance value</span>
+<span class="sd">            received by each population quintile, poorest to richest;</span>
+<span class="sd">            defaults to ``RM_QUINTILE_VALUE_SHARES``</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        eta_RM (Numpy array): (S, J) matrix summing to one. Each group's</span>
+<span class="sd">            column sums to its data share of remittance value (the quintile</span>
+<span class="sd">            shares interpolated onto the group boundaries, assuming a</span>
+<span class="sd">            uniform density of remittance value within a quintile); within a</span>
+<span class="sd">            group, remittances are spread per capita across ages, so every</span>
+<span class="sd">            household in the group receives the same amount.</span>
+<span class="sd">    """</span>
+    <span class="n">omega_SS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">omega_SS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">lambdas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lambdas</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">quintile_value_shares</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">quintile_value_shares</span> <span class="o">=</span> <span class="n">RM_QUINTILE_VALUE_SHARES</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">quintile_value_shares</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">q</span> <span class="o">/</span> <span class="n">q</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="c1"># cumulative remittance value at each population percentile, evaluated</span>
+    <span class="c1"># at the lambdas group boundaries</span>
+    <span class="n">cum_pop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">q</span><span class="o">.</span><span class="n">size</span><span class="p">))])</span>
+    <span class="n">cum_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">q</span><span class="p">)])</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">lambdas</span><span class="p">)])</span>
+    <span class="n">group_share</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">cum_pop</span><span class="p">,</span> <span class="n">cum_val</span><span class="p">))</span>
+    <span class="n">group_share</span> <span class="o">=</span> <span class="n">group_share</span> <span class="o">/</span> <span class="n">group_share</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">within</span> <span class="o">=</span> <span class="n">omega_SS</span> <span class="o">/</span> <span class="n">omega_SS</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">within</span> <span class="o">*</span> <span class="n">group_share</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">derive_remittance_params</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">,</span> <span class="n">omega_SS</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">scenario</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    The remittance parameters that depend on a given set of demographics.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        g_y (scalar): model-period productivity growth rate</span>
+<span class="sd">        g_n (array_like): population growth path, length T + S</span>
+<span class="sd">        omega_SS (array_like): steady-state population distribution, (S, J)</span>
+<span class="sd">        lambdas (array_like): population shares of the J groups</span>
+<span class="sd">        scenario (str): ``"history"`` keeps the remittance share of GDP at</span>
+<span class="sd">            its measured FY2024/25 value; ``"program"`` moves it along the</span>
+<span class="sd">            IMF projection (see SCENARIOS); defaults to DEFAULT_SCENARIO</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: ``{"g_RM": list, "eta_RM": nested list}`` ready for</span>
+<span class="sd">            ``Specifications.update_specifications``</span>
+<span class="sd">    """</span>
+    <span class="n">scenario</span> <span class="o">=</span> <span class="n">check_scenario</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scenario</span> <span class="o">==</span> <span class="s2">"program"</span><span class="p">:</span>
+        <span class="n">g_RM</span> <span class="o">=</span> <span class="n">program_share_g_RM</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">g_RM</span> <span class="o">=</span> <span class="n">flat_share_g_RM</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"g_RM"</span><span class="p">:</span> <span class="n">g_RM</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+        <span class="s2">"eta_RM"</span><span class="p">:</span> <span class="n">remittance_eta</span><span class="p">(</span><span class="n">omega_SS</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">derived_remittance_params</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">scenario</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    The remittance parameters that depend on the demographics in ``p``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        p (Specifications): parameters carrying ``g_y``, ``g_n``,</span>
+<span class="sd">            ``omega_SS`` and ``lambdas``</span>
+<span class="sd">        scenario (str): see ``derive_remittance_params``</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: see ``derive_remittance_params``</span>
+<span class="sd">    """</span>
+    <span class="n">g_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">g_n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:</span> <span class="n">p</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">S</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">derive_remittance_params</span><span class="p">(</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span> <span class="n">scenario</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Long-run debt ratio of the program scenario: the IMF program's FY2030/31</span>
+<span class="c1"># debt ratio is 28.6 percent of GDP and the authorities' medium-term</span>
+<span class="c1"># objective a ratio near 30 percent (macro.md).</span>
+<span class="n">PROGRAM_DEBT_RATIO_SS</span> <span class="o">=</span> <span class="mf">0.30</span>
+
+<span class="c1"># Fiscal program path (IMF Country Report 26/174, fifth ECF review, Tables 1,</span>
+<span class="c1"># 2b and 4b). Ethiopian fiscal years FY2024/25 (model period 0, start year</span>
+<span class="c1"># 2025) through FY2030/31 (period 6); the last value of each series is held</span>
+<span class="c1"># for the long run. All figures are percent of GDP, general government.</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="n">PROGRAM_YEARS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"FY2024/25"</span><span class="p">,</span>
+    <span class="s2">"FY2025/26"</span><span class="p">,</span>
+    <span class="s2">"FY2026/27"</span><span class="p">,</span>
+    <span class="s2">"FY2027/28"</span><span class="p">,</span>
+    <span class="s2">"FY2028/29"</span><span class="p">,</span>
+    <span class="s2">"FY2029/30"</span><span class="p">,</span>
+    <span class="s2">"FY2030/31"</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">IMF_PUBLIC_DEBT</span> <span class="o">=</span> <span class="p">[</span><span class="mf">50.5</span><span class="p">,</span> <span class="mf">45.3</span><span class="p">,</span> <span class="mf">40.8</span><span class="p">,</span> <span class="mf">37.2</span><span class="p">,</span> <span class="mf">34.0</span><span class="p">,</span> <span class="mf">31.2</span><span class="p">,</span> <span class="mf">28.6</span><span class="p">]</span>
+<span class="n">IMF_REVENUE</span> <span class="o">=</span> <span class="p">[</span><span class="mf">9.2</span><span class="p">,</span> <span class="mf">10.8</span><span class="p">,</span> <span class="mf">11.4</span><span class="p">,</span> <span class="mf">11.8</span><span class="p">,</span> <span class="mf">12.1</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">,</span> <span class="mf">12.3</span><span class="p">]</span>  <span class="c1"># excl. grants</span>
+<span class="n">IMF_TAX_REVENUE</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mf">7.8</span><span class="p">,</span>
+    <span class="mf">9.5</span><span class="p">,</span>
+    <span class="mf">10.1</span><span class="p">,</span>
+    <span class="mf">10.5</span><span class="p">,</span>
+    <span class="mf">10.8</span><span class="p">,</span>
+    <span class="mf">10.9</span><span class="p">,</span>
+    <span class="mf">11.0</span><span class="p">,</span>
+<span class="p">]</span>  <span class="c1"># model has no nontax</span>
+<span class="n">IMF_GRANTS</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.7</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+<span class="n">IMF_EXPENDITURE</span> <span class="o">=</span> <span class="p">[</span><span class="mf">12.0</span><span class="p">,</span> <span class="mf">14.1</span><span class="p">,</span> <span class="mf">13.5</span><span class="p">,</span> <span class="mf">13.5</span><span class="p">,</span> <span class="mf">14.0</span><span class="p">,</span> <span class="mf">14.0</span><span class="p">,</span> <span class="mf">14.0</span><span class="p">]</span>
+<span class="n">IMF_RECURRENT</span> <span class="o">=</span> <span class="p">[</span><span class="mf">7.1</span><span class="p">,</span> <span class="mf">8.2</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">,</span> <span class="mf">8.5</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">,</span> <span class="mf">8.8</span><span class="p">,</span> <span class="mf">8.9</span><span class="p">]</span>
+<span class="n">IMF_INTEREST</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]</span>
+<span class="n">IMF_CAPITAL</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.8</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.4</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">,</span> <span class="mf">5.1</span><span class="p">]</span>
+<span class="n">IMF_REAL_GDP_GROWTH</span> <span class="o">=</span> <span class="p">[</span><span class="mf">9.2</span><span class="p">,</span> <span class="mf">9.2</span><span class="p">,</span> <span class="mf">7.8</span><span class="p">,</span> <span class="mf">8.2</span><span class="p">,</span> <span class="mf">8.2</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">,</span> <span class="mf">7.7</span><span class="p">]</span>
+<span class="n">IMF_TRADE_BALANCE</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="o">-</span><span class="mf">8.3</span><span class="p">,</span>
+    <span class="o">-</span><span class="mf">9.9</span><span class="p">,</span>
+    <span class="o">-</span><span class="mf">8.6</span><span class="p">,</span>
+    <span class="o">-</span><span class="mf">8.4</span><span class="p">,</span>
+    <span class="o">-</span><span class="mf">8.5</span><span class="p">,</span>
+    <span class="o">-</span><span class="mf">8.3</span><span class="p">,</span>
+    <span class="o">-</span><span class="mf">8.3</span><span class="p">,</span>
+<span class="p">]</span>  <span class="c1"># goods+services</span>
+<span class="n">IMF_PRIVATE_TRANSFERS</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.6</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span> <span class="mf">5.9</span><span class="p">,</span> <span class="mf">5.3</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">,</span> <span class="mf">4.6</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">]</span>
+<span class="n">IMF_CURRENT_ACCOUNT</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.7</span><span class="p">]</span>
+<span class="n">IMF_GROSS_INVESTMENT</span> <span class="o">=</span> <span class="p">[</span><span class="mf">20.1</span><span class="p">,</span> <span class="mf">28.7</span><span class="p">,</span> <span class="mf">27.5</span><span class="p">,</span> <span class="mf">27.2</span><span class="p">,</span> <span class="mf">27.2</span><span class="p">,</span> <span class="mf">27.4</span><span class="p">,</span> <span class="mf">26.5</span><span class="p">]</span>
+<span class="n">IMF_DOMESTIC_DEBT</span> <span class="o">=</span> <span class="p">[</span><span class="mf">18.7</span><span class="p">,</span> <span class="mf">15.4</span><span class="p">,</span> <span class="mf">13.7</span><span class="p">,</span> <span class="mf">12.6</span><span class="p">,</span> <span class="mf">12.6</span><span class="p">,</span> <span class="mf">12.5</span><span class="p">,</span> <span class="mf">11.9</span><span class="p">]</span>
+
+<span class="c1"># Cash transfers to households as a share of GDP. The IMF recurrent line</span>
+<span class="c1"># bundles the wage bill, goods and services, interest, and transfers; the</span>
+<span class="c1"># household-transfer part is the fuel and fertilizer subsidies (about 1</span>
+<span class="c1"># percent of GDP in FY2024/25, fuel subsidies eliminated by March 2026 and a</span>
+<span class="c1"># capped envelope in FY2026/27, fertilizer about 1 percent of GDP), the</span>
+<span class="c1"># Productive Safety Net Program (budget contribution about 0.4 percent of</span>
+<span class="c1"># GDP), and public pension payouts (about 0.5 percent of GDP). IMF CR</span>
+<span class="c1"># 26/174 paragraphs 9, 20-22 and Box on social safety nets.</span>
+<span class="n">CASH_TRANSFERS</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.8</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]</span>
+
+<span class="c1"># Long-run grants (percent of GDP) once the program's donor surge fades.</span>
+<span class="n">LONG_RUN_GRANTS</span> <span class="o">=</span> <span class="mf">0.3</span>
+
+<span class="c1"># Required real return of foreign investors in Ethiopian capital (OG-Core's</span>
+<span class="c1"># world_int_rate_annual). The 4 percent risk-free benchmark understates it for</span>
+<span class="c1"># a frontier market: UNCTAD's World Investment Report 2018 puts the rate of</span>
+<span class="c1"># return on inward FDI in Africa at 6.3 percent (2017), down from 12.3 percent</span>
+<span class="c1"># in 2012. With OG-Core's capital split K_f = zeta_K (K_open - K_d), where</span>
+<span class="c1"># K_open is capital demand at the world rate, this is the lever that sets the</span>
+<span class="c1"># foreign-owned capital stock against the ~0.24 of GDP FDI stock (UNCTAD).</span>
+<span class="n">WORLD_INT_RATE_ANNUAL</span> <span class="o">=</span> <span class="mf">0.063</span>
+
+<span class="c1"># Long-run real effective interest rate on public debt. Ethiopia's public</span>
+<span class="c1"># debt is mostly concessional external debt (average interest on new</span>
+<span class="c1"># FY2024/25 commitments 0.77 percent, MoF Bulletin 56) and domestic paper</span>
+<span class="c1"># whose real return has been deeply negative; the program's FY2030/31</span>
+<span class="c1"># interest bill (1.5 percent of GDP on 28.6 percent debt, a 5.2 percent</span>
+<span class="c1"># nominal effective rate) against a GDP deflator of 8.6 percent still implies</span>
+<span class="c1"># a negative real rate. We take 2 percent as the long-run real effective</span>
+<span class="c1"># rate once inflation settles at the authorities' single-digit objective and</span>
+<span class="c1"># domestic financing moves to market terms.</span>
+<span class="n">LONG_RUN_R_GOV</span> <span class="o">=</span> <span class="mf">0.02</span>
+<span class="c1"># Periods after the program horizon over which r_gov converges to the</span>
+<span class="c1"># long-run rate above</span>
+<span class="n">R_GOV_CONVERGENCE_PERIODS</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="c1"># OG-Core clips the sovereign rate at ``r_gov_floor`` (a parameter since</span>
+<span class="c1"># PSLmodels/OG-Core#1203; the hard-coded 0.0 before that). The shipped shift</span>
+<span class="c1"># path targets the program-implied negative real rates, and the example</span>
+<span class="c1"># lowers the floor to R_GOV_FLOOR where the installed ogcore has the</span>
+<span class="c1"># parameter so they can bind; on an older ogcore the rate sits at zero</span>
+<span class="c1"># through the program years instead (documented in macro.md).</span>
+<span class="n">R_GOV_FLOOR</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.10</span>
+<span class="c1"># Steady-state return on capital the r_gov_shift path is evaluated at: the</span>
+<span class="c1"># solved baseline steady state of examples/run_og_eth.py.</span>
+<span class="n">R_SS_FOR_R_GOV</span> <span class="o">=</span> <span class="mf">0.0901</span>
+
+<span class="c1"># Formalization along the program. The informality calibration (taxes.md)</span>
+<span class="c1"># grades income-tax compliance by lifetime-income group: the bottom five</span>
+<span class="c1"># groups pay none of the tax owed, group 6 half, the top group all. The</span>
+<span class="c1"># program's revenue gains are direct-tax heavy -- in the first nine months of</span>
+<span class="c1"># FY2025/26 federal direct taxes grew 78 percent against 41 percent for</span>
+<span class="c1"># domestic VAT and 5 percent for import taxes (IMF CR 26/174, p. 15) -- so</span>
+<span class="c1"># part of the gain is modelled as the tax base broadening: group 6 moves</span>
+<span class="c1"># from half to full compliance and group 5 from none to a fifth over the</span>
+<span class="c1"># seven program years, linearly, and stays there. Lifetime income proxies</span>
+<span class="c1"># formality, so this is the margin of the formal sector moving down the</span>
+<span class="c1"># income distribution.</span>
+<span class="n">NONCOMPLIANCE_START</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+<span class="n">NONCOMPLIANCE_END</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+<span class="c1"># Personal-income-tax revenue the formalization adds by the end of the</span>
+<span class="c1"># program, percent of GDP, read off the solved transition of the packaged</span>
+<span class="c1"># calibration (personal income tax 1.4 -&gt; 2.6 percent of GDP by FY2030/31;</span>
+<span class="c1"># a first estimate from steady-state incidence, 0.7, undershot it).</span>
+<span class="n">PIT_FORMALIZATION_GAIN</span> <span class="o">=</span> <span class="mf">0.012</span>
+<span class="c1"># With the statutory schedule as the tax function, the compliance vectors</span>
+<span class="c1"># above give the *shape* of the formal tax boundary and this scale its</span>
+<span class="c1"># level: even the top percent remits only part of the tax the schedule</span>
+<span class="c1"># implies, because much of its income is business and self-employment income</span>
+<span class="c1"># outside Schedule A. The scale is calibrated so that personal income tax</span>
+<span class="c1"># collects PIT_REVENUE_TARGET of GDP in FY2024/25</span>
+<span class="c1"># (ogeth.calibrate.match_steady_state).</span>
+<span class="n">COMPLIANCE_SCALE</span> <span class="o">=</span> <span class="mf">0.198381</span>
+<span class="n">PIT_REVENUE_TARGET</span> <span class="o">=</span> <span class="mf">0.014</span>
+<span class="c1"># The matching sees only the steady state; the first-period collections it</span>
+<span class="c1"># infers from the steady-state incidence came out 5 percent above the solved</span>
+<span class="c1"># transition's FY2024/25 value, so the steady-state target is raised by this</span>
+<span class="c1"># factor (measured on the solved transition of the packaged calibration).</span>
+<span class="n">PIT_START_CORRECTION</span> <span class="o">=</span> <span class="mf">1.053</span>
+
+<span class="c1"># Pension coverage by lifetime-income group. Ethiopia's two schemes (PSSSA for</span>
+<span class="c1"># public servants, POESSA for private formal employees) cover only formal</span>
+<span class="c1"># employment, a small share of the labour force; the same formality proxy is</span>
+<span class="c1"># used, so the informal groups draw no public pension.</span>
+<span class="n">PENSION_COVERAGE</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+<span class="c1"># The public pension is a defined-benefit scheme (Proclamations 1267/2022 for</span>
+<span class="c1"># public servants and 1268/2022 for private employees): retirement at 60</span>
+<span class="c1"># after at least ten years of service, a benefit of 30 percent of the average</span>
+<span class="c1"># salary of the last three years plus 1.25 percent for every year of service</span>
+<span class="c1"># beyond ten, capped at 70 percent. A full career from 20 to 60 gives 67.5</span>
+<span class="c1"># percent. OG-Core's defined-benefit formula is yr_contrib * alpha_db times</span>
+<span class="c1"># average earnings over avg_earn_num_years, so alpha_db is the replacement</span>
+<span class="c1"># rate per year of contribution.</span>
+<span class="n">PENSIONS_ON</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">PENSION_RETIREMENT_AGE</span> <span class="o">=</span> <span class="mi">60</span>
+<span class="n">PENSION_MIN_YEARS</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">PENSION_BASE_REPLACEMENT</span> <span class="o">=</span> <span class="mf">0.30</span>
+<span class="n">PENSION_REPLACEMENT_PER_YEAR</span> <span class="o">=</span> <span class="mf">0.0125</span>
+<span class="n">PENSION_MAX_REPLACEMENT</span> <span class="o">=</span> <span class="mf">0.70</span>
+<span class="n">PENSION_AVERAGING_YEARS</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">PENSION_CAREER_YEARS</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="c1"># The coverage vector above says which groups draw a pension; the scale</span>
+<span class="c1"># multiplies it so that pension outlays match PENSIONS_SHARE_OF_GDP. The</span>
+<span class="c1"># formal groups hold 10 percent of households but 40 percent of labor income,</span>
+<span class="c1"># far more than the scheme's 800,000 pensioners and two percent of the</span>
+<span class="c1"># working-age population, so the scale is well below one. Calibrated by</span>
+<span class="c1"># ogeth.calibrate.match_steady_state.</span>
+<span class="n">PENSION_COVERAGE_SCALE</span> <span class="o">=</span> <span class="mf">0.876028</span>
+<span class="c1"># Pension outlays relative to GDP rise along the transition as the population</span>
+<span class="c1"># ages: in the solved transition they are 1.6 times higher in the steady state</span>
+<span class="c1"># than in FY2024/25. The data anchor is today's 0.5 percent of GDP, so the</span>
+<span class="c1"># steady-state target the matching uses is that much higher.</span>
+<span class="n">PENSION_OUTLAYS_SS_TO_START</span> <span class="o">=</span> <span class="mf">1.6</span>
+
+<span class="c1"># Personal income tax: the statutory employment-income schedule (Schedule A)</span>
+<span class="c1"># in birr per month, as (upper bound, marginal rate) with an open last</span>
+<span class="c1"># bracket. Proclamation 979/2016 applies in FY2024/25 (model period 0) and</span>
+<span class="c1"># Proclamation 1395/2025, in force from July 2025, from FY2025/26 on.</span>
+<span class="n">PIT_SCHEDULE_2016</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">1650</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">3200</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">5250</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">7800</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">10900</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">),</span>
+    <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">PIT_SCHEDULE_2025</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">7000</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">14000</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">),</span>
+    <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="c1"># Capital income is taxed under Schedule D at flat rates, 10 percent on</span>
+<span class="c1"># dividends and 5 percent on interest; the model uses the dividend rate.</span>
+<span class="n">CAPITAL_INCOME_TAX_RATE</span> <span class="o">=</span> <span class="mf">0.10</span>
+<span class="c1"># The model's birr are FY2025/26 birr: mean_income_data is GDP per adult of</span>
+<span class="c1"># that year (IMF CR 26/174, Table 1, nominal GDP in billions of birr; World</span>
+<span class="c1"># Bank population and age structure, 2024, grown one year), and the FY2024/25</span>
+<span class="c1"># schedule's thresholds are scaled up by nominal income growth per head</span>
+<span class="c1"># between the two years so that they bite at the same real incomes.</span>
+<span class="n">NOMINAL_GDP_BIRR_BN</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"FY2024/25"</span><span class="p">:</span> <span class="mf">19268.0</span><span class="p">,</span> <span class="s2">"FY2025/26"</span><span class="p">:</span> <span class="mf">23851.0</span><span class="p">}</span>
+<span class="n">POPULATION_2024</span> <span class="o">=</span> <span class="mf">132.06e6</span>
+<span class="n">ADULT_SHARE_2024</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mf">0.4986</span>  <span class="c1"># aged 20 and over: 1 - 0.3906 (0-14) - 0.1108 (15-19)</span>
+<span class="p">)</span>
+<span class="n">POPULATION_GROWTH</span> <span class="o">=</span> <span class="mf">0.026</span>
+<span class="c1"># income grid, birr per year, on which the Gouveia-Strauss form is fitted to</span>
+<span class="c1"># the schedule: from the old exemption threshold to well past the top decile</span>
+<span class="c1"># of wage earners (55,000 birr a month)</span>
+<span class="n">TAX_FIT_INCOME_RANGE</span> <span class="o">=</span> <span class="p">(</span><span class="mf">12_000.0</span><span class="p">,</span> <span class="mf">5_000_000.0</span><span class="p">)</span>
+<span class="c1"># OG-Core caps the third Gouveia-Strauss parameter; a flat rate is the limit</span>
+<span class="c1"># of a very large one</span>
+<span class="n">GS_FLAT_PHI2</span> <span class="o">=</span> <span class="mf">2.0e4</span>
+
+<span class="c1"># Allocation of the program's revenue gains net of formalization across the</span>
+<span class="c1"># other instruments: 60 percent to consumption taxes (VAT reform, excises,</span>
+<span class="c1"># customs) and 40 percent to corporate income tax collections (tax</span>
+<span class="c1"># administration), following the outturn composition above. FY2024/25 model</span>
+<span class="c1"># collections these are scaled against: consumption taxes 3.85 and CIT 1.71</span>
+<span class="c1"># percent of GDP.</span>
+<span class="n">INDIRECT_SHARE_OF_REVENUE_GAIN</span> <span class="o">=</span> <span class="mf">0.6</span>
+<span class="n">BASE_CONS_TAX_REVENUE</span> <span class="o">=</span> <span class="mf">0.0385</span>
+<span class="n">BASE_CIT_REVENUE</span> <span class="o">=</span> <span class="mf">0.0171</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">program_spending_paths</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Government spending ratios along the IMF program, mapped onto the model's</span>
+<span class="sd">    three spending instruments.</span>
+
+<span class="sd">    Government consumption is recurrent spending net of interest (which the</span>
+<span class="sd">    model pays through r_gov) and of cash transfers; transfers are the cash</span>
+<span class="sd">    items in CASH_TRANSFERS; public investment is capital expenditure. The</span>
+<span class="sd">    sum reproduces the IMF's primary expenditure to within a tenth of a</span>
+<span class="sd">    percent of GDP in every program year.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: alpha_G, alpha_T, alpha_I, alpha_FA as lists (length 7 plus</span>
+<span class="sd">            the long-run value; OG-Core holds the last value thereafter)</span>
+<span class="sd">    """</span>
+    <span class="n">rec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_RECURRENT</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">interest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_INTEREST</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">CASH_TRANSFERS</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">rec</span> <span class="o">-</span> <span class="n">interest</span> <span class="o">-</span> <span class="n">tr</span>
+    <span class="k">if</span> <span class="n">PENSIONS_ON</span><span class="p">:</span>
+        <span class="c1"># pension payouts are paid by the pension system, not as transfers</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="n">tr</span> <span class="o">-</span> <span class="n">PENSIONS_SHARE_OF_GDP</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">ig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_CAPITAL</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">fa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_GRANTS</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"alpha_G"</span><span class="p">:</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">g</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]),</span>
+        <span class="s2">"alpha_T"</span><span class="p">:</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">tr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]),</span>
+        <span class="s2">"alpha_I"</span><span class="p">:</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ig</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">ig</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]),</span>
+        <span class="s2">"alpha_FA"</span><span class="p">:</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">fa</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">LONG_RUN_GRANTS</span> <span class="o">/</span> <span class="mi">100</span><span class="p">]),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">program_revenue_paths</span><span class="p">(</span><span class="n">tau_c_0</span><span class="p">,</span> <span class="n">cit_factor_0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Consumption-tax and CIT-collection paths that raise the model's tax</span>
+<span class="sd">    revenue by the same percentage points of GDP as the IMF revenue path net</span>
+<span class="sd">    of what the formalization path delivers, with the remainder allocated per</span>
+<span class="sd">    INDIRECT_SHARE_OF_REVENUE_GAIN.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tau_c_0 (scalar): FY2024/25 effective consumption-tax rate</span>
+<span class="sd">        cit_factor_0 (scalar): FY2024/25 CIT collections adjustment factor</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: tau_c (list of [rate] per period, I = 1) and</span>
+<span class="sd">            adjustment_factor_for_cit_receipts (list), each length 7 plus</span>
+<span class="sd">            the long-run value</span>
+<span class="sd">    """</span>
+    <span class="n">gain</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_REVENUE</span><span class="p">)</span> <span class="o">-</span> <span class="n">IMF_REVENUE</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="c1"># the part of the gain the formalization path delivers, phased in with it</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">PROGRAM_YEARS</span><span class="p">)</span>
+    <span class="n">gain</span> <span class="o">=</span> <span class="n">gain</span> <span class="o">-</span> <span class="n">PIT_FORMALIZATION_GAIN</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">tau_c</span> <span class="o">=</span> <span class="n">tau_c_0</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">+</span> <span class="n">INDIRECT_SHARE_OF_REVENUE_GAIN</span> <span class="o">*</span> <span class="n">gain</span> <span class="o">/</span> <span class="n">BASE_CONS_TAX_REVENUE</span>
+    <span class="p">)</span>
+    <span class="n">cit</span> <span class="o">=</span> <span class="n">cit_factor_0</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">INDIRECT_SHARE_OF_REVENUE_GAIN</span><span class="p">)</span> <span class="o">*</span> <span class="n">gain</span> <span class="o">/</span> <span class="n">BASE_CIT_REVENUE</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"tau_c"</span><span class="p">:</span> <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">tau_c</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">tau_c</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]],</span>
+        <span class="s2">"adjustment_factor_for_cit_receipts"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">cit</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">cit</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="p">],</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">program_compliance_paths</span><span class="p">(</span>
+    <span class="n">compliance_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pension_coverage_scale</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Income-tax non-compliance paths (labor and capital, identical) that move</span>
+<span class="sd">    linearly from NONCOMPLIANCE_START to NONCOMPLIANCE_END over the program</span>
+<span class="sd">    years and stay there, and the pension-coverage matrix.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        compliance_scale (scalar): multiplies the compliance (one minus</span>
+<span class="sd">            non-compliance) of every group at every date; defaults to</span>
+<span class="sd">            COMPLIANCE_SCALE</span>
+<span class="sd">        pension_coverage_scale (scalar): multiplies PENSION_COVERAGE;</span>
+<span class="sd">            defaults to PENSION_COVERAGE_SCALE</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: labor_income_tax_noncompliance_rate,</span>
+<span class="sd">            capital_income_tax_noncompliance_rate (lists of J-vectors, one</span>
+<span class="sd">            per program year plus the long run) and replacement_rate_adjust</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">compliance_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">compliance_scale</span> <span class="o">=</span> <span class="n">COMPLIANCE_SCALE</span>
+    <span class="k">if</span> <span class="n">pension_coverage_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pension_coverage_scale</span> <span class="o">=</span> <span class="n">PENSION_COVERAGE_SCALE</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">PROGRAM_YEARS</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">compliance_scale</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NONCOMPLIANCE_START</span><span class="p">))</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">compliance_scale</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NONCOMPLIANCE_END</span><span class="p">))</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">end</span><span class="p">)]</span>
+    <span class="n">coverage</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">pension_coverage_scale</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">PENSION_COVERAGE</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"labor_income_tax_noncompliance_rate"</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+        <span class="s2">"capital_income_tax_noncompliance_rate"</span><span class="p">:</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">path</span><span class="p">],</span>
+        <span class="s2">"replacement_rate_adjust"</span><span class="p">:</span> <span class="p">[</span><span class="n">coverage</span><span class="p">],</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">schedule_tax_rates</span><span class="p">(</span><span class="n">annual_income</span><span class="p">,</span> <span class="n">schedule</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Effective and marginal rates of a monthly bracket schedule at given</span>
+<span class="sd">    annual incomes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        annual_income (array_like): income in birr per year</span>
+<span class="sd">        schedule (list): (monthly upper bound or None, marginal rate) pairs</span>
+<span class="sd">        scale (scalar): multiplies the bracket thresholds</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        etr (Numpy array): tax paid over income</span>
+<span class="sd">        mtr (Numpy array): marginal rate of the bracket the income falls in</span>
+<span class="sd">    """</span>
+    <span class="n">annual_income</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">annual_income</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">monthly</span> <span class="o">=</span> <span class="n">annual_income</span> <span class="o">/</span> <span class="mf">12.0</span>
+    <span class="n">tax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">monthly</span><span class="p">)</span>
+    <span class="n">mtr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">monthly</span><span class="p">)</span>
+    <span class="n">lower</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">upper</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="n">schedule</span><span class="p">:</span>
+        <span class="n">hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">upper</span> <span class="o">*</span> <span class="n">scale</span>
+        <span class="n">tax</span> <span class="o">+=</span> <span class="n">rate</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">monthly</span> <span class="o">-</span> <span class="n">lower</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span>
+        <span class="n">mtr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">monthly</span> <span class="o">&gt;</span> <span class="n">lower</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">monthly</span> <span class="o">&lt;=</span> <span class="n">hi</span><span class="p">),</span> <span class="n">rate</span><span class="p">,</span> <span class="n">mtr</span><span class="p">)</span>
+        <span class="n">lower</span> <span class="o">=</span> <span class="n">hi</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">):</span>
+        <span class="n">etr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">annual_income</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">12.0</span> <span class="o">*</span> <span class="n">tax</span> <span class="o">/</span> <span class="n">annual_income</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">etr</span><span class="p">,</span> <span class="n">mtr</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">gs_rates</span><span class="p">(</span><span class="n">income</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">rate_type</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    OG-Core's Gouveia-Strauss tax function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        income (array_like): income in birr per year</span>
+<span class="sd">        phi (array_like): the three parameters</span>
+<span class="sd">        rate_type (str): "etr" or "mtr"</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        rates (Numpy array): effective or marginal rates</span>
+<span class="sd">    """</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">income</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">phi0</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span> <span class="o">=</span> <span class="n">phi</span>
+    <span class="k">if</span> <span class="n">rate_type</span> <span class="o">==</span> <span class="s2">"etr"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">phi0</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="p">(</span><span class="n">x</span><span class="o">**-</span><span class="n">phi1</span> <span class="o">+</span> <span class="n">phi2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">phi1</span><span class="p">))</span> <span class="o">/</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">phi0</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="n">x</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">phi1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="o">**-</span><span class="n">phi1</span> <span class="o">+</span> <span class="n">phi2</span><span class="p">)</span> <span class="o">**</span> <span class="p">((</span><span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">phi1</span><span class="p">)</span> <span class="o">/</span> <span class="n">phi1</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_gs_parameters</span><span class="p">(</span><span class="n">schedule</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Fit OG-Core's Gouveia-Strauss form to a statutory bracket schedule by</span>
+<span class="sd">    least squares on the effective and marginal rates over a log-spaced</span>
+<span class="sd">    income grid.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schedule (list): (monthly upper bound or None, marginal rate) pairs</span>
+<span class="sd">        scale (scalar): multiplies the bracket thresholds</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        phi (list): the three parameters, floats</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">optimize</span>
+
+    <span class="n">incomes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">TAX_FIT_INCOME_RANGE</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">TAX_FIT_INCOME_RANGE</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="mi">400</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">etr</span><span class="p">,</span> <span class="n">mtr</span> <span class="o">=</span> <span class="n">schedule_tax_rates</span><span class="p">(</span><span class="n">incomes</span><span class="p">,</span> <span class="n">schedule</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+    <span class="n">top_rate</span> <span class="o">=</span> <span class="n">schedule</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">loss</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mf">1e6</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">gs_rates</span><span class="p">(</span><span class="n">incomes</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="s2">"etr"</span><span class="p">)</span> <span class="o">-</span> <span class="n">etr</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">gs_rates</span><span class="p">(</span><span class="n">incomes</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="s2">"mtr"</span><span class="p">)</span> <span class="o">-</span> <span class="n">mtr</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="p">)</span>
+
+    <span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">phi1</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">phi2</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1e-8</span><span class="p">):</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span>
+                <span class="n">loss</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">top_rate</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="p">],</span>
+                <span class="n">method</span><span class="o">=</span><span class="s2">"Nelder-Mead"</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">"xatol"</span><span class="p">:</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="s2">"fatol"</span><span class="p">:</span> <span class="mf">1e-14</span><span class="p">,</span> <span class="s2">"maxiter"</span><span class="p">:</span> <span class="mi">20000</span><span class="p">},</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">res</span><span class="o">.</span><span class="n">fun</span> <span class="o">&lt;</span> <span class="n">best</span><span class="o">.</span><span class="n">fun</span><span class="p">:</span>
+                <span class="n">best</span> <span class="o">=</span> <span class="n">res</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">best</span><span class="o">.</span><span class="n">x</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">flat_gs_parameters</span><span class="p">(</span><span class="n">rate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Gouveia-Strauss parameters that reproduce a flat rate.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        rate (scalar): the flat tax rate</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        phi (list): the three parameters</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">rate</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">GS_FLAT_PHI2</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mean_income_per_adult</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    GDP per adult in FY2025/26 birr, the mean_income_data that converts the</span>
+<span class="sd">    model's income units into the birr the tax schedule is written in.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: birr per year</span>
+<span class="sd">    """</span>
+    <span class="n">adults</span> <span class="o">=</span> <span class="n">POPULATION_2024</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">POPULATION_GROWTH</span><span class="p">)</span> <span class="o">*</span> <span class="n">ADULT_SHARE_2024</span>
+    <span class="k">return</span> <span class="n">NOMINAL_GDP_BIRR_BN</span><span class="p">[</span><span class="s2">"FY2025/26"</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span> <span class="o">/</span> <span class="n">adults</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">statutory_tax_params</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Income-tax function parameters from the statutory schedules: the</span>
+<span class="sd">    FY2024/25 schedule (in FY2025/26 birr) in the first period and the</span>
+<span class="sd">    2025 schedule thereafter for effective and labor marginal rates, a flat</span>
+<span class="sd">    dividend rate on capital income, and the birr-per-model-unit anchor.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: tax_func_type, etr_params, mtrx_params, mtry_params,</span>
+<span class="sd">            mean_income_data</span>
+<span class="sd">    """</span>
+    <span class="n">nominal_growth_per_head</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">NOMINAL_GDP_BIRR_BN</span><span class="p">[</span><span class="s2">"FY2025/26"</span><span class="p">]</span> <span class="o">/</span> <span class="n">NOMINAL_GDP_BIRR_BN</span><span class="p">[</span><span class="s2">"FY2024/25"</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">POPULATION_GROWTH</span><span class="p">)</span>
+    <span class="n">phi_2016</span> <span class="o">=</span> <span class="n">fit_gs_parameters</span><span class="p">(</span><span class="n">PIT_SCHEDULE_2016</span><span class="p">,</span> <span class="n">nominal_growth_per_head</span><span class="p">)</span>
+    <span class="n">phi_2025</span> <span class="o">=</span> <span class="n">fit_gs_parameters</span><span class="p">(</span><span class="n">PIT_SCHEDULE_2025</span><span class="p">)</span>
+    <span class="n">labor</span> <span class="o">=</span> <span class="p">[[</span><span class="n">phi_2016</span><span class="p">],</span> <span class="p">[</span><span class="n">phi_2025</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"tax_func_type"</span><span class="p">:</span> <span class="s2">"GS"</span><span class="p">,</span>
+        <span class="s2">"etr_params"</span><span class="p">:</span> <span class="n">labor</span><span class="p">,</span>
+        <span class="s2">"mtrx_params"</span><span class="p">:</span> <span class="p">[[</span><span class="nb">list</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">labor</span><span class="p">],</span>
+        <span class="s2">"mtry_params"</span><span class="p">:</span> <span class="p">[[</span><span class="n">flat_gs_parameters</span><span class="p">(</span><span class="n">CAPITAL_INCOME_TAX_RATE</span><span class="p">)]],</span>
+        <span class="s2">"mean_income_data"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">mean_income_per_adult</span><span class="p">()),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">defined_benefit_params</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    OG-Core defined-benefit pension parameters for Ethiopia's schemes.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: pension_system, retirement_age, yr_contrib,</span>
+<span class="sd">            avg_earn_num_years, alpha_db</span>
+<span class="sd">    """</span>
+    <span class="n">replacement</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+        <span class="n">PENSION_BASE_REPLACEMENT</span>
+        <span class="o">+</span> <span class="n">PENSION_REPLACEMENT_PER_YEAR</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">PENSION_CAREER_YEARS</span> <span class="o">-</span> <span class="n">PENSION_MIN_YEARS</span><span class="p">),</span>
+        <span class="n">PENSION_MAX_REPLACEMENT</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"pension_system"</span><span class="p">:</span> <span class="s2">"Defined Benefits"</span><span class="p">,</span>
+        <span class="s2">"retirement_age"</span><span class="p">:</span> <span class="p">[</span><span class="n">PENSION_RETIREMENT_AGE</span><span class="p">],</span>
+        <span class="s2">"yr_contrib"</span><span class="p">:</span> <span class="n">PENSION_CAREER_YEARS</span><span class="p">,</span>
+        <span class="s2">"avg_earn_num_years"</span><span class="p">:</span> <span class="n">PENSION_AVERAGING_YEARS</span><span class="p">,</span>
+        <span class="s2">"alpha_db"</span><span class="p">:</span> <span class="n">replacement</span> <span class="o">/</span> <span class="n">PENSION_CAREER_YEARS</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="c1"># Foreign share of net new government borrowing along the program. With debt</span>
+<span class="c1"># falling, zeta_D is the share of the decline borne by external creditors; the</span>
+<span class="c1"># IMF path has external debt falling from 31.8 to 16.7 percent of GDP while</span>
+<span class="c1"># domestic debt falls from 18.7 to 11.9, i.e. amortization to external</span>
+<span class="c1"># creditors carries most of the adjustment (CR 26/174, Table 1). The long-run</span>
+<span class="c1"># value is the calibrated 0.15 (macro.md).</span>
+<span class="n">LONG_RUN_ZETA_D</span> <span class="o">=</span> <span class="mf">0.15</span>
+
+<span class="c1"># Cash transfers by programme, percent of GDP, long run (see CASH_TRANSFERS):</span>
+<span class="c1"># the Productive Safety Net Program goes to the poorest households, public</span>
+<span class="c1"># pensions to retired formal-sector workers, the fertilizer subsidy to farming</span>
+<span class="c1"># households. OG-Core's eta matrix allocates aggregate transfers across ages</span>
+<span class="c1"># and lifetime-income groups; the default is population-proportional.</span>
+<span class="n">PSNP_SHARE_OF_GDP</span> <span class="o">=</span> <span class="mf">0.4</span>
+<span class="n">PENSIONS_SHARE_OF_GDP</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">FERTILIZER_SUBSIDY_SHARE_OF_GDP</span> <span class="o">=</span> <span class="mf">0.6</span>
+<span class="n">PSNP_GROUPS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># poorest quarter of households</span>
+<span class="n">FARM_GROUPS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># bottom 70 percent: smallholder agriculture</span>
+<span class="n">PENSION_GROUPS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>  <span class="c1"># the formal groups, as in PENSION_COVERAGE</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">program_zeta_D_path</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    zeta_D path: the external creditors' share of each program year's change</span>
+<span class="sd">    in the debt ratio, clipped to [0, 1], then LONG_RUN_ZETA_D.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: length 7 plus the long-run value (period 0 uses period 1's)</span>
+<span class="sd">    """</span>
+    <span class="n">tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_PUBLIC_DEBT</span><span class="p">)</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">tot</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_DOMESTIC_DEBT</span><span class="p">)</span>
+    <span class="n">share</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">tot</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">share</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">share</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">LONG_RUN_ZETA_D</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">transfer_eta</span><span class="p">(</span><span class="n">omega_SS</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">retire_age_index</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Allocation matrix eta distributing aggregate transfers across households,</span>
+<span class="sd">    shaped (S, J): the safety net per capita within PSNP_GROUPS, the</span>
+<span class="sd">    fertilizer subsidy per capita within FARM_GROUPS, and pensions per</span>
+<span class="sd">    capita among the retired (age index &gt;= retire_age_index) in</span>
+<span class="sd">    PENSION_GROUPS, each programme weighted by its share of GDP.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Numpy array: (S, J), sums to one</span>
+<span class="sd">    """</span>
+    <span class="n">omega_SS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">omega_SS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">S</span><span class="p">,</span> <span class="n">J</span> <span class="o">=</span> <span class="n">omega_SS</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">S</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">spread</span><span class="p">(</span><span class="n">groups</span><span class="p">,</span> <span class="n">ages</span><span class="p">,</span> <span class="n">weight</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">S</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>
+        <span class="n">mask</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ix_</span><span class="p">(</span><span class="n">ages</span><span class="p">,</span> <span class="n">groups</span><span class="p">)]</span> <span class="o">=</span> <span class="n">omega_SS</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ix_</span><span class="p">(</span><span class="n">ages</span><span class="p">,</span> <span class="n">groups</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">weight</span> <span class="o">*</span> <span class="n">mask</span> <span class="o">/</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="n">eta</span> <span class="o">+=</span> <span class="n">spread</span><span class="p">(</span><span class="n">PSNP_GROUPS</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">),</span> <span class="n">PSNP_SHARE_OF_GDP</span><span class="p">)</span>
+    <span class="n">eta</span> <span class="o">+=</span> <span class="n">spread</span><span class="p">(</span><span class="n">FARM_GROUPS</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">),</span> <span class="n">FERTILIZER_SUBSIDY_SHARE_OF_GDP</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">PENSIONS_ON</span><span class="p">:</span>
+        <span class="c1"># pensions inside the cash-transfer ratio, to the retired formal</span>
+        <span class="c1"># groups; with the pension system on they are paid as benefits</span>
+        <span class="n">eta</span> <span class="o">+=</span> <span class="n">spread</span><span class="p">(</span>
+            <span class="n">PENSION_GROUPS</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">retire_age_index</span><span class="p">,</span> <span class="n">S</span><span class="p">),</span> <span class="n">PENSIONS_SHARE_OF_GDP</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">eta</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">derived_transfer_eta</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The transfer allocation matrix for the demographics in ``p``."""</span>
+    <span class="n">retire_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">retirement_age</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">E</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"eta"</span><span class="p">:</span> <span class="n">transfer_eta</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">omega_SS</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">lambdas</span><span class="p">,</span> <span class="n">retire_idx</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">implied_real_rate_on_debt</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Real effective interest rate on public debt that reproduces the IMF</span>
+<span class="sd">    debt path given the program's primary balances and the model's growth.</span>
+
+<span class="sd">    In the model's detrended units debt evolves as</span>
+<span class="sd">    d_t = ((1 + r_t) d_{t-1} - pb_{t-1}) / (exp(g_y) (1 + g_n[t])), so the</span>
+<span class="sd">    rate that carries the ratio from one program year to the next is</span>
+<span class="sd">    r_t = (d_t growth_t + pb_{t-1}) / d_{t-1} - 1. The program's debt</span>
+<span class="sd">    decline works through inflation and nominal growth eroding a stock that</span>
+<span class="sd">    carries concessional and administered rates; in a real model that is a</span>
+<span class="sd">    negative real effective rate on the legacy debt.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        g_y (scalar): model-period productivity growth rate</span>
+<span class="sd">        g_n (array_like): population growth path</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Numpy array: r_gov for periods 1..6 (period 0 has no predecessor)</span>
+<span class="sd">    """</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_PUBLIC_DEBT</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">rev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_REVENUE</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">sp</span> <span class="o">=</span> <span class="n">program_spending_paths</span><span class="p">()</span>
+    <span class="n">pb</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">rev</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sp</span><span class="p">[</span><span class="s2">"alpha_FA"</span><span class="p">][:</span><span class="mi">7</span><span class="p">])</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sp</span><span class="p">[</span><span class="s2">"alpha_G"</span><span class="p">][:</span><span class="mi">7</span><span class="p">])</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sp</span><span class="p">[</span><span class="s2">"alpha_T"</span><span class="p">][:</span><span class="mi">7</span><span class="p">])</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sp</span><span class="p">[</span><span class="s2">"alpha_I"</span><span class="p">][:</span><span class="mi">7</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">PENSIONS_ON</span><span class="p">:</span>
+        <span class="c1"># pension benefits are primary spending too, paid by the scheme</span>
+        <span class="n">pb</span> <span class="o">=</span> <span class="n">pb</span> <span class="o">-</span> <span class="n">PENSIONS_SHARE_OF_GDP</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">growth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">g_y</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">g_n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:</span><span class="mi">7</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[(</span><span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="n">growth</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">+</span> <span class="n">pb</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">)]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">r_gov_shift_path</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">,</span> <span class="n">r_gov_scale</span><span class="p">,</span> <span class="n">r_gov_DY2</span><span class="p">,</span> <span class="n">debt_ratio_ss</span><span class="p">,</span> <span class="n">r_ss</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Level-shift path for the sovereign rate, r_gov = r_gov_scale r - shift +</span>
+<span class="sd">    premium, that puts the real effective rate on debt on the program-implied</span>
+<span class="sd">    path, converges it linearly to LONG_RUN_R_GOV over</span>
+<span class="sd">    R_GOV_CONVERGENCE_PERIODS, and keeps the debt-elastic premium centered on</span>
+<span class="sd">    debt_ratio_ss (see macro.md). The market return r is approximated by its</span>
+<span class="sd">    steady-state value; along the transition r moves by at most a percentage</span>
+<span class="sd">    point, which the 0.24 scale turns into a few basis points of r_gov.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: r_gov_shift path, length 7 + R_GOV_CONVERGENCE_PERIODS + 1</span>
+<span class="sd">    """</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">IMF_PUBLIC_DEBT</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">r_prog</span> <span class="o">=</span> <span class="n">implied_real_rate_on_debt</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">)</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">[</span><span class="n">r_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>  <span class="c1"># period 0: no program-implied value; use period 1</span>
+            <span class="n">r_prog</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                <span class="n">r_prog</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">LONG_RUN_R_GOV</span><span class="p">,</span> <span class="n">R_GOV_CONVERGENCE_PERIODS</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="p">)[</span><span class="mi">1</span><span class="p">:],</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">debt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">R_GOV_CONVERGENCE_PERIODS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">debt_ratio_ss</span><span class="p">)]</span>
+    <span class="p">)</span>
+    <span class="c1"># OG-Core adds r_gov_DY d + r_gov_DY2 d^2 with r_gov_DY = -2 r_gov_DY2 D,</span>
+    <span class="c1"># which equals r_gov_DY2 (d - D)^2 - r_gov_DY2 D^2; the shift absorbs the</span>
+    <span class="c1"># constant so the premium is exactly zero at the target.</span>
+    <span class="n">centering</span> <span class="o">=</span> <span class="n">r_gov_DY2</span> <span class="o">*</span> <span class="n">debt_ratio_ss</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">r_gov_scale</span> <span class="o">*</span> <span class="n">r_ss</span>
+        <span class="o">+</span> <span class="n">r_gov_DY2</span> <span class="o">*</span> <span class="p">(</span><span class="n">debt</span> <span class="o">-</span> <span class="n">debt_ratio_ss</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">-</span> <span class="n">centering</span>
+        <span class="o">-</span> <span class="n">targets</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shift</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fiscal_program_params</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">r_ss</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    All fiscal parameters that follow the IMF program path, derived from the</span>
+<span class="sd">    Specifications object's growth and premium settings.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        p (Specifications): parameters carrying g_y, g_n, r_gov_scale,</span>
+<span class="sd">            r_gov_DY2, debt_ratio_ss, tau_c, adjustment_factor_for_cit_receipts</span>
+<span class="sd">        r_ss (scalar): steady-state market return used in r_gov_shift_path;</span>
+<span class="sd">            defaults to R_SS_FOR_R_GOV</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: ready for Specifications.update_specifications</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">r_ss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">r_ss</span> <span class="o">=</span> <span class="n">R_SS_FOR_R_GOV</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">program_spending_paths</span><span class="p">())</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">program_compliance_paths</span><span class="p">())</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"zeta_D"</span><span class="p">]</span> <span class="o">=</span> <span class="n">program_zeta_D_path</span><span class="p">()</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">derived_transfer_eta</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">program_revenue_paths</span><span class="p">(</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau_c</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="nb">float</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">adjustment_factor_for_cit_receipts</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"r_gov_shift"</span><span class="p">]</span> <span class="o">=</span> <span class="n">r_gov_shift_path</span><span class="p">(</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">g_y</span><span class="p">,</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">g_n</span><span class="p">,</span>
+        <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">r_gov_scale</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">r_gov_DY2</span><span class="p">),</span>
+        <span class="n">PROGRAM_DEBT_RATIO_SS</span><span class="p">,</span>
+        <span class="n">r_ss</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"initial_debt_ratio"</span><span class="p">]</span> <span class="o">=</span> <span class="n">IMF_PUBLIC_DEBT</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"debt_ratio_ss"</span><span class="p">]</span> <span class="o">=</span> <span class="n">PROGRAM_DEBT_RATIO_SS</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"r_gov_DY"</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">r_gov_DY2</span><span class="p">)</span> <span class="o">*</span> <span class="n">PROGRAM_DEBT_RATIO_SS</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"tG1"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">PROGRAM_YEARS</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">remittance_level_params</span><span class="p">(</span><span class="n">scenario</span><span class="o">=</span><span class="s2">"program"</span><span class="p">))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">statutory_tax_params</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">PENSIONS_ON</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">defined_benefit_params</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Initial household wealth</span>
+<span class="c1">#</span>
+<span class="c1"># OG-Core (from PSLmodels/OG-Core#1189) can anchor aggregate household wealth</span>
+<span class="c1"># in the first period of the transition to a multiple of steady-state GDP,</span>
+<span class="c1"># B(0) = initial_wealth_ratio x Y_ss. Household wealth in the model is</span>
+<span class="c1"># domestically owned capital plus domestically held government debt, so the</span>
+<span class="c1"># data counterpart is K/Y less the foreign-owned capital stock plus the</span>
+<span class="c1"># domestically held debt: the Penn World Table capital-output ratio of about</span>
+<span class="c1"># 2.2, less inward FDI stock of about 0.24 of GDP (UNCTAD), plus domestic</span>
+<span class="c1"># public debt of 18.7 percent of GDP (IMF CR 26/174, Table 2: 50.5 total less</span>
+<span class="c1"># 31.8 external). Until the ogcore release that carries #1189, the example</span>
+<span class="c1"># script applies the value only when the installed ogcore supports it.</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="n">PWT_CAPITAL_OUTPUT_RATIO</span> <span class="o">=</span> <span class="mf">2.2</span>
+<span class="n">FDI_STOCK_TO_GDP</span> <span class="o">=</span> <span class="mf">0.24</span>
+<span class="n">DOMESTIC_DEBT_TO_GDP</span> <span class="o">=</span> <span class="mf">0.187</span>
+<span class="n">INITIAL_WEALTH_RATIO</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+    <span class="n">PWT_CAPITAL_OUTPUT_RATIO</span> <span class="o">-</span> <span class="n">FDI_STOCK_TO_GDP</span> <span class="o">+</span> <span class="n">DOMESTIC_DEBT_TO_GDP</span><span class="p">,</span> <span class="mi">3</span>
+<span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Baseline scenarios</span>
+<span class="c1">#</span>
+<span class="c1"># The packaged baseline is history-anchored: every fiscal and external input</span>
+<span class="c1"># takes its measured FY2024/25 value or the enacted FY2025/26 budget and is</span>
+<span class="c1"># held there, legislated tax changes included, and debt, growth and the</span>
+<span class="c1"># external balance are model outcomes. The IMF program path is kept as a</span>
+<span class="c1"># scenario (fiscal_program_params) that the example can overlay; the two are</span>
+<span class="c1"># compared in macro.md.</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="n">SCENARIOS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"history"</span><span class="p">,</span> <span class="s2">"program"</span><span class="p">)</span>
+<span class="n">DEFAULT_SCENARIO</span> <span class="o">=</span> <span class="s2">"history"</span>
+<span class="c1"># Fiscal years whose ratios are known when the baseline is built: the</span>
+<span class="c1"># FY2024/25 outturn (model period 0) and the enacted FY2025/26 budget</span>
+<span class="c1"># (period 1); the budget-year values are held for the long run.</span>
+<span class="n">HISTORY_KNOWN_YEARS</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="c1"># History-anchored long-run debt ratio: the measured FY2024/25 ratio, so the</span>
+<span class="c1"># closure rule stabilizes debt where it starts rather than at a plan.</span>
+<span class="n">HISTORY_DEBT_RATIO_SS</span> <span class="o">=</span> <span class="n">IMF_PUBLIC_DEBT</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">check_scenario</span><span class="p">(</span><span class="n">scenario</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Validate a scenario name, defaulting to DEFAULT_SCENARIO.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        scenario (str or None): one of SCENARIOS</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: the scenario</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">scenario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">DEFAULT_SCENARIO</span>
+    <span class="k">if</span> <span class="n">scenario</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCENARIOS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"scenario must be one of </span><span class="si">{</span><span class="n">SCENARIOS</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">scenario</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_held</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">known</span><span class="o">=</span><span class="n">HISTORY_KNOWN_YEARS</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""First ``known`` values of ``path``, then the last known value held."""</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span><span class="p">[:</span><span class="n">known</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">path</span><span class="p">[</span><span class="n">known</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">-</span> <span class="n">known</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">history_spending_paths</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Spending ratios of the history-anchored baseline: the FY2024/25 outturn</span>
+<span class="sd">    and the enacted FY2025/26 budget (the first two program-table columns),</span>
+<span class="sd">    the budget-year values held thereafter.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: alpha_G, alpha_T, alpha_I, alpha_FA, same lengths as</span>
+<span class="sd">            program_spending_paths</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_held</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">program_spending_paths</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">history_revenue_paths</span><span class="p">(</span><span class="n">tau_c_0</span><span class="p">,</span> <span class="n">cit_factor_0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Effective consumption-tax rate and CIT collections factor held at their</span>
+<span class="sd">    FY2024/25 values (no program revenue measures).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tau_c_0 (scalar): FY2024/25 effective consumption-tax rate</span>
+<span class="sd">        cit_factor_0 (scalar): FY2024/25 CIT collections adjustment factor</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: tau_c and adjustment_factor_for_cit_receipts, same lengths as</span>
+<span class="sd">            program_revenue_paths</span>
+<span class="sd">    """</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">PROGRAM_YEARS</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"tau_c"</span><span class="p">:</span> <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">tau_c_0</span><span class="p">)]]</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span>
+        <span class="s2">"adjustment_factor_for_cit_receipts"</span><span class="p">:</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">cit_factor_0</span><span class="p">)]</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">history_compliance_paths</span><span class="p">(</span>
+    <span class="n">compliance_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pension_coverage_scale</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Income-tax non-compliance held at its FY2024/25 calibration (no</span>
+<span class="sd">    formalization along the program); the pension-coverage matrix is the</span>
+<span class="sd">    same as in the program scenario.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        compliance_scale, pension_coverage_scale: see</span>
+<span class="sd">            program_compliance_paths</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: see program_compliance_paths</span>
+<span class="sd">    """</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">program_compliance_paths</span><span class="p">(</span><span class="n">compliance_scale</span><span class="p">,</span> <span class="n">pension_coverage_scale</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"labor_income_tax_noncompliance_rate"</span><span class="p">])</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"labor_income_tax_noncompliance_rate"</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">d</span><span class="p">[</span><span class="s2">"labor_income_tax_noncompliance_rate"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+    <span class="n">d</span><span class="p">[</span><span class="s2">"capital_income_tax_noncompliance_rate"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">d</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">compliance_paths</span><span class="p">(</span>
+    <span class="n">scenario</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compliance_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pension_coverage_scale</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Compliance paths of a scenario (see program_compliance_paths)."""</span>
+    <span class="k">if</span> <span class="n">check_scenario</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"program"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">program_compliance_paths</span><span class="p">(</span>
+            <span class="n">compliance_scale</span><span class="p">,</span> <span class="n">pension_coverage_scale</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">history_compliance_paths</span><span class="p">(</span><span class="n">compliance_scale</span><span class="p">,</span> <span class="n">pension_coverage_scale</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">history_zeta_D_path</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Foreign share of new government borrowing held at LONG_RUN_ZETA_D. The</span>
+<span class="sd">    FY2024/25 realized flow is a restructuring-year outlier and the stock</span>
+<span class="sd">    share (0.63) is a poor guide to new borrowing while external debt is</span>
+<span class="sd">    being restructured, so the medium-term flow share the debt sustainability</span>
+<span class="sd">    analysis projects is the one forward-looking input this baseline keeps</span>
+<span class="sd">    (macro.md).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: same length as program_zeta_D_path</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">LONG_RUN_ZETA_D</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">PROGRAM_YEARS</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">history_real_rate_on_debt</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Real effective rate on public debt for the history-anchored baseline:</span>
+<span class="sd">    the rate the FY2024/25 outturn and the FY2025/26 budget imply for the</span>
+<span class="sd">    stock (the first program-implied value), held through the program</span>
+<span class="sd">    horizon before converging to LONG_RUN_R_GOV.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        g_y (scalar): model-period productivity growth rate</span>
+<span class="sd">        g_n (array_like): population growth path</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: real effective rate</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">implied_real_rate_on_debt</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">history_r_gov_shift_path</span><span class="p">(</span>
+    <span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">,</span> <span class="n">r_gov_scale</span><span class="p">,</span> <span class="n">r_gov_DY2</span><span class="p">,</span> <span class="n">debt_ratio_ss</span><span class="p">,</span> <span class="n">r_ss</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Level-shift path for the sovereign rate in the history-anchored</span>
+<span class="sd">    baseline: the budget-implied real effective rate held for the program</span>
+<span class="sd">    horizon, then a linear convergence to LONG_RUN_R_GOV over</span>
+<span class="sd">    R_GOV_CONVERGENCE_PERIODS. The debt path is a model outcome here, so</span>
+<span class="sd">    the shift is evaluated at the debt anchor (premium exactly zero there,</span>
+<span class="sd">    as in r_gov_shift_path) and the premium prices deviations from it as</span>
+<span class="sd">    they occur.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        g_y (scalar): model-period productivity growth rate</span>
+<span class="sd">        g_n (array_like): population growth path</span>
+<span class="sd">        r_gov_scale (scalar): pass-through of the market return</span>
+<span class="sd">        r_gov_DY2 (scalar): curvature of the debt-elastic premium</span>
+<span class="sd">        debt_ratio_ss (scalar): debt anchor the premium is centered on</span>
+<span class="sd">        r_ss (scalar): steady-state market return</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: r_gov_shift path, same length as r_gov_shift_path</span>
+<span class="sd">    """</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">PROGRAM_YEARS</span><span class="p">)</span>
+    <span class="n">r0</span> <span class="o">=</span> <span class="n">history_real_rate_on_debt</span><span class="p">(</span><span class="n">g_y</span><span class="p">,</span> <span class="n">g_n</span><span class="p">)</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">r0</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">r0</span><span class="p">,</span> <span class="n">LONG_RUN_R_GOV</span><span class="p">,</span> <span class="n">R_GOV_CONVERGENCE_PERIODS</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">1</span><span class="p">:],</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">centering</span> <span class="o">=</span> <span class="n">r_gov_DY2</span> <span class="o">*</span> <span class="n">debt_ratio_ss</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">r_gov_scale</span> <span class="o">*</span> <span class="n">r_ss</span> <span class="o">-</span> <span class="n">centering</span> <span class="o">-</span> <span class="n">targets</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">history_anchored_params</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">r_ss</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    All fiscal and external parameters of the history-anchored baseline,</span>
+<span class="sd">    derived from the Specifications object's growth and premium settings.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        p (Specifications): parameters carrying g_y, g_n, r_gov_scale,</span>
+<span class="sd">            r_gov_DY2, tau_c, adjustment_factor_for_cit_receipts</span>
+<span class="sd">        r_ss (scalar): steady-state market return used in the shift path;</span>
+<span class="sd">            defaults to R_SS_FOR_R_GOV</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: ready for Specifications.update_specifications</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">r_ss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">r_ss</span> <span class="o">=</span> <span class="n">R_SS_FOR_R_GOV</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">history_spending_paths</span><span class="p">())</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">history_compliance_paths</span><span class="p">())</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"zeta_D"</span><span class="p">]</span> <span class="o">=</span> <span class="n">history_zeta_D_path</span><span class="p">()</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">derived_transfer_eta</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">history_revenue_paths</span><span class="p">(</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau_c</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="nb">float</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">adjustment_factor_for_cit_receipts</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"r_gov_shift"</span><span class="p">]</span> <span class="o">=</span> <span class="n">history_r_gov_shift_path</span><span class="p">(</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">g_y</span><span class="p">,</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">g_n</span><span class="p">,</span>
+        <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">r_gov_scale</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">r_gov_DY2</span><span class="p">),</span>
+        <span class="n">HISTORY_DEBT_RATIO_SS</span><span class="p">,</span>
+        <span class="n">r_ss</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"initial_debt_ratio"</span><span class="p">]</span> <span class="o">=</span> <span class="n">IMF_PUBLIC_DEBT</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"debt_ratio_ss"</span><span class="p">]</span> <span class="o">=</span> <span class="n">HISTORY_DEBT_RATIO_SS</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"r_gov_DY"</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">r_gov_DY2</span><span class="p">)</span> <span class="o">*</span> <span class="n">HISTORY_DEBT_RATIO_SS</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">"tG1"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">PROGRAM_YEARS</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">remittance_level_params</span><span class="p">(</span><span class="n">scenario</span><span class="o">=</span><span class="s2">"history"</span><span class="p">))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">statutory_tax_params</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">PENSIONS_ON</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">defined_benefit_params</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">scenario_params</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">scenario</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">r_ss</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    The fiscal, external and remittance parameters of a baseline scenario.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        p (Specifications): see history_anchored_params</span>
+<span class="sd">        scenario (str): one of SCENARIOS; defaults to DEFAULT_SCENARIO</span>
+<span class="sd">        r_ss (scalar): see history_anchored_params</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: ready for Specifications.update_specifications</span>
+<span class="sd">    """</span>
+    <span class="n">scenario</span> <span class="o">=</span> <span class="n">check_scenario</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scenario</span> <span class="o">==</span> <span class="s2">"program"</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">fiscal_program_params</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">r_ss</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">history_anchored_params</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">r_ss</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">derived_remittance_params</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">scenario</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span>
 </pre></div>
 
                 </article>

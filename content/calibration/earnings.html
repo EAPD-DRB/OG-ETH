@@ -158,6 +158,10 @@
   
 
   
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
 </div>
 
     </header>
@@ -477,7 +481,9 @@
 <button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
 </button>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -493,6 +499,20 @@
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#approach">Approach</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#age-factor-from-national-transfer-accounts">Age factor from National Transfer Accounts</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#group-levels-from-the-world-inequality-database">Group levels from the World Inequality Database</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#results">Results</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#limits">Limits</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -504,24 +524,114 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="lifetime-earnings-profiles">
 <span id="chap-lfearn"></span><h1>Lifetime Earnings Profiles<a class="headerlink" href="#lifetime-earnings-profiles" title="Link to this heading">#</a></h1>
-<p>Among households in <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code>, we model variations in the labor productivity over the lifecycle and between households of different skill groups. Together, these variations in productivity generate a distribution of earnings that is calibrated to match the level of inequality in Ethiopia. This chapter describes the calibration of the lifecycle earnings profiles and the distribution of earnings in the model.</p>
-<p>Differences among workers’ productivity is one of the key dimensions of heterogeneity to model in a micro-founded macroeconomy. In this chapter, we characterize this heterogeneity as deterministic lifetime productivity paths to which new cohorts of agents in the model are randomly assigned. In <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code>, households’ labor income comes from the equilibrium wage and the agent’s endogenous quantity of labor supply. In this section, we augment the labor income expression with an individual productivity <span class="math notranslate nohighlight">\(e_{j,s}\)</span>, where <span class="math notranslate nohighlight">\(j\)</span> is the index of the ability type or path of the individual and <span class="math notranslate nohighlight">\(s\)</span> is the age of the individual with that ability path.</p>
+<p>Among households in <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code>, we model variations in labor productivity over the lifecycle and between households of different skill groups. Together, these variations generate a distribution of earnings. This chapter describes how the lifecycle earnings profiles are calibrated to Ethiopian data on the age profile of labor income and on the distribution of income across households.</p>
+<p>Differences among workers’ productivity is one of the key dimensions of heterogeneity to model in a micro-founded macroeconomy. We characterize this heterogeneity as deterministic lifetime productivity paths to which new cohorts of agents in the model are randomly assigned. Households’ labor income comes from the equilibrium wage and the agent’s endogenous quantity of labor supply, augmented by an individual productivity <span class="math notranslate nohighlight">\(e_{j,s}\)</span>, where <span class="math notranslate nohighlight">\(j\)</span> is the index of the ability type or path of the individual and <span class="math notranslate nohighlight">\(s\)</span> is the age of the individual with that ability path.</p>
 <div class="math notranslate nohighlight" id="equation-eqlaborincome">
-<span class="eqno">(15)<a class="headerlink" href="#equation-eqlaborincome" title="Link to this equation">#</a></span>\[  \text{labor income:}\quad x_{j,s,t}\equiv w_t e_{j,s}n_{j,s,t} \quad\forall j,t \quad\text{and}\quad E+1\leq s\leq E+S\]</div>
+<span class="eqno">(16)<a class="headerlink" href="#equation-eqlaborincome" title="Link to this equation">#</a></span>\[  \text{labor income:}\quad x_{j,s,t}\equiv w_t e_{j,s}n_{j,s,t} \quad\forall j,t \quad\text{and}\quad E+1\leq s\leq E+S\]</div>
 <p>In this specification, <span class="math notranslate nohighlight">\(w_t\)</span> is an equilibrium wage representing a portion of labor income that is common to all workers. Individual quantity of labor supply is <span class="math notranslate nohighlight">\(n_{j,s,t}\)</span>, and <span class="math notranslate nohighlight">\(e_{j,s}\)</span> represents a labor productivity factor that augments or diminishes the productivity of a worker’s labor supply relative to average productivity.</p>
-<p>We calibrate the model such that each lifetime income group has a different life-cycle profile of earnings. Since the distribution on income and wealth are key aspects of our model, we calibrate these processes so that we can represent earners in the top 1 percent of the distribution of lifetime income.</p>
-<p>We calibrate deterministic productivity paths such that each lifetime income group has a different life-cycle profile of earnings. The distribution of income and wealth are often focal components of macroeconomic models. These calibrations require the use of microeconomic data on household incomes, but this level of data is not readily available for Ethiopia from public sources or surveys. To overcome this, we start with the proposition that estimated productivity curves calibrated for the <a class="reference external" href="https://pslmodels.github.io/OG-USA/content/calibration/earnings.html">OG-USA</a> model, generated from micro-level earnings data, represent a generalized relationship between age and lifetime income <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../OGETH_references.html#id25" title="Jason DeBacker, Richard W. Evans, Evan Magnusson, Kerk L. Phillips, Shanthi Ramnath, and Isaac Swift. The distributional effects of redistributional tax policy. mimeo, Open Source Macroeconomics Laboratory, January 2017.">DeBacker <em>et al.</em>, 2017</a>]</span>. As such, our objective is to generate the curves for the U.S. and then adjust their generalized shapes to produce those for Ethiopia. In other words, our strategic approach is to begin with the lifecycle labor productivity profiles estimated from detailed U.S. data and then adjust these to match the distribution of income in Ethiopia, as measured with the Gini coefficient. This is done in by finding the value of <span class="math notranslate nohighlight">\(a\)</span>, such that:</p>
+<section id="approach">
+<h2>Approach<a class="headerlink" href="#approach" title="Link to this heading">#</a></h2>
+<p>Estimating lifetime productivity paths requires long panels of individual earnings, which do not exist for Ethiopia. As in the other OG-Core country models, we therefore start from the <span class="math notranslate nohighlight">\(J=10\)</span> profiles estimated for the United States in <a class="reference external" href="https://pslmodels.github.io/OG-USA/content/calibration/earnings.html">OG-USA</a> <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../OGETH_references.html#id25" title="Jason DeBacker, Richard W. Evans, Evan Magnusson, Kerk L. Phillips, Shanthi Ramnath, and Isaac Swift. The distributional effects of redistributional tax policy. mimeo, Open Source Macroeconomics Laboratory, January 2017.">DeBacker <em>et al.</em>, 2017</a>]</span>, interpolate them onto the seven lifetime-income groups used here, <span class="math notranslate nohighlight">\(\boldsymbol{\lambda}=[0.25, 0.25, 0.20, 0.10, 0.10, 0.09, 0.01]\)</span>, and then reshape them with Ethiopian data. The reshaping is the two-step method first proposed for <code class="docutils literal notranslate"><span class="pre">OG-ZAF</span></code> (<a class="reference external" href="https://github.com/EAPD-DRB/OG-ZAF/issues/18">EAPD-DRB/OG-ZAF#18</a>), implemented here as a function that runs from the data rather than as fitted coefficients:</p>
+<ol class="arabic simple">
+<li><p><strong>Over age</strong>, every US profile is multiplied by an age factor <span class="math notranslate nohighlight">\(A_s\)</span> built from National Transfer Accounts labor-income profiles, so that the shape of Ethiopian earnings over the lifecycle replaces the US one.</p></li>
+<li><p><strong>Across lifetime-income groups</strong>, each profile is scaled by a constant <span class="math notranslate nohighlight">\(G_j\)</span> so that the income shares the matrix implies for the seven groups equal the shares observed in the World Inequality Database for Ethiopia.</p></li>
+</ol>
 <div class="math notranslate nohighlight" id="equation-eqnearningscalib">
-<span class="eqno">(16)<a class="headerlink" href="#equation-eqnearningscalib" title="Link to this equation">#</a></span>\[    e^{PHL} = e^{USA} * exp^{(a * e^{USA})}\]</div>
-<p>and where, <span class="math notranslate nohighlight">\(e^{PHL}\)</span>, when applied to the population distribution of Ethiopia, returns a Gini coefficient that matches the observed Gini coefficient for Ethiopia, 31.1.</p>
+<span class="eqno">(17)<a class="headerlink" href="#equation-eqnearningscalib" title="Link to this equation">#</a></span>\[    e^{ETH}_{j,s} = e^{USA}_{j,s}\; A_s\; G_j, \qquad \sum_{s,j} e^{ETH}_{j,s}\,\omega_{s,j} = 1\]</div>
+<p>where <span class="math notranslate nohighlight">\(\omega_{s,j}\)</span> is the steady-state population distribution over age and lifetime-income group. What carries over from the US estimates is the <em>shape of each profile over age</em>; the level of every age relative to other ages and of every group relative to other groups is set by Ethiopian data. <code class="docutils literal notranslate"><span class="pre">get_e_interp</span></code> also accepts a caller’s own target shares (<code class="docutils literal notranslate"><span class="pre">group_shares</span></code>) or, as the sibling models do, a single Gini coefficient (<code class="docutils literal notranslate"><span class="pre">gini_to_match</span></code>), in which case the groups are tilted, <span class="math notranslate nohighlight">\(e \cdot \exp(a e)\)</span>, until the Gini of <span class="math notranslate nohighlight">\(e\)</span> over the population equals the target.</p>
+<p>This replaces the earlier calibration, shared with several sibling models, that tilted the US profiles with a single scalar so that the model reproduced the ratio of the two countries’ Gini coefficients. That approach used one number, and in <code class="docutils literal notranslate"><span class="pre">OG-ETH</span></code> the number was a World Bank <em>consumption</em> Gini for Ethiopia (31.1) set against an <em>income</em> Gini for the United States (41.5), which understated Ethiopian inequality by a wide margin (issue #33). The reshaping uses seven income shares and eighty ages instead of one statistic.</p>
+<p>The code is in <code class="docutils literal notranslate"><span class="pre">ogeth/income.py</span></code>; <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">ogeth.income</span></code> regenerates the packaged matrix from the packaged demographics and prints the comparison with the data.</p>
+<section id="age-factor-from-national-transfer-accounts">
+<h3>Age factor from National Transfer Accounts<a class="headerlink" href="#age-factor-from-national-transfer-accounts" title="Link to this heading">#</a></h3>
+<p>The National Transfer Accounts project <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../OGETH_references.html#id84" title="National Transfer Accounts Project. National transfer accounts database: labor income age profiles (ethiopia 2005, united states 2006). 2022. Ethiopia profile prepared by Terefe Degefa, uploaded April 2022. URL: https://www.ntaccounts.org/web/nta/show/Browse%20database.">National Transfer Accounts Project, 2022</a>]</span> publishes smoothed mean labor income per capita by single year of age. Ethiopia’s only profile is for 2005 (prepared by Terefe Degefa); the US profile closest in time is 2006. Labor income per capita mixes two things, how many people of an age work and how much each earns, and the model’s <span class="math notranslate nohighlight">\(e_{j,s}\)</span> is productivity per unit of labor supplied, with labor supply decided separately (see the labor supply section of <span class="xref std std-ref">Chap_Households</span>). We therefore divide each per-capita profile by the ILOSTAT employment-to-population ratio of the same country and year (five-year age bands, interpolated), to obtain labor income per <em>worker</em> by age. Each per-worker profile is normalized to its mean over ages 20–64 and the age factor is their ratio:</p>
+<div class="math notranslate nohighlight">
+\[  A_s = \frac{y^{ETH}_s / \bar{y}^{ETH}}{y^{USA}_s / \bar{y}^{USA}}, \qquad y^c_s = \frac{\text{NTA labor income per capita}^c_s}{\text{employment ratio}^c_s}\]</div>
+<p>Beyond 65 the employment ratio is a single open band in both countries, so per-worker earnings cannot be measured by age there; from 65 the factor is held at its mean over ages 60–64, and the shape of the profiles at older ages is the US shape (itself an arctan extrapolation for ages 80–100 in <span class="bibtex-citation" id="id3">[<a class="reference internal" href="../OGETH_references.html#id25" title="Jason DeBacker, Richard W. Evans, Evan Magnusson, Kerk L. Phillips, Shanthi Ramnath, and Isaac Swift. The distributional effects of redistributional tax policy. mimeo, Open Source Macroeconomics Laboratory, January 2017.">DeBacker <em>et al.</em>, 2017</a>]</span>). Little labor is supplied at those ages, so this matters little for the results.</p>
+<p>Ethiopian earnings per worker peak earlier and fall faster after 50 than US earnings. The factor is about 1.5 at age 20, 1.3 at 25, 1.2 through the thirties, 1.05 at 45, 0.8 at 55 and 0.55 from 60. As a result the population-weighted age profile of <span class="math notranslate nohighlight">\(e\)</span> relative to the thirties is 0.63 in the twenties, 1.25 in the forties, 1.10 in the fifties and 0.75 in the sixties, where the US shape gives 0.60, 1.43, 1.69 and 1.63. This is the difference between an economy of long formal careers with returns to seniority and one where most work is physical and self-employed.</p>
+</section>
+<section id="group-levels-from-the-world-inequality-database">
+<h3>Group levels from the World Inequality Database<a class="headerlink" href="#group-levels-from-the-world-inequality-database" title="Link to this heading">#</a></h3>
+<p>The World Inequality Database (WID) <span class="bibtex-citation" id="id4">[<a class="reference internal" href="../OGETH_references.html#id85" title="World Inequality Lab. World inequality database: pre-tax national income shares and gini coefficients, equal-split adults. 2024. Series sptincj992 and gptincj992, Ethiopia and United States, 2021. URL: https://wid.world/.">World Inequality Lab, 2024</a>]</span> publishes pre-tax national income shares by percentile group for equal-split adults; Ethiopia’s series (2021 is the latest estimate) is built from the household consumption surveys with a correction for top incomes. We read off the shares of the seven lifetime-income groups directly from the cumulative shares WID reports at the 25th, 50th, 70th, 80th, 90th and 99th percentiles, and choose <span class="math notranslate nohighlight">\(G_j\)</span> so that the share of total ability-weighted labor accruing to each group in the model, <span class="math notranslate nohighlight">\(\sum_s e_{j,s}\omega_{s,j} / \sum_{s,j} e_{j,s}\omega_{s,j}\)</span>, equals the WID share. Because the shares are linear in <span class="math notranslate nohighlight">\(G_j\)</span>, this is a single rescaling, and the resulting matrix reproduces the seven shares exactly.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Lifetime-income group</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\lambda_j\)</span></p></th>
+<th class="head"><p>WID share, Ethiopia 2021</p></th>
+<th class="head"><p>Lifetime mean of <span class="math notranslate nohighlight">\(e_{j,s}\)</span></p></th>
+<th class="head"><p>For reference: WID share, United States 2021</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1 (bottom 25%)</p></td>
+<td><p>0.25</p></td>
+<td><p>4.4%</p></td>
+<td><p>0.18</p></td>
+<td><p>3.4%</p></td>
+</tr>
+<tr class="row-odd"><td><p>2 (25–50%)</p></td>
+<td><p>0.25</p></td>
+<td><p>13.0%</p></td>
+<td><p>0.52</p></td>
+<td><p>10.1%</p></td>
+</tr>
+<tr class="row-even"><td><p>3 (50–70%)</p></td>
+<td><p>0.20</p></td>
+<td><p>16.0%</p></td>
+<td><p>0.80</p></td>
+<td><p>14.7%</p></td>
+</tr>
+<tr class="row-odd"><td><p>4 (70–80%)</p></td>
+<td><p>0.10</p></td>
+<td><p>11.0%</p></td>
+<td><p>1.10</p></td>
+<td><p>10.8%</p></td>
+</tr>
+<tr class="row-even"><td><p>5 (80–90%)</p></td>
+<td><p>0.10</p></td>
+<td><p>15.2%</p></td>
+<td><p>1.52</p></td>
+<td><p>15.0%</p></td>
+</tr>
+<tr class="row-odd"><td><p>6 (90–99%)</p></td>
+<td><p>0.09</p></td>
+<td><p>30.0%</p></td>
+<td><p>3.33</p></td>
+<td><p>26.2%</p></td>
+</tr>
+<tr class="row-even"><td><p>7 (top 1%)</p></td>
+<td><p>0.01</p></td>
+<td><p>10.5%</p></td>
+<td><p>10.47</p></td>
+<td><p>19.9%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="results">
+<h2>Results<a class="headerlink" href="#results" title="Link to this heading">#</a></h2>
+<figure class="align-default" id="figearnvsdata">
+<a class="reference internal image-reference" href="../../_images/earnings_vs_data.png"><img alt="../../_images/earnings_vs_data.png" src="../../_images/earnings_vs_data.png" style="height: 350px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 13 </span><span class="caption-text">Left: the population-weighted age profile of <span class="math notranslate nohighlight">\(e\)</span> against the unadjusted OG-USA profile and the two NTA per-worker profiles it is reshaped with (each relative to its mean at ages 30–39). Right: the income share of each lifetime-income group implied by <span class="math notranslate nohighlight">\(e\)</span> against the WID shares for Ethiopia and the United States.</span><a class="headerlink" href="#figearnvsdata" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <figure class="align-default" id="figlogabil">
 <a class="reference internal image-reference" href="../../_images/ability_profiles.png"><img alt="../../_images/ability_profiles.png" src="../../_images/ability_profiles.png" style="height: 350px;" />
 </a>
 <figcaption>
-<p><span class="caption-number">Fig. 8 </span><span class="caption-text">Exogenous life cycle income ability paths <span class="math notranslate nohighlight">\(\log(e_{j,s})\)</span> with <span class="math notranslate nohighlight">\(S=80\)</span> and <span class="math notranslate nohighlight">\(J=7\)</span></span><a class="headerlink" href="#figlogabil" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 14 </span><span class="caption-text">Exogenous life cycle income ability paths <span class="math notranslate nohighlight">\(\log(e_{j,s})\)</span> with <span class="math notranslate nohighlight">\(S=80\)</span> and <span class="math notranslate nohighlight">\(J=7\)</span></span><a class="headerlink" href="#figlogabil" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p><a class="reference internal" href="#figlogabil"><span class="std std-numref">Figure 8</span></a> shows a calibration for <span class="math notranslate nohighlight">\(J=7\)</span> deterministic lifetime ability paths <span class="math notranslate nohighlight">\(e_{j,s}\)</span> corresponding to labor income percentiles <span class="math notranslate nohighlight">\(\boldsymbol{\lambda}=[0.25, 0.25, 0.20, 0.10, 0.10, 0.09, 0.01]\)</span>. Because there are few individuals above age 80 in the data, <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../OGETH_references.html#id25" title="Jason DeBacker, Richard W. Evans, Evan Magnusson, Kerk L. Phillips, Shanthi Ramnath, and Isaac Swift. The distributional effects of redistributional tax policy. mimeo, Open Source Macroeconomics Laboratory, January 2017.">DeBacker <em>et al.</em>, 2017</a>]</span> extrapolate these estimates for model ages 80-100 using an arctan function.</p>
+<p><a class="reference internal" href="#figlogabil"><span class="std std-numref">Figure 14</span></a> shows the resulting <span class="math notranslate nohighlight">\(J=7\)</span> deterministic lifetime ability paths <span class="math notranslate nohighlight">\(e_{j,s}\)</span>, and <a class="reference internal" href="#figearnvsdata"><span class="std std-numref">Figure 13</span></a> compares them with the data they are built from. The lifetime means of the seven groups run from 0.18 for the bottom quarter to 10.47 for the top percent, a ratio of 59 against 28 in the US profiles interpolated to the same groups and 8.8 in the previous Gini-tilted calibration. The Gini coefficient of <span class="math notranslate nohighlight">\(e\)</span> over the model population is 0.520, against WID’s 0.516 for Ethiopia’s pre-tax income: the shares pin down inequality <em>between</em> the groups, and the variation of earnings over age <em>within</em> each group adds the small remainder.</p>
+<p>Two alternatives were considered and are available through the function’s arguments. Tilting the groups to WID’s Gini alone (<code class="docutils literal notranslate"><span class="pre">gini_to_match=0.516</span></code>) puts the top percent at 24 times the average and the bottom quarter at 0.36, because a single-parameter tilt can only stretch the distribution proportionally; the seven shares are a richer target. Scaling the groups by Ethiopia’s shares <em>relative to the US shares</em> — a ratio approach in the spirit of the family’s Gini-ratio method — gives a Gini of only 0.35 and a bottom quarter at 0.54, because it inherits the wedge between the OG-USA profiles (lifetime labor earnings of workers, with a bottom-quarter share of 10 percent) and WID’s annual income per adult (3.4 percent in the United States). We impose Ethiopia’s shares directly: the distribution of income across households is one of the model’s focal outputs, and the data describe it without detour through the United States.</p>
+</section>
+<section id="limits">
+<h2>Limits<a class="headerlink" href="#limits" title="Link to this heading">#</a></h2>
+<p>Three limits are worth stating plainly. First, WID’s pre-tax national income includes capital income, which is more concentrated than labor income, so imposing its shares on the labor-ability matrix overstates the concentration of <em>earnings</em> at the top; WID publishes labor-income shares for the United States but not for Ethiopia, so the correction cannot be made from the same source. Second, the model has no non-employment: every household of working age supplies labor, whereas WID’s adult population includes people with no income. Ethiopia’s employment ratios of 80–90 percent at working ages make this less of a distortion than it would be for the United States, but the bottom quarter’s share of 4.4 percent is partly people with no income rather than low earnings. Third, the Ethiopian NTA profile is from 2005 and WID’s Ethiopian estimate rests on consumption surveys with a borrowed top correction; no Ethiopian earnings panel exists to check either. The 2021/22 Ethiopia Socioeconomic Panel Survey has individual wages and hours and would allow a cross-sectional check of both the age profile and the shares when its microdata are used.</p>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -578,6 +688,29 @@
             </div>
             
             
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#approach">Approach</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#age-factor-from-national-transfer-accounts">Age factor from National Transfer Accounts</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#group-levels-from-the-world-inequality-database">Group levels from the World Inequality Database</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#results">Results</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#limits">Limits</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

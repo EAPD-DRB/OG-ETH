@@ -456,11 +456,13 @@
             </div>
             <nav aria-label="Page">
                 <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calibration-vintage-and-refresh-policy">Calibration vintage and refresh policy</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#economic-assumptions">Economic Assumptions</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#open-economy-parameters">Open Economy Parameters</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#foreign-holding-of-government-debt-in-the-initial-period">Foreign holding of government debt in the initial period</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#foreign-purchases-of-newly-issued-debt">Foreign purchases of newly issued debt</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#foreign-holdings-of-excess-capital">Foreign holdings of excess capital</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#world-interest-rate">World interest rate</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#government-debt-spending-and-transfers">Government Debt, Spending and Transfers</a><ul class="nav section-nav flex-column">
@@ -470,8 +472,19 @@
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate-transfers">Aggregate transfers</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#government-expenditures">Government expenditures</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#foreign-aid">Foreign aid</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two-baselines-history-anchored-and-program">Two baselines: history-anchored and program</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-program-scenario-the-program-path-and-the-transition">The program scenario: the program path and the transition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-household-wealth">Initial household wealth</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#remittances">Remittances</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#level">Level</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#growth-path">Growth path</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#distribution-across-households">Distribution across households</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#steady-state-validation">Steady-state validation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#footnotes">Footnotes</a></li>
 </ul>
             </nav>
@@ -486,47 +499,476 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="calibration-of-macroeconomic-parameters">
 <span id="chap-macrocalib"></span><h1>Calibration of Macroeconomic Parameters<a class="headerlink" href="#calibration-of-macroeconomic-parameters" title="Link to this heading">#</a></h1>
+<section id="calibration-vintage-and-refresh-policy">
+<h2>Calibration vintage and refresh policy<a class="headerlink" href="#calibration-vintage-and-refresh-policy" title="Link to this heading">#</a></h2>
+<p>The macroeconomic parameters below are calibrated to Ethiopian fiscal year <strong>2024/25</strong> (Ethiopian FY runs 8 July–7 July, so FY2024/25 ended 7 July 2025), which is the OG-ETH model start year of 2025.  This is the first full-year vintage that reflects the July 2024 exchange-rate float, and it materially changes the debt block relative to the pre-float FY2023/24 numbers used in earlier calibrations.</p>
+<p>Following the approach used in the sibling models OG-PHL and OG-IDN, only parameters whose documented source is genuinely a live data feed are refreshed when <code class="docutils literal notranslate"><span class="pre">Calibration(update_from_api=True)</span></code> runs.  For OG-ETH that is <code class="docutils literal notranslate"><span class="pre">g_y_annual</span></code> (World Bank WDI) and <code class="docutils literal notranslate"><span class="pre">gamma</span></code> (UN ILOSTAT).  Every other parameter on this page is a documented, point-in-time value held in <a class="reference external" href="https://github.com/EAPD-DRB/OG-ETH/blob/main/ogeth/ogeth_default_parameters.json"><code class="docutils literal notranslate"><span class="pre">ogeth_default_parameters.json</span></code></a> so that a live update cannot silently overwrite a value sourced from a report table or a national statistical office.  In particular the World Bank Quarterly Public Sector Debt pull and the IMF Government Finance Statistics pull are switched off (the QPSD database has no Ethiopia coverage, and the IMF SDMX endpoint returns only 2002-vintage data for Ethiopia).</p>
+<blockquote>
+<div><p><strong>A note on GDP rebasing.</strong>  All ratios on this page sit on Ethiopia’s 2015/16-base national accounts.  The Ministry of Planning and Development and the IMF program both schedule a national-accounts rebasing for late 2026 (base year 2024/25 or 2025/26).  Because services are widely thought to be undermeasured, the rebasing is expected to raise the nominal-GDP level, which would mechanically shrink every ratio here (debt/GDP, transfers/GDP, government consumption/GDP, the effective consumption-tax rate).  The calibration should be revisited once the rebased accounts are published.</p>
+</div></blockquote>
+</section>
 <section id="economic-assumptions">
 <h2>Economic Assumptions<a class="headerlink" href="#economic-assumptions" title="Link to this heading">#</a></h2>
-<p>As the default rate of labor augmenting technological change, <span class="math notranslate nohighlight">\(g_y\)</span>, we use a value of 6%.  The average annual growth rate in GDP per capita in Ethiopia between 2006 and 2024 is 6.0% per year, according to <a class="reference external" href="https://data.worldbank.org/indicator/NY.GDP.PCAP.KD.ZG?locations=ET">data from the World Bank</a>.</p>
+<p>As the default rate of labor-augmenting technological change, <span class="math notranslate nohighlight">\(g_y\)</span>, we use a value of <strong>4.7%</strong>.  This is the average annual growth rate of GDP per capita in Ethiopia over <strong>2016–2025</strong>, according to <a class="reference external" href="https://data.worldbank.org/indicator/NY.GDP.PCAP.KD.ZG?locations=ET">data from the World Bank</a> (series <code class="docutils literal notranslate"><span class="pre">NY.GDP.PCAP.KD</span></code>).</p>
+<p><span class="math notranslate nohighlight">\(g_y\)</span> is the <em>permanent</em> balanced-growth-path rate of labor-augmenting technical change, so it should reflect Ethiopia’s sustainable long-run growth rather than a historical episode.  We deliberately do not use the longer 2006–2024 window, whose ~6.0% average embeds the 2004–2015 state-led investment boom that the <a class="reference external" href="https://www.imf.org/en/publications/cr/issues/2026/01/29/the-federal-democratic-republic-of-ethiopia-fourth-review-under-the-extended-573522">IMF Country Report 26/20</a> Debt Sustainability Analysis explicitly assumes will not repeat (“growth slower than historical rates of around 10 percent per annum over the two decades prior to 2019”).  The post-2015 decade averages over the post-boom normalization, the 2020–2022 conflict-and-COVID dip, and the recent gold-export-driven recovery, giving a more defensible long-run anchor.  The IMF’s own medium-term path (~8% real GDP growth) implies roughly 5.6% per-capita growth on UN population projections, which we treat as a program-optimistic upper bound rather than the balanced-growth rate.</p>
 </section>
 <section id="open-economy-parameters">
 <h2>Open Economy Parameters<a class="headerlink" href="#open-economy-parameters" title="Link to this heading">#</a></h2>
 <section id="foreign-holding-of-government-debt-in-the-initial-period">
 <h3>Foreign holding of government debt in the initial period<a class="headerlink" href="#foreign-holding-of-government-debt-in-the-initial-period" title="Link to this heading">#</a></h3>
-<p>The path of foreign holding of domestic debt is endogenous, but the initial period stock of debt held by foreign investors is exogenous.  We set <code class="docutils literal notranslate"><span class="pre">initial_foreign_debt_ratio</span> <span class="pre">=</span> <span class="pre">0.42</span></code> using <a class="reference external" href="https://www.mofed.gov.et/media/filer_public/da/15/da150f60-a08c-440d-832c-111410cc1f85/public_sector_debt_statistical_bulletin_no_51-final12.pdf">Ministry of Finance Public Sector Debt Statistical Bulletin No. 51</a>, Table 25: external debt of USD 28.89 billion against total public debt of USD 68.86 billion at end of FY2023/24 (42 percent).</p>
+<p>The path of foreign holding of domestic debt is endogenous, but the initial-period stock of debt held by foreign investors is exogenous.  We set <code class="docutils literal notranslate"><span class="pre">initial_foreign_debt_ratio</span> <span class="pre">=</span> <span class="pre">0.63</span></code> using the external share of public and publicly guaranteed (PPG) debt at end-June 2025 (FY2024/25).  The <a class="reference external" href="https://www.mofed.gov.et/resources/bulletin/">Ministry of Finance Public Sector Debt Statistical Bulletin No. 56</a> (Feb 2026), Table 25, reports external debt of USD 34.09 billion against total public debt of USD 53.20 billion (64.1 percent), and the <a class="reference external" href="https://www.imf.org/en/publications/cr/issues/2026/01/29/the-federal-democratic-republic-of-ethiopia-fourth-review-under-the-extended-573522">joint World Bank–IMF Debt Sustainability Analysis</a> for the fourth ECF review puts the external share at 62.9 percent of PPG debt.  The July 2024 float (the birr moved from about 57 to about 135 per US dollar) mechanically raised the birr value of external debt, so the foreign share jumped from about 45 percent (FY2023/24) to about 63 percent (FY2024/25).</p>
 </section>
 <section id="foreign-purchases-of-newly-issued-debt">
 <h3>Foreign purchases of newly issued debt<a class="headerlink" href="#foreign-purchases-of-newly-issued-debt" title="Link to this heading">#</a></h3>
-<p>We set <span class="math notranslate nohighlight">\(\zeta_D = 0.12\)</span>, the share of newly issued government debt held by foreign creditors.  This anchors on FY2023/24 flow data in the <a class="reference external" href="https://www.mofed.gov.et/media/filer_public/da/15/da150f60-a08c-440d-832c-111410cc1f85/public_sector_debt_statistical_bulletin_no_51-final12.pdf">Ministry of Finance Public Sector Debt Statistical Bulletin No. 51</a>: the change in external debt was about USD 0.64 billion against a change in total public debt of about USD 5.53 billion, a foreign share of net new issuance near 11.6 percent.</p>
+<p>We set <span class="math notranslate nohighlight">\(\zeta_D = 0.15\)</span>, the share of newly issued government debt held by foreign creditors.  The FY2024/25 realized flow is an outlier: net external borrowing of about 1.0 percent of GDP against net domestic financing of about 0.2 percent (a foreign share above 80 percent) reflected a one-off surge of IMF and World Bank budget support combined with a debt-service standstill during the restructuring, per the <a class="reference external" href="https://documents.worldbank.org/curated/en/099060226161033684">World Bank Inclusive Growth DPO Program Document</a> (May 2026), Table 2.  Over the medium term the DSA projects net external financing falling back toward zero (and turning negative as amortization resumes) while net domestic financing shifts toward market-based instruments, so the foreign share of net new issuance settles well below the FY2024/25 outlier.  We set <span class="math notranslate nohighlight">\(\zeta_D = 0.15\)</span> as the long-run value, between that near-zero steady-state share and the concessional-external dependence that persists through the transition.  Along the program <span class="math notranslate nohighlight">\(\zeta_D\)</span> is a path: with debt falling, it is the share of each year’s debt reduction borne by external creditors, and the IMF’s external and domestic debt paths (<span class="bibtex-citation" id="id1">[<a class="reference internal" href="../OGETH_references.html#id79" title="International Monetary Fund. The federal democratic republic of ethiopia: fifth review under the extended credit facility arrangement. IMF Country Report 26/174, International Monetary Fund, July 2026. URL: https://www.imf.org/-/media/files/publications/cr/2026/english/1ethea2026002.pdf.">International Monetary Fund, 2026</a>]</span>, Table 1: external 31.8 → 16.7, domestic 18.7 → 11.9 percent of GDP) put that share at 0.37, 0.62, 0.69, 1.0, 0.96 and 0.77 for FY2025/26–FY2030/31 — amortization to external creditors carries most of the adjustment — after which it returns to 0.15 (<code class="docutils literal notranslate"><span class="pre">macro_params.program_zeta_D_path</span></code>).  With the constant 0.15 the model’s external debt had fallen only to 20 percent of GDP by FY2030/31.</p>
 </section>
 <section id="foreign-holdings-of-excess-capital">
 <h3>Foreign holdings of excess capital<a class="headerlink" href="#foreign-holdings-of-excess-capital" title="Link to this heading">#</a></h3>
-<p>We set <span class="math notranslate nohighlight">\(\zeta_K = 0.20\)</span>.  Foreign direct investment inflows averaged 2 to 3 percent of GDP between 2018 and 2024 per the <a class="reference external" href="https://unctad.org/system/files/official-document/wir2025_en.pdf">UNCTAD World Investment Report</a> against gross fixed capital formation of about 25 percent of GDP per the <a class="reference external" href="https://data.worldbank.org/indicator/NE.GDI.FTOT.ZS?locations=ET">World Bank gross fixed capital formation series</a>, implying foreign financing of new capital near 10 percent.  The <a class="reference external" href="https://www.imf.org/en/Publications/Annual-Report-on-Exchange-Arrangements-and-Exchange-Restrictions">IMF Annual Report on Exchange Arrangements and Exchange Restrictions</a> documents binding controls by Ethiopia’s central bank on foreign currency outflows and no resident access to international portfolio markets, with foreign banking access first opened under the 2024 financial-sector reform.</p>
+<p>We set <span class="math notranslate nohighlight">\(\zeta_K = 0.16\)</span>, anchored on Ethiopia’s <strong>normalized Chinn-Ito capital-account-openness index</strong>, which is 0.162 in the 2023 vintage and flat since the 1990s (the <a class="reference external" href="https://web.pdx.edu/~ito/Chinn-Ito_website.htm">Chinn-Ito KAOPEN dataset</a>).  This places Ethiopia in the second-lowest openness bin, just above fully-closed economies and well below the investment-grade siblings OG-PHL (0.45) and OG-IDN (0.42).  It is cross-checked against the flow evidence: foreign direct investment of about USD 4.0 billion in FY2024/25 (<a class="reference external" href="https://unctad.org/publication/world-investment-report-2025">Ethiopian Investment Commission</a>) against gross fixed capital formation of about 20 percent of a roughly USD 126 billion economy implies foreign financing of new capital in the low-teens percent (about 11–16 percent depending on the window), consistent with <span class="math notranslate nohighlight">\(\zeta_K\)</span> near 0.16.  Ethiopia is a near-closed capital account: the <a class="reference external" href="https://www.imf.org/en/Publications/Annual-Report-on-Exchange-Arrangements-and-Exchange-Restrictions">IMF Annual Report on Exchange Arrangements and Exchange Restrictions</a> documents binding foreign-exchange controls until the July 2024 reform, no resident access to international portfolio markets, and only nascent foreign participation via the Ethiopian Securities Exchange (launched January 2025) and the 2024 banking-sector opening.  The value is a modest reduction from the previous 0.20, moving the model’s steady-state foreign-owned capital share toward the low level implied by Ethiopia’s international investment position.</p>
+</section>
+<section id="world-interest-rate">
+<h3>World interest rate<a class="headerlink" href="#world-interest-rate" title="Link to this heading">#</a></h3>
+<p>We set <code class="docutils literal notranslate"><span class="pre">world_int_rate_annual</span> <span class="pre">=</span> <span class="pre">0.063</span></code>, the required real return of foreign investors in Ethiopian capital.  In OG-Core the world rate is not a portfolio benchmark: it fixes <span class="math notranslate nohighlight">\(K^{open}\)</span>, the capital stock firms would demand at that return, and foreign capital fills a share <span class="math notranslate nohighlight">\(\zeta_K\)</span> of the gap between it and what domestic wealth finances, <span class="math notranslate nohighlight">\(K_f = \zeta_K\,(K^{open} - K_d)\)</span>.  At the 4 percent risk-free benchmark used before, <span class="math notranslate nohighlight">\(K^{open}\)</span> was about 4.5 times GDP and the model’s foreign-owned capital stock settled at 0.37 of GDP, half again the ~0.24 inward-FDI stock in the data.  Foreign direct investment in a frontier market like Ethiopia earns — and is only supplied at — a much higher return than the risk-free rate: UNCTAD’s <a class="reference external" href="https://www.imf.org/external/pubs/ft/bop/2018/pdf/18-30.pdf">World Investment Report 2018</a> measures the rate of return on inward FDI in Africa at 6.3 percent in 2017 (down from 12.3 percent in 2012).  At 6.3 percent the foreign-owned capital stock comes out near the FDI stock.  Ethiopia is a distressed sovereign (it defaulted on its single Eurobond and is still restructuring), so the “risk-free rate plus a small sovereign spread” logic used for the investment-grade siblings OG-PHL and OG-IDN does not apply to its <em>debt</em>; the sovereign’s cost of funds is calibrated separately below.</p>
 </section>
 </section>
 <section id="government-debt-spending-and-transfers">
 <h2>Government Debt, Spending and Transfers<a class="headerlink" href="#government-debt-spending-and-transfers" title="Link to this heading">#</a></h2>
 <section id="government-debt">
 <h3>Government Debt<a class="headerlink" href="#government-debt" title="Link to this heading">#</a></h3>
-<p>The path of government debt is endogenous. But the initial value and the steady-state (long-run) value are exogenous. To avoid converting between model units and dollars, we calibrate the initial debt to GDP ratio, rather than the dollar value of the debt. This is the model parameter <span class="math notranslate nohighlight">\(\alpha_D\)</span> and the parameter name in <a class="reference external" href="https://github.com/EAPD-DRB/OG-ETH/blob/main/ogeth/ogeth_default_parameters.json"><code class="docutils literal notranslate"><span class="pre">ogeth_default_parameters.json</span></code></a> is <code class="docutils literal notranslate"><span class="pre">initial_debt_ratio</span></code>.  We set <code class="docutils literal notranslate"><span class="pre">initial_debt_ratio</span> <span class="pre">=</span> <span class="pre">0.327</span></code> from the <a class="reference external" href="https://www.mofed.gov.et/media/filer_public/da/15/da150f60-a08c-440d-832c-111410cc1f85/public_sector_debt_statistical_bulletin_no_51-final12.pdf">Ministry of Finance Public Sector Debt Statistical Bulletin No. 51</a>, reporting total public debt at 32.9 percent of GDP for FY2023/24.</p>
-<p>The steady-state debt-to-GDP ratio is set as <code class="docutils literal notranslate"><span class="pre">debt_ratio_ss</span> <span class="pre">=</span> <span class="pre">0.40</span></code>.  This anchors the long-run debt level to the <a class="reference external" href="https://www.imf.org/en/publications/cr/issues/2025/07/15/the-federal-democratic-republic-of-ethiopia-2025-article-iv-consultation-third-review-under-568611">IMF Country Report 25/188</a> medium-term fiscal framework (Table 1), which projects Ethiopia’s public-debt-to-GDP ratio declining from a 49.8 percent peak in FY2024/25 to 34.5 percent by FY2028/29.  The value sits well below the 55 percent threshold at which low-income countries are classified as at high risk of debt distress under the IMF/World Bank Debt Sustainability Framework.</p>
+<p>The path of government debt is endogenous, but the initial value and the steady-state (long-run) value are exogenous.  To avoid converting between model units and birr, we calibrate the initial debt-to-GDP ratio rather than the birr value of the debt.  This is the model parameter <span class="math notranslate nohighlight">\(\alpha_D\)</span>; the parameter name in <a class="reference external" href="https://github.com/EAPD-DRB/OG-ETH/blob/main/ogeth/ogeth_default_parameters.json"><code class="docutils literal notranslate"><span class="pre">ogeth_default_parameters.json</span></code></a> is <code class="docutils literal notranslate"><span class="pre">initial_debt_ratio</span></code>.</p>
+<p>We set <code class="docutils literal notranslate"><span class="pre">initial_debt_ratio</span> <span class="pre">=</span> <span class="pre">0.505</span></code>, public debt at end-June 2025 (FY2024/25) in the IMF’s fifth ECF review (<span class="bibtex-citation" id="id2">[<a class="reference internal" href="../OGETH_references.html#id79" title="International Monetary Fund. The federal democratic republic of ethiopia: fifth review under the extended credit facility arrangement. IMF Country Report 26/174, International Monetary Fund, July 2026. URL: https://www.imf.org/-/media/files/publications/cr/2026/english/1ethea2026002.pdf.">International Monetary Fund, 2026</a>]</span>, Table 1).  This is a sharp increase from 35.5 percent in FY2023/24, and the increase is almost entirely valuation: the July 2024 float raised the birr value of external debt, lifting external debt from 15.8 to 31.8 percent of GDP while domestic debt fell from 19.7 to 18.7 percent.  The debt block is therefore calibrated on the post-float basis throughout.</p>
+<p>The steady-state debt-to-GDP ratio depends on the scenario (<a class="reference internal" href="#sec-scenarios"><span class="std std-ref">Two baselines: history-anchored and program</span></a>).  The packaged <strong>history-anchored baseline</strong> sets <code class="docutils literal notranslate"><span class="pre">debt_ratio_ss</span> <span class="pre">=</span> <span class="pre">0.505</span></code>, the measured FY2024/25 ratio: the long-run anchor is a measurement, and OG-Core’s closure rule stabilizes debt where it starts rather than at a plan.  The <strong>program scenario</strong> sets it to 0.30, the IMF program’s medium-term path — the fifth review projects public debt declining from the FY2024/25 peak to 34.0 percent of GDP by FY2028/29 and 28.6 percent by FY2030/31 — a value below the 35 percent present-value benchmark used for weak debt-carrying-capacity countries under the IMF–World Bank debt sustainability framework, which is the constraint the program is built around.</p>
+<p>In both scenarios OG-Core’s debt-closure rule, which adjusts government consumption toward <code class="docutils literal notranslate"><span class="pre">debt_ratio_ss</span></code>, starts at <code class="docutils literal notranslate"><span class="pre">tG1</span> <span class="pre">=</span> <span class="pre">7</span></code> (FY2031/32).  Before that the baseline holds its inputs at the FY2025/26 budget values and lets debt fall or rise as the budget identity dictates; the program scenario imposes the program’s spending, revenue, grant and interest paths for FY2024/25–FY2030/31 (model periods 0–6), so that how it gets from 0.505 to 0.30 is calibrated too (<a class="reference internal" href="#sec-programpath"><span class="std std-ref">The program scenario: the program path and the transition</span></a>).</p>
 <section id="interest-rates-on-government-debt">
 <h4>Interest rates on government debt<a class="headerlink" href="#interest-rates-on-government-debt" title="Link to this heading">#</a></h4>
-<p>We assume that there is a wedge between the real rate of return on private capital and the real interest rate on government debt.  We model this wedge a scale and level shift.  Specifically, we assume that the real interest rate on government debt, <span class="math notranslate nohighlight">\(r_{gov,t}\)</span>, is related to the real rate of return on private capital, <span class="math notranslate nohighlight">\(r_{t}\)</span>, by the following equation:</p>
+<p>We assume a wedge between the real rate of return on private capital and the real interest rate on government debt.  OG-Core models this as a scale term, a level shift, and (optionally) a debt-elastic premium:</p>
 <div class="math notranslate nohighlight" id="equation-eqn-r-gov">
-<span class="eqno">(4)<a class="headerlink" href="#equation-eqn-r-gov" title="Link to this equation">#</a></span>\[    r_{gov,t} = (1-\tau_{d,t})r_t + \mu_d\]</div>
-<p>where <span class="math notranslate nohighlight">\(\tau_d\)</span> is the scale parameter and <span class="math notranslate nohighlight">\(\mu_d\)</span> is the level shift parameter.  We set the values of these two parameters to 0.245 and -0.034, respectively.  These are found by using the estimated relationship between corporate and sovereign yields in <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../OGETH_references.html#id75" title="Delong Li, Nicolas E. Magud, and Alejandro Werner. The long-run impact of sovereign yields on corporate yields in emerging markets. Journal of International Money and Finance, 130(C):, 2023. URL: https://ideas.repec.org/a/eee/jimfin/v130y2023ics0261560622001516.html, doi:10.1016/j.jimonfin.2022.1.">Li <em>et al.</em>, 2023</a>]</span> (Table 8, Column 2) and simulating a series of corporate yields given a series of sovereign yields between 2% and 12%.  We then estimate the scale and level shift parameters that best fit these simulated data using ordinary least squares.</p>
+<span class="eqno">(4)<a class="headerlink" href="#equation-eqn-r-gov" title="Link to this equation">#</a></span>\[    r_{gov,t} = \max\left\{(1-\tau_{d})r_t - \mu_{d,t} + \beta_1\frac{D_t}{Y_t} + \beta_2\left(\frac{D_t}{Y_t}\right)^2,\; 0\right\}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\tau_d\)</span> is the scale parameter (<code class="docutils literal notranslate"><span class="pre">r_gov_scale</span></code>), <span class="math notranslate nohighlight">\(\mu_{d,t}\)</span> is the level shift (<code class="docutils literal notranslate"><span class="pre">r_gov_shift</span></code>, a time path), and <span class="math notranslate nohighlight">\(\beta_1\)</span> (<code class="docutils literal notranslate"><span class="pre">r_gov_DY</span></code>), <span class="math notranslate nohighlight">\(\beta_2\)</span> (<code class="docutils literal notranslate"><span class="pre">r_gov_DY2</span></code>) govern the debt-elastic premium.  The scale is set to 0.245 by inverting the estimated relationship between corporate and sovereign yields in <span class="bibtex-citation" id="id3">[<a class="reference internal" href="../OGETH_references.html#id75" title="Delong Li, Nicolas E. Magud, and Alejandro Werner. The long-run impact of sovereign yields on corporate yields in emerging markets. Journal of International Money and Finance, 130(C):, 2023. URL: https://ideas.repec.org/a/eee/jimfin/v130y2023ics0261560622001516.html, doi:10.1016/j.jimonfin.2022.1.">Li <em>et al.</em>, 2023</a>]</span> (Table 8, Column 2): we simulate corporate yields for sovereign yields between 2 and 12 percent and estimate the scale and shift that best fit these simulated data by ordinary least squares (reproduced by <code class="docutils literal notranslate"><span class="pre">ogeth.macro_params.estimate_r_gov</span></code>).  The <strong>level</strong>, however, is anchored to Ethiopia’s actual real effective interest rate on public debt rather than to the cross-country intercept, because it multiplies the whole debt stock in the government’s interest bill and so decides what primary balance the debt path requires.</p>
+<p>Ethiopia’s effective interest rate on public debt is far below the model’s return on capital.  Most of the debt is concessional external debt (new FY2024/25 commitments carried an average interest rate of 0.77 percent with a 52 percent grant element, per <a class="reference external" href="https://www.mofed.gov.et/resources/bulletin/">MoF Bulletin No. 56</a>, Table 12), and the domestic paper has carried administered rates well below inflation.  The program’s own numbers make the point: interest payments of 0.8 percent of GDP on a debt stock of 50.5 percent in FY2024/25 are a 1.6 percent nominal effective rate against a GDP deflator of 17 percent, and even by FY2030/31 the projected 5.2 percent nominal effective rate (1.5 percent of GDP on 28.6 percent debt) sits below the projected 8.6 percent deflator (<span class="bibtex-citation" id="id4">[<a class="reference internal" href="../OGETH_references.html#id79" title="International Monetary Fund. The federal democratic republic of ethiopia: fifth review under the extended credit facility arrangement. IMF Country Report 26/174, International Monetary Fund, July 2026. URL: https://www.imf.org/-/media/files/publications/cr/2026/english/1ethea2026002.pdf.">International Monetary Fund, 2026</a>]</span>, Tables 1 and 2b).  In a real model this shows up as a <strong>negative real effective rate on the legacy debt</strong>, which is precisely what lets the program’s debt ratio fall by 22 points of GDP with primary balances that never exceed half a percent of GDP.</p>
+<p>We therefore calibrate <span class="math notranslate nohighlight">\(\mu_{d,t}\)</span> as a path.  For the program years the real effective rate that reproduces the IMF debt path given the program’s primary balances and the model’s growth follows from the debt identity: with detrended debt evolving as <span class="math notranslate nohighlight">\(d_t = \left[(1+r_{gov,t})d_{t-1} - pb_{t-1}\right]/\left(e^{g_y}(1+g_{n,t})\right)\)</span>, the implied rate is <span class="math notranslate nohighlight">\(r_{gov,t} = (d_t\,e^{g_y}(1+g_{n,t}) + pb_{t-1})/d_{t-1} - 1\)</span>, which runs from about −3.5 percent in FY2025/26 to −1.4 percent in FY2030/31 (<code class="docutils literal notranslate"><span class="pre">macro_params.implied_real_rate_on_debt</span></code>).  The calibrated <span class="math notranslate nohighlight">\(\mu_{d,t}\)</span> path puts <span class="math notranslate nohighlight">\(r_{gov}\)</span> on exactly these rates.  Whether the model can <em>follow</em> them depends on the installed OG-Core: <a class="reference internal" href="#equation-eqn-r-gov">(4)</a> clips the sovereign rate at a floor (<code class="docutils literal notranslate"><span class="pre">r_gov_floor</span></code>, a parameter since <a class="reference external" href="https://github.com/PSLmodels/OG-Core/pull/1203">PSLmodels/OG-Core#1203</a>, hard-coded at zero before it), and the example lowers the floor to −10 percent where the parameter exists so the negative program rates bind.  With the floor at zero the rate sits at zero through the program years instead, and the debt ratio declines more slowly than the program’s — to about 36 rather than 29 percent of GDP by FY2030/31 — before the closure rule takes it to target; that gap is the inflation tax on domestic debt holders and the below-market terms on external debt, which a real model with a non-negative real rate leaves out.  The project’s <code class="docutils literal notranslate"><span class="pre">uv</span></code> environment pins an OG-Core build that has the parameter (see <a class="reference internal" href="#sec-initialwealth"><span class="std std-ref">Initial household wealth</span></a>), and the results on this page use it.  After the program the rate converges linearly over four periods to a long-run 2 percent — a judgment between the still-negative program-horizon rate and the 4–5 percent the LMW intercept would imply, reflecting inflation settling at the authorities’ single-digit objective and domestic financing moving to market terms.  The steady-state <span class="math notranslate nohighlight">\(r_{gov}\)</span> of 2 percent, against a return on capital near 4.4 percent, implies a debt-stabilizing primary balance of <span class="math notranslate nohighlight">\((r_{gov}-g)/(1+g)\cdot\bar{D} \approx -1.3\)</span> percent of GDP, i.e. the steady state can run a modest primary deficit.</p>
+<p>Following OG-PHL and OG-IDN, we also turn on a <strong>debt-elastic sovereign premium</strong> — the crowding-out-via-risk channel that a distressed sovereign like Ethiopia faces but that OG-Core leaves off by default.  We use the convex form of <span class="bibtex-citation" id="id5">[]</span>, <span class="math notranslate nohighlight">\(\beta_2\left(D_t/Y_t - \bar{D}\right)^2\)</span> with <span class="math notranslate nohighlight">\(\beta_2 = 0.04\)</span>, and <strong>center it on the steady-state debt ratio</strong> <span class="math notranslate nohighlight">\(\bar{D} =\)</span> <code class="docutils literal notranslate"><span class="pre">debt_ratio_ss</span></code> <span class="math notranslate nohighlight">\(= 0.30\)</span> so the premium is exactly zero at the target and does not move the steady state; it only prices deviations of debt from target.  Expanding the square and folding the constant into the level shift (OG-Core subtracts <code class="docutils literal notranslate"><span class="pre">r_gov_shift</span></code>) gives</p>
+<div class="math notranslate nohighlight" id="equation-eqn-r-gov-center">
+<span class="eqno">(5)<a class="headerlink" href="#equation-eqn-r-gov-center" title="Link to this equation">#</a></span>\[    \beta_1 = -2\beta_2\bar{D} = -0.024, \qquad
+    \mu_{d,t} = \tau_d\,\bar{r} - r^{target}_{gov,t} + \beta_2\left(d_t - \bar{D}\right)^2 - \beta_2\bar{D}^2,\]</div>
+<p>evaluated at the program debt ratios <span class="math notranslate nohighlight">\(d_t\)</span> for the program years and at <span class="math notranslate nohighlight">\(\bar{D}\)</span> thereafter, with <span class="math notranslate nohighlight">\(\bar{r}\)</span> the steady-state return on capital (the transition’s <span class="math notranslate nohighlight">\(r\)</span> starts about 1.8 percentage points above its steady state, which the 0.245 scale turns into a sovereign rate of about 0.4 rather than 0 percent in the first program years).  The sign of the last term follows from OG-Core’s formula, <span class="math notranslate nohighlight">\(\beta_1 d + \beta_2 d^2 = \beta_2(d-\bar{D})^2 - \beta_2\bar{D}^2\)</span>: the shift must <em>subtract</em> <span class="math notranslate nohighlight">\(\beta_2\bar{D}^2\)</span> to cancel the expansion’s constant.  (The earlier calibration added it, which had put the long-run sovereign rate about 0.7 percentage points below the level it documented.)  The path is built by <code class="docutils literal notranslate"><span class="pre">macro_params.r_gov_shift_path</span></code> and pinned by <code class="docutils literal notranslate"><span class="pre">tests/test_fiscal_program.py</span></code>.</p>
 </section>
 </section>
 <section id="aggregate-transfers">
 <h3>Aggregate transfers<a class="headerlink" href="#aggregate-transfers" title="Link to this heading">#</a></h3>
-<p>We set <span class="math notranslate nohighlight">\(\alpha_T = 0.05\)</span>, combining about 3.4 percent of GDP for non-pension social benefits reported in the <a class="reference external" href="https://data.imf.org/en/Data-Explorer?datasetUrn=IMF.STA:GFS_SOO(12.0.0)&amp;amp;INDICATOR=G271_T">IMF Government Finance Statistics</a> with an additional 1.6 percent of GDP for social benefits and subsidies to households (fuel, fertilizer, food, medicine, expanded safety net) documented in <a class="reference external" href="https://www.imf.org/en/publications/cr/issues/2025/07/15/the-federal-democratic-republic-of-ethiopia-2025-article-iv-consultation-third-review-under-568611">IMF Country Report 25/188</a>.</p>
+<p><span class="math notranslate nohighlight">\(\alpha_T\)</span> is the ratio of cash transfers to households to GDP.  The IMF’s general-government accounts bundle these into recurrent spending together with the wage bill, goods and services and interest, so the household-transfer part has to be built up from its components (<span class="bibtex-citation" id="id6">[<a class="reference internal" href="../OGETH_references.html#id79" title="International Monetary Fund. The federal democratic republic of ethiopia: fifth review under the extended credit facility arrangement. IMF Country Report 26/174, International Monetary Fund, July 2026. URL: https://www.imf.org/-/media/files/publications/cr/2026/english/1ethea2026002.pdf.">International Monetary Fund, 2026</a>]</span>, ¶9, ¶20–22 and the social-safety-net box): explicit fuel and fertilizer subsidies of about 1 percent of GDP in FY2024/25 — fuel subsidies were effectively eliminated by March 2026, with a capped envelope in FY2026/27 to smooth the 2026 oil-price shock, while fertilizer imports (about 1 percent of GDP) remain subsidized — the government’s contribution to the Productive Safety Net Program (about 0.4 percent of GDP; the ETB 60 billion FY2026/27 allocation), and public pension payouts of roughly half a percent of GDP.  We set the path <span class="math notranslate nohighlight">\(\alpha_T\)</span> = 2.0, 1.8, 1.5 percent of GDP for FY2024/25–FY2026/27 and 1.5 percent thereafter.</p>
+<p>The transfers are targeted, not spread evenly.  OG-Core’s <code class="docutils literal notranslate"><span class="pre">eta</span></code> matrix allocates aggregate transfers across ages and lifetime-income groups and defaults to population shares; we build it by programme (<code class="docutils literal notranslate"><span class="pre">macro_params.transfer_eta</span></code>): the safety net (0.4 percent of GDP) goes per capita to the poorest quarter of households, the fertilizer subsidy (0.6 percent) per capita to the bottom 70 percent — smallholder agriculture — and pension payouts (0.5 percent) to retired households in the two formal groups.  The fourth and fifth groups receive nothing, and the poorest quarter receives 41 percent of transfers rather than its 25 percent population share.  The composition is the long-run one; the fuel subsidy that inflates FY2024/25–FY2025/26 is spread with the rest.</p>
+<p>The IMF’s <em>poverty-reducing expenditure</em> line (2.3 rising to 3.5 percent of GDP) is not a household transfer: it is education, health, agriculture, roads and water spending, which in the national accounts is government consumption and public investment and is therefore already inside <span class="math notranslate nohighlight">\(\alpha_G\)</span> and <span class="math notranslate nohighlight">\(\alpha_I\)</span>.  Likewise the federal block grant to the regions (about 1.8 percent of GDP) is an intergovernmental transfer, not a household one.</p>
 </section>
 <section id="government-expenditures">
 <h3>Government expenditures<a class="headerlink" href="#government-expenditures" title="Link to this heading">#</a></h3>
-<p>We set <span class="math notranslate nohighlight">\(\alpha_G = 0.055\)</span>, the most recent (2024) value of the <a class="reference external" href="https://data.worldbank.org/indicator/NE.CON.GOVT.ZS?locations=ET">World Bank General government final consumption expenditure (% of GDP)</a> series (<code class="docutils literal notranslate"><span class="pre">NE.CON.GOVT.ZS</span></code>), which captures current spending on goods and services and excludes capital outlays.  Public infrastructure investment is calibrated separately via <span class="math notranslate nohighlight">\(\alpha_I\)</span>.</p>
+<p><span class="math notranslate nohighlight">\(\alpha_G\)</span> is government consumption of goods and services relative to GDP.  We take it from the same general-government cash accounts as the rest of the fiscal block, so that the government budget identity the debt path obeys is the one the data describe: recurrent expenditure net of interest (which the model pays through <span class="math notranslate nohighlight">\(r_{gov}\)</span>) and net of the cash transfers in <span class="math notranslate nohighlight">\(\alpha_T\)</span>.  From <span class="bibtex-citation" id="id7">[<a class="reference internal" href="../OGETH_references.html#id79" title="International Monetary Fund. The federal democratic republic of ethiopia: fifth review under the extended credit facility arrangement. IMF Country Report 26/174, International Monetary Fund, July 2026. URL: https://www.imf.org/-/media/files/publications/cr/2026/english/1ethea2026002.pdf.">International Monetary Fund, 2026</a>]</span>, Table 2b, this gives 4.3 percent of GDP in FY2024/25, rising to 5.1, 5.2, 5.7, 5.8, 5.9 and 5.9 percent through FY2030/31 as the FY2025/26 budget restores real public-sector wages, and 5.9 percent thereafter.  The long-run value is close to the 5.8 percent that the <a class="reference external" href="https://data.worldbank.org/indicator/NE.CON.GOVT.ZS?locations=ET">World Bank general government final consumption expenditure (% of GDP)</a> series (<code class="docutils literal notranslate"><span class="pre">NE.CON.GOVT.ZS</span></code>) reports for 2025 on a national-accounts basis; the cash-accounts figure for FY2024/25 is lower because the wage bill was still depressed in real terms after the float.  Public investment is calibrated separately via <span class="math notranslate nohighlight">\(\alpha_I\)</span>, which follows the program’s capital expenditure — 5.0, 5.8, 5.5, 5.0, 5.4, 5.2 and 5.1 percent of GDP — and is held at 5.1 percent (see <a class="reference internal" href="firms.html#chap-firmcalib"><span class="std std-ref">Calibration of Firm Parameters</span></a> for the public-capital block).</p>
+<p>The three spending paths together reproduce the program’s primary expenditure (total expenditure less interest) to within a tenth of a percent of GDP in every program year, which <code class="docutils literal notranslate"><span class="pre">tests/test_fiscal_program.py</span></code> checks.</p>
+<blockquote>
+<div><p><strong>A note on federal versus general government.</strong>  Ethiopia is a federation, and the regional states execute much of the pro-poor spending and most of the education and health wage bill, financed largely by a federal block grant (about ETB 214 billion, ~1.8 percent of GDP, in FY2023/24 — an <em>intergovernmental</em> transfer, not a household transfer, and correctly excluded from <span class="math notranslate nohighlight">\(\alpha_T\)</span>).  The fiscal figures used here are the IMF/World Bank <strong>general-government</strong> aggregates, which consolidate federal and regional accounts.  Separately, much of Ethiopia’s public investment historically ran <em>off-budget through state-owned enterprises</em>, so general-government spending (~12 percent of GDP) understates the broader public sector — which is why public-sector <em>debt</em> is ~50 percent of GDP while on-budget spending looks small.  <span class="math notranslate nohighlight">\(\alpha_I\)</span> here is the on-budget general-government figure.</p>
+</div></blockquote>
 </section>
+<section id="foreign-aid">
+<h3>Foreign aid<a class="headerlink" href="#foreign-aid" title="Link to this heading">#</a></h3>
+<p>Ethiopia is one of the world’s largest aid recipients, and on-budget grants to the government were 1.7 percent of GDP in FY2024/25, elevated by post-reform donor budget support.  OG-Core’s <code class="docutils literal notranslate"><span class="pre">alpha_FA</span></code> parameter routes foreign aid to the domestic government as a share of GDP: it is a government resource (it funds spending and reduces the deficit) and an external inflow in the resource constraint.  It accepts a time path, and we set it to the program’s grants — 1.7, 1.3, 0.9, 0.3, 0.3, 0.3 and 0.1 percent of GDP for FY2024/25–FY2030/31 (<span class="bibtex-citation" id="id8">[<a class="reference internal" href="../OGETH_references.html#id79" title="International Monetary Fund. The federal democratic republic of ethiopia: fifth review under the extended credit facility arrangement. IMF Country Report 26/174, International Monetary Fund, July 2026. URL: https://www.imf.org/-/media/files/publications/cr/2026/english/1ethea2026002.pdf.">International Monetary Fund, 2026</a>]</span>, Table 2b) — and to 0.3 percent of GDP in the long run, a level a low-income country like Ethiopia is likely to keep receiving after the program’s donor surge fades.</p>
+</section>
+<section id="two-baselines-history-anchored-and-program">
+<span id="sec-scenarios"></span><h3>Two baselines: history-anchored and program<a class="headerlink" href="#two-baselines-history-anchored-and-program" title="Link to this heading">#</a></h3>
+<p>A calibration has to assume something about every fiscal and external input in every future year.  Measured history and the start year pin down only the starting values; for the years after, “hold at the start-year value” is as much an assumption as “follow the program”.  OG-ETH therefore ships two baselines built from the same data and the same household calibration, and reports both.</p>
+<p>The <strong>history-anchored baseline</strong> is the packaged default (<code class="docutils literal notranslate"><span class="pre">ogeth_default_parameters.json</span></code>; <code class="docutils literal notranslate"><span class="pre">macro_params.history_anchored_params</span></code>).  Every input takes an official outturn or enacted value and is held there: the FY2024/25 outturn for model period 0 and the enacted FY2025/26 budget for period 1 (<span class="bibtex-citation" id="id9">[<a class="reference internal" href="../OGETH_references.html#id79" title="International Monetary Fund. The federal democratic republic of ethiopia: fifth review under the extended credit facility arrangement. IMF Country Report 26/174, International Monetary Fund, July 2026. URL: https://www.imf.org/-/media/files/publications/cr/2026/english/1ethea2026002.pdf.">International Monetary Fund, 2026</a>]</span>, Table 2b, the budget-year column), then the budget-year value for the long run.  The income tax uses the statutory schedule in force, Proclamation 1395/2025 from FY2025/26, because it is law; nothing else that the program <em>projects</em> — revenue measures, base broadening, the decline of grants, the borrowing mix, the fall in remittances, the debt target — is imposed.  Debt, growth, the current account and the trade balance are model outcomes, compared with the IMF projections below but not fitted to them.  Two inputs are forward-looking by necessity and are stated as such: the real effective rate on debt holds the value the FY2024/25 outturn and the FY2025/26 budget imply for the stock (−3.5 percent, from the debt identity in <a class="reference internal" href="#sec-programpath"><span class="std std-ref">The program scenario: the program path and the transition</span></a>) for the program horizon and then converges to the 2 percent long-run rate over four years, because the stock’s nominal terms are fixed and inflation is a known outturn for the first years; and the foreign share of new borrowing is 0.15 throughout, the medium-term flow the debt sustainability analysis projects, because the FY2024/25 realized flow is a restructuring-year outlier and the 0.63 stock share is a poor guide to new borrowing while external debt is being restructured (see <em>Foreign purchases of newly issued debt</em> above).</p>
+<p>The <strong>program scenario</strong> (<code class="docutils literal notranslate"><span class="pre">macro_params.fiscal_program_params</span></code>; <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">examples/run_og_eth.py</span> <span class="pre">--scenario</span> <span class="pre">program</span></code>, results under <code class="docutils literal notranslate"><span class="pre">examples/OG-ETH-Example/program</span></code>) is the calibration described in the next section: the IMF fifth-review program’s spending, revenue, grant, borrowing and remittance paths imposed for FY2024/25–FY2030/31 and held, and the long-run debt ratio at the program’s 30 percent.  For a country under an ECF arrangement it is a legitimate reading of current policy, and it is the version to use when the question is what the program delivers.  Its debt path matches the IMF’s largely by construction — revenue and interest paths were built to reproduce it — so that match shows the fiscal block is internally consistent, not that the model independently reproduces Ethiopia; the history-anchored baseline is where the model’s own findings can be read.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head text-left"><p>Input</p></th>
+<th class="head text-left"><p>History-anchored baseline (packaged)</p></th>
+<th class="head text-left"><p>Program scenario</p></th>
+<th class="head text-left"><p>Source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">alpha_G</span></code>, <code class="docutils literal notranslate"><span class="pre">alpha_T</span></code>, <code class="docutils literal notranslate"><span class="pre">alpha_I</span></code> (% GDP)</p></td>
+<td class="text-left"><p>4.3, 1.5, 5.0 (FY2024/25); 5.1, 1.3, 5.8 (FY2025/26 budget), held</p></td>
+<td class="text-left"><p>program path FY2024/25–FY2030/31, then held</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 2b</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">alpha_FA</span></code> (% GDP)</p></td>
+<td class="text-left"><p>1.7; 1.3 (budget), held</p></td>
+<td class="text-left"><p>1.7 → 0.1 over the program; 0.3 long run</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 2b</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">tau_c</span></code>, CIT collections factor</p></td>
+<td class="text-left"><p>0.060, 0.327 held</p></td>
+<td class="text-left"><p>0.060 → 0.078, 0.327 → 0.472</p></td>
+<td class="text-left"><p>IMF program revenue path</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Income-tax compliance</p></td>
+<td class="text-left"><p>FY2024/25 calibration held</p></td>
+<td class="text-left"><p>broadens over the program (<a class="reference internal" href="taxes.html#chap-tax"><span class="std std-ref">Taxes in OG-ETH</span></a>)</p></td>
+<td class="text-left"><p>IMF CR 26/174, p. 15</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Income-tax schedule</p></td>
+<td class="text-left"><p>Proclamation 979/2016 in FY2024/25, 1395/2025 from FY2025/26</p></td>
+<td class="text-left"><p>same</p></td>
+<td class="text-left"><p>law</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">zeta_D</span></code></p></td>
+<td class="text-left"><p>0.15 throughout</p></td>
+<td class="text-left"><p>program external/domestic split, then 0.15</p></td>
+<td class="text-left"><p>IMF DSA; CR 26/174, Table 1</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">debt_ratio_ss</span></code></p></td>
+<td class="text-left"><p>0.505 (measured FY2024/25)</p></td>
+<td class="text-left"><p>0.30 (program)</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Real rate on debt</p></td>
+<td class="text-left"><p>−3.5% (budget-implied) held 7 years, then → 2%</p></td>
+<td class="text-left"><p>program-implied path (−3.5 to −1.4%), then → 2%</p></td>
+<td class="text-left"><p>debt identity</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">alpha_RM_1</span></code>, <code class="docutils literal notranslate"><span class="pre">alpha_RM_T</span></code></p></td>
+<td class="text-left"><p>0.056, 0.056</p></td>
+<td class="text-left"><p>0.056 → 0.041 over the program, held</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 4b</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">tG1</span></code></p></td>
+<td class="text-left"><p>7</p></td>
+<td class="text-left"><p>7</p></td>
+<td class="text-left"><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">macro_params.scenario_params(p,</span> <span class="pre">scenario)</span></code> builds either set from the same tables, <code class="docutils literal notranslate"><span class="pre">update_baseline.py</span></code> writes the packaged one, and <code class="docutils literal notranslate"><span class="pre">tests/test_fiscal_program.py</span></code> pins both.</p>
+</section>
+<section id="the-program-scenario-the-program-path-and-the-transition">
+<span id="sec-programpath"></span><h3>The program scenario: the program path and the transition<a class="headerlink" href="#the-program-scenario-the-program-path-and-the-transition" title="Link to this heading">#</a></h3>
+<p>In the program scenario the fiscal block follows the IMF fifth-review program for its seven fiscal years (FY2024/25 is model period 0, the 2025 start year) and holds the last value thereafter; OG-Core’s closure rule, which adjusts government consumption to bring debt to <code class="docutils literal notranslate"><span class="pre">debt_ratio_ss</span></code>, starts at <code class="docutils literal notranslate"><span class="pre">tG1</span> <span class="pre">=</span> <span class="pre">7</span></code> (FY2031/32).  Revenue follows the program too: the model’s tax revenue rises by the same percentage points of GDP as the IMF revenue line (9.2 to 12.3 percent).  About 0.7 points come from the formalization path in <a class="reference internal" href="taxes.html#chap-tax"><span class="std std-ref">Taxes in OG-ETH</span></a> — income-tax compliance improving in the fifth and sixth lifetime-income groups — and the remainder is split 60/40 between consumption taxes (<code class="docutils literal notranslate"><span class="pre">tau_c</span></code> 0.060 → 0.082, the VAT reform, excise and customs measures) and corporate-tax collections (<code class="docutils literal notranslate"><span class="pre">adjustment_factor_for_cit_receipts</span></code> 0.327 → 0.511, tax administration), following the direct-tax-heavy composition of the FY2025/26 outturn.  The payroll tax is unchanged.  The table gives the program values and the parameters they map to; all paths are derived from the IMF tables by <code class="docutils literal notranslate"><span class="pre">ogeth.macro_params</span></code> and rebuilt by <code class="docutils literal notranslate"><span class="pre">update_baseline.py</span></code>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head text-left"><p>Fiscal year (model period)</p></th>
+<th class="head text-center"><p>24/25 (0)</p></th>
+<th class="head text-center"><p>25/26 (1)</p></th>
+<th class="head text-center"><p>26/27 (2)</p></th>
+<th class="head text-center"><p>27/28 (3)</p></th>
+<th class="head text-center"><p>28/29 (4)</p></th>
+<th class="head text-center"><p>29/30 (5)</p></th>
+<th class="head text-center"><p>30/31 (6)</p></th>
+<th class="head text-center"><p>long run</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-left"><p>Public debt, IMF (% GDP)</p></td>
+<td class="text-center"><p>50.5</p></td>
+<td class="text-center"><p>45.3</p></td>
+<td class="text-center"><p>40.8</p></td>
+<td class="text-center"><p>37.2</p></td>
+<td class="text-center"><p>34.0</p></td>
+<td class="text-center"><p>31.2</p></td>
+<td class="text-center"><p>28.6</p></td>
+<td class="text-center"><p>30.0 (target)</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Revenue excl. grants, IMF (% GDP)</p></td>
+<td class="text-center"><p>9.2</p></td>
+<td class="text-center"><p>10.8</p></td>
+<td class="text-center"><p>11.4</p></td>
+<td class="text-center"><p>11.8</p></td>
+<td class="text-center"><p>12.1</p></td>
+<td class="text-center"><p>12.2</p></td>
+<td class="text-center"><p>12.3</p></td>
+<td class="text-center"><p>12.3</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Primary expenditure, IMF (% GDP)</p></td>
+<td class="text-center"><p>11.2</p></td>
+<td class="text-center"><p>12.8</p></td>
+<td class="text-center"><p>12.2</p></td>
+<td class="text-center"><p>12.2</p></td>
+<td class="text-center"><p>12.7</p></td>
+<td class="text-center"><p>12.6</p></td>
+<td class="text-center"><p>12.5</p></td>
+<td class="text-center"><p>12.5</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">alpha_G</span></code> (% GDP)</p></td>
+<td class="text-center"><p>4.3</p></td>
+<td class="text-center"><p>5.1</p></td>
+<td class="text-center"><p>5.2</p></td>
+<td class="text-center"><p>5.7</p></td>
+<td class="text-center"><p>5.8</p></td>
+<td class="text-center"><p>5.9</p></td>
+<td class="text-center"><p>5.9</p></td>
+<td class="text-center"><p>5.9</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">alpha_T</span></code> (% GDP), cash transfers excl. pensions</p></td>
+<td class="text-center"><p>1.5</p></td>
+<td class="text-center"><p>1.3</p></td>
+<td class="text-center"><p>1.0</p></td>
+<td class="text-center"><p>1.0</p></td>
+<td class="text-center"><p>1.0</p></td>
+<td class="text-center"><p>1.0</p></td>
+<td class="text-center"><p>1.0</p></td>
+<td class="text-center"><p>1.0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Pension benefits (% GDP), paid by the scheme</p></td>
+<td class="text-center"><p>0.5</p></td>
+<td class="text-center"><p>0.5</p></td>
+<td class="text-center"><p>0.5</p></td>
+<td class="text-center"><p>0.5</p></td>
+<td class="text-center"><p>0.5</p></td>
+<td class="text-center"><p>0.5</p></td>
+<td class="text-center"><p>0.5</p></td>
+<td class="text-center"><p>0.5</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">alpha_I</span></code> (% GDP)</p></td>
+<td class="text-center"><p>5.0</p></td>
+<td class="text-center"><p>5.8</p></td>
+<td class="text-center"><p>5.5</p></td>
+<td class="text-center"><p>5.0</p></td>
+<td class="text-center"><p>5.4</p></td>
+<td class="text-center"><p>5.2</p></td>
+<td class="text-center"><p>5.1</p></td>
+<td class="text-center"><p>5.1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">alpha_FA</span></code> (% GDP)</p></td>
+<td class="text-center"><p>1.7</p></td>
+<td class="text-center"><p>1.3</p></td>
+<td class="text-center"><p>0.9</p></td>
+<td class="text-center"><p>0.3</p></td>
+<td class="text-center"><p>0.3</p></td>
+<td class="text-center"><p>0.3</p></td>
+<td class="text-center"><p>0.1</p></td>
+<td class="text-center"><p>0.3</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><span class="math notranslate nohighlight">\(\zeta_D\)</span> (external share of debt change)</p></td>
+<td class="text-center"><p>0.37</p></td>
+<td class="text-center"><p>0.37</p></td>
+<td class="text-center"><p>0.62</p></td>
+<td class="text-center"><p>0.69</p></td>
+<td class="text-center"><p>1.00</p></td>
+<td class="text-center"><p>0.96</p></td>
+<td class="text-center"><p>0.77</p></td>
+<td class="text-center"><p>0.15</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Non-compliance, groups 5 / 6</p></td>
+<td class="text-center"><p>1 / 0.5</p></td>
+<td class="text-center"><p>0.97 / 0.42</p></td>
+<td class="text-center"><p>0.93 / 0.33</p></td>
+<td class="text-center"><p>0.9 / 0.25</p></td>
+<td class="text-center"><p>0.87 / 0.17</p></td>
+<td class="text-center"><p>0.83 / 0.08</p></td>
+<td class="text-center"><p>0.8 / 0</p></td>
+<td class="text-center"><p>0.8 / 0</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">tau_c</span></code></p></td>
+<td class="text-center"><p>0.060</p></td>
+<td class="text-center"><p>0.073</p></td>
+<td class="text-center"><p>0.077</p></td>
+<td class="text-center"><p>0.079</p></td>
+<td class="text-center"><p>0.080</p></td>
+<td class="text-center"><p>0.079</p></td>
+<td class="text-center"><p>0.078</p></td>
+<td class="text-center"><p>0.078</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>CIT collections factor</p></td>
+<td class="text-center"><p>0.327</p></td>
+<td class="text-center"><p>0.434</p></td>
+<td class="text-center"><p>0.465</p></td>
+<td class="text-center"><p>0.480</p></td>
+<td class="text-center"><p>0.488</p></td>
+<td class="text-center"><p>0.480</p></td>
+<td class="text-center"><p>0.472</p></td>
+<td class="text-center"><p>0.472</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Implied real rate on debt (%)</p></td>
+<td class="text-center"><p>—</p></td>
+<td class="text-center"><p>−3.5</p></td>
+<td class="text-center"><p>−3.7</p></td>
+<td class="text-center"><p>−1.1</p></td>
+<td class="text-center"><p>−1.5</p></td>
+<td class="text-center"><p>−1.8</p></td>
+<td class="text-center"><p>−1.4</p></td>
+<td class="text-center"><p>2.0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The figure compares the program scenario’s transition (<code class="docutils literal notranslate"><span class="pre">examples/run_og_eth.py</span> <span class="pre">--scenario</span> <span class="pre">program</span></code>) with the program path for the moments it imposes and for the ones it does not.  Model periods 0–6 sit on the program values by construction where a parameter is imposed (spending, and the remittance share, which glides from the measured level to the program endpoint); revenue, debt, the current account and growth are model outcomes.  The history-anchored baseline’s transition is compared with the same program numbers in <a class="reference internal" href="#calibvsprogram"><span class="std std-numref">Fig. 4</span></a> under <a class="reference internal" href="#sec-validation"><span class="std std-ref">Steady-state validation</span></a>.</p>
+<figure class="align-center" id="programvsprogram">
+<a class="reference internal image-reference" href="../../_images/program_scenario_vs_program.png"><img alt="../../_images/program_scenario_vs_program.png" src="../../_images/program_scenario_vs_program.png" style="width: 1980.0px; height: 2340.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">OG-ETH program scenario against the IMF fifth-review program path.  Shaded years are the program horizon over which the fiscal paths are imposed.</span><a class="headerlink" href="#programvsprogram" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="initial-household-wealth">
+<span id="sec-initialwealth"></span><h3>Initial household wealth<a class="headerlink" href="#initial-household-wealth" title="Link to this heading">#</a></h3>
+<p>The transition starts from a predetermined stock of household wealth.  By default OG-Core sets it to the steady-state level, which for Ethiopia would mean starting the economy with the capital stock it will only reach after decades of catch-up.  Where the installed OG-Core supports it (PSLmodels/OG-Core#1189, <code class="docutils literal notranslate"><span class="pre">initial_wealth_ratio</span></code>), the example anchors aggregate initial wealth to the data instead: household wealth in the model is domestically owned capital plus domestically held government debt, so its data counterpart is the Penn World Table capital-output ratio of about 2.2, less the inward FDI stock of about 0.24 of GDP (UNCTAD), plus domestically held public debt of 18.7 percent of GDP (50.5 less 31.8 external; <span class="bibtex-citation" id="id10">[<a class="reference internal" href="../OGETH_references.html#id79" title="International Monetary Fund. The federal democratic republic of ethiopia: fifth review under the extended credit facility arrangement. IMF Country Report 26/174, International Monetary Fund, July 2026. URL: https://www.imf.org/-/media/files/publications/cr/2026/english/1ethea2026002.pdf.">International Monetary Fund, 2026</a>]</span>, Table 1) — a ratio of <strong>2.15</strong> to steady-state GDP, against a steady-state wealth-to-GDP ratio near 3.1.  The value lives in <code class="docutils literal notranslate"><span class="pre">ogeth.macro_params.INITIAL_WEALTH_RATIO</span></code> and is applied by the example only when the parameter exists, so the packaged calibration keeps loading with the released OG-Core; it moves into <code class="docutils literal notranslate"><span class="pre">ogeth_default_parameters.json</span></code> once an OG-Core release carrying the parameter is the project’s floor.  Until then the project’s <code class="docutils literal notranslate"><span class="pre">uv</span></code> environment pins OG-Core to a build with both this parameter and <code class="docutils literal notranslate"><span class="pre">r_gov_floor</span></code> — OG-Core master merged into the #1189 branch, on <code class="docutils literal notranslate"><span class="pre">marcelolafleur/OG-Core</span></code> (<code class="docutils literal notranslate"><span class="pre">integrate/master-plus-1189</span></code>) — via <code class="docutils literal notranslate"><span class="pre">[tool.uv.sources]</span></code> in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, so <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span></code> followed by <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">python</span> <span class="pre">examples/run_og_eth.py</span></code> reproduces the results on this page; a <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ogeth</span></code> gets the released OG-Core and the two fallbacks the example announces.</p>
+</section>
+<section id="remittances">
+<h3>Remittances<a class="headerlink" href="#remittances" title="Link to this heading">#</a></h3>
+<p>Remittances are a defining feature of Ethiopian household income, and the model calibrates their level, their growth along the transition, and how they are shared out across households.  The theory is in the OG-Core chapter “<a class="reference external" href="https://pslmodels.github.io/OG-Core/content/theory/households.html#remittances">Remittances</a>”.</p>
+<section id="level">
+<h4>Level<a class="headerlink" href="#level" title="Link to this heading">#</a></h4>
+<p>The IMF’s fifth ECF review (<span class="bibtex-citation" id="id11">[<a class="reference internal" href="../OGETH_references.html#id79" title="International Monetary Fund. The federal democratic republic of ethiopia: fifth review under the extended credit facility arrangement. IMF Country Report 26/174, International Monetary Fund, July 2026. URL: https://www.imf.org/-/media/files/publications/cr/2026/english/1ethea2026002.pdf.">International Monetary Fund, 2026</a>]</span>, Table 4a) records net private transfers of USD 7,037 million in FY2024/25 — <strong>5.6 percent of GDP</strong>, larger than FDI — the first full post-float year and the vintage the rest of this page uses.  We set <code class="docutils literal notranslate"><span class="pre">alpha_RM_1</span> <span class="pre">=</span> <span class="pre">0.056</span></code>, the measured value, and <code class="docutils literal notranslate"><span class="pre">alpha_RM_T</span> <span class="pre">=</span> <span class="pre">0.041</span></code>, the program’s FY2030/31 projection, held for the long run like the other program series.  The World Bank WDI personal-remittances series (the BPM6 measure: personal transfers plus compensation of employees) puts the same inflow at USD 7.14 billion for calendar 2024; its lower GDP ratio (4.8 percent) reflects only a dollar-GDP denominator that straddles the July 2024 float, so the two sources agree on the flow.  Two caveats on the level.  The IMF line does not separate household remittances from transfers to NGOs, so it is an upper bound on household receipts; and formal channels capture only part of what the diaspora sends — market studies put informal flows at 65–80 percent of the total (<span class="bibtex-citation" id="id12">[<a class="reference internal" href="../OGETH_references.html#id82" title="United Nations Capital Development Fund. Ethiopia country assessment report on inclusive digital remittances. Technical Report, UNCDF Migrant Money, October 2022. URL: https://migrantmoney.uncdf.org/wp-content/uploads/2023/02/Ethiopia-Country-Assessment.pdf.">United Nations Capital Development Fund, 2022</a>]</span>) — so the measured figure is a floor on the true inflow.  We use the balance-of-payments value because it is the one consistent with the trade and current-account data the open-economy block is calibrated to.  The IMF projects the ratio peaking near 6 percent in FY2025/26 and easing to 4.1 percent by FY2030/31 as GDP outgrows transfers; the model follows that decline (next section) and keeps the endpoint as its long-run share.  Turning remittances on is what lets the model run a trade deficit at all: like aid, remittances are an external inflow that finances imports in excess of exports (how the model’s trade balance and current account compare with the data is taken up under Validation).</p>
+</section>
+<section id="growth-path">
+<h4>Growth path<a class="headerlink" href="#growth-path" title="Link to this heading">#</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">g_RM</span></code> is not the growth rate of remittances in dollars.  Before <span class="math notranslate nohighlight">\(t_{G1}\)</span> OG-Core advances <em>detrended</em> remittances by <span class="math notranslate nohighlight">\((1+g_{RM,t})/\left(e^{g_y}(1+g_{n,t-1})\right)\)</span>, independently of that period’s output, so remittances keep pace with trend GDP only when that factor is exactly one.  With Ethiopia’s productivity and population growth (about 4.7 and 2–3.5 percent a year) a scalar <code class="docutils literal notranslate"><span class="pre">g_RM</span> <span class="pre">=</span> <span class="pre">0</span></code> shrinks remittances relative to trend GDP by about 7 percent a year — from 5.6 percent toward 1.5 percent over the first twenty years — before OG-Core blends them back to <code class="docutils literal notranslate"><span class="pre">alpha_RM_T</span></code>.  <span class="math notranslate nohighlight">\(\alpha_{RM,1}\)</span> and <span class="math notranslate nohighlight">\(\alpha_{RM,T}\)</span> pin only the endpoints.  We therefore build <span class="math notranslate nohighlight">\(g_{RM,t}\)</span> on <span class="math notranslate nohighlight">\(e^{g_y}(1+g_{n,t-1}) - 1\)</span>, the path derived from the packaged <code class="docutils literal notranslate"><span class="pre">g_n</span></code> that keeps remittances exactly on trend GDP (because <span class="math notranslate nohighlight">\(g_n\)</span> falls over the transition no single constant does this), and scale it by the ratio of consecutive remittance shares along the program: the share glides geometrically from the measured 5.6 percent of GDP to the program’s 4.1 percent in FY2030/31 (5.6, 5.3, 5.0, 4.8, 4.5, 4.3, 4.1) and then holds, so that OG-Core’s blend toward <code class="docutils literal notranslate"><span class="pre">alpha_RM_T</span></code> after <span class="math notranslate nohighlight">\(t_{G1}\)</span> changes nothing.  The IMF’s year-by-year projection is not followed exactly: it peaks at 6.0 percent in FY2025/26 and then falls by up to 0.6 points a year, which would need remittance growth rates of +16 and −4 percent in consecutive periods, outside the bounds OG-Core places on <code class="docutils literal notranslate"><span class="pre">g_RM</span></code> (−2 to 15 percent).  Along the transition <span class="math notranslate nohighlight">\(RM/Y\)</span> also moves inversely with output’s deviation from trend; in the baseline run output stays close to trend and the share follows the glide to within 0.1 point of GDP (5.6, 5.3, 5.1, 4.8, 4.6, 4.4, 4.2).  The path is rebuilt with the demographics by <code class="docutils literal notranslate"><span class="pre">update_baseline.py</span></code> (the derivation lives in <code class="docutils literal notranslate"><span class="pre">ogeth.macro_params</span></code>), and <code class="docutils literal notranslate"><span class="pre">tests/test_remittances.py</span></code> asserts that on trend it reproduces the program shares exactly.</p>
+</section>
+<section id="distribution-across-households">
+<h4>Distribution across households<a class="headerlink" href="#distribution-across-households" title="Link to this heading">#</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">eta_RM</span></code> allocates aggregate remittances across ages and lifetime-income groups.  OG-Core’s default gives every group exactly its population share; the Ethiopian evidence says receipt is concentrated among better-off, urban households.  The World Bank’s national remittance survey (<span class="bibtex-citation" id="id13">[<a class="reference internal" href="../OGETH_references.html#id80" title="World Bank and Bendixen &amp; Amandi International. Remittances to ethiopia. Technical Report, World Bank, Future of African Remittances national surveys, October 2010. Survey of 2,412 Ethiopian adults, July 14 – September 4, 2010. URL: https://microdata.worldbank.org/index.php/catalog/595.">World Bank and Bendixen &amp; Amandi International, 2010</a>]</span>; 2,412 adults, margin of error 2 points) found 14 percent of adults receiving international remittances regularly; 35 percent of recipients were urban against 16 percent of the population; and recipients’ monthly household income was 9 percent below ETB 1,000, 47 percent at ETB 1,000–3,500 and 37 percent above ETB 3,500 (7 percent did not answer).  Against 2010 GDP per capita of ETB 4,262 (WDI) — about ETB 1,600 a month for a household of 4.6 — those brackets sit below, around and well above the mean, and we map them to the bottom two, middle two and top quintile of households.  Renormalizing over respondents gives remittance value shares by quintile of <strong>4.8, 4.8, 25.3, 25.3 and 39.8 percent</strong> from poorest to richest (the survey reports amounts per transfer without a systematic income gradient, so value shares follow recipient shares).  A 2011 household panel finds the same positive selection: recipient households are more educated and rated their economic position higher before receiving (<span class="bibtex-citation" id="id14">[<a class="reference internal" href="../OGETH_references.html#id81" title="Lisa Andersson. Migration, remittances and household welfare in ethiopia. UNU-MERIT Working Paper 2014-004, United Nations University – MERIT, 2014. URL: https://ideas.repec.org/p/unm/unumer/2014004.html.">Andersson, 2014</a>]</span>).</p>
+<p>The quintile shares are mapped onto the model’s seven lifetime-income groups by linear interpolation of the cumulative distribution (uniform density within each quintile), and spread per capita across ages within each group, so every household in a group receives the same amount.  The resulting group shares are 6.0, 16.3, 25.3, 12.6, 19.9, 17.9 and 2.0 percent against population shares of 25, 25, 20, 10, 10, 9 and 1: the bottom quarter of households receives 6 percent of remittance value rather than 25, and the top fifth 40 percent rather than 20.  Three caveats.  The survey is a 2010 vintage and inflows have since roughly doubled in dollars; the brackets are self-reported <em>current</em> income, so a household can sit in a higher bracket <em>because</em> it receives remittances, which overstates concentration relative to the lifetime-income concept the model’s groups represent; and mapping every household above ETB 3,500 a month to the whole top quintile is conservative in the other direction (in 2010 that threshold was well above the 80th percentile).  The survey’s age profile of recipients (over-represented at ages 25–34 and 65+) is not used, because its cells are coarse and the 65+ cell tiny.  The matrix is rebuilt with the demographics by <code class="docutils literal notranslate"><span class="pre">update_baseline.py</span></code>, and <code class="docutils literal notranslate"><span class="pre">tests/test_remittances.py</span></code> pins the quintile shares to the survey and the tilt toward higher-income groups.</p>
+</section>
+</section>
+</section>
+<section id="steady-state-validation">
+<span id="sec-validation"></span><h2>Steady-state validation<a class="headerlink" href="#steady-state-validation" title="Link to this heading">#</a></h2>
+<p>Most of the parameters on this page are only weakly identified from the data on their own, so the real test of the calibration is whether the <em>steady state they jointly produce</em> resembles the Ethiopian economy — and whether the transition from today’s starting point, with nothing imposed beyond the enacted budget, lands anywhere near the path the authorities and the IMF expect.  <a class="reference internal" href="#calibvsprogram"><span class="std std-numref">Fig. 4</span></a> puts the history-anchored baseline’s transition next to the IMF program numbers; here they are a comparison, not a target.</p>
+<figure class="align-center" id="calibvsprogram">
+<a class="reference internal image-reference" href="../../_images/calibration_vs_program.png"><img alt="../../_images/calibration_vs_program.png" src="../../_images/calibration_vs_program.png" style="width: 1980.0px; height: 2340.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">OG-ETH history-anchored baseline against the IMF fifth-review program path.  Shaded years are the program horizon; the model imposes nothing from the program after the FY2025/26 budget.</span><a class="headerlink" href="#calibvsprogram" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>The table below compares the steady states and program-year paths of both scenarios (from <code class="docutils literal notranslate"><span class="pre">examples/run_og_eth.py</span></code>, run with the OG-Core build that carries <code class="docutils literal notranslate"><span class="pre">initial_wealth_ratio</span></code>) with Ethiopian data; “program years” are FY2024/25–FY2030/31.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head text-left"><p>Moment</p></th>
+<th class="head text-center"><p>History-anchored baseline</p></th>
+<th class="head text-center"><p>Program scenario</p></th>
+<th class="head text-center"><p>Ethiopia data</p></th>
+<th class="head text-left"><p>Data source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-left"><p>Government debt <span class="math notranslate nohighlight">\(D/Y\)</span></p></td>
+<td class="text-center"><p>0.505 (anchor); path 50.5 → 34.9% by FY2030/31</p></td>
+<td class="text-center"><p>0.30 (anchor); 50.5 → 29.6%</p></td>
+<td class="text-center"><p>50.5% (FY2024/25); program 28.6% by FY2030/31</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>External public debt (% GDP)</p></td>
+<td class="text-center"><p>31.8 → 20.6 by FY2030/31; <span class="math notranslate nohighlight">\(D_f/D\)</span> 0.15 long run</p></td>
+<td class="text-center"><p>31.8 → 19.1</p></td>
+<td class="text-center"><p>31.8 → 16.7 (program); stock share 0.63</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 1</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Real effective rate on public debt <span class="math notranslate nohighlight">\(r_{gov}\)</span></p></td>
+<td class="text-center"><p>−3.5% held through FY2030/31; 2.0% long run</p></td>
+<td class="text-center"><p>−3.5 to −1.1% through FY2030/31; 1.9% long run</p></td>
+<td class="text-center"><p>negative through the program (5.2% nominal on the stock vs 8.6% deflator); ~0.8% on new external commitments</p></td>
+<td class="text-left"><p>IMF CR 26/174; MoF Bulletin 56</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Tax revenue <span class="math notranslate nohighlight">\(T/Y\)</span></p></td>
+<td class="text-center"><p>0.093; path 9.2 → 9.1%</p></td>
+<td class="text-center"><p>0.120; 9.2 → 11.8%</p></td>
+<td class="text-center"><p>7.8% (FY2024/25); 11.0% (FY2030/31 program)</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 2b</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Personal income tax / <span class="math notranslate nohighlight">\(Y\)</span></p></td>
+<td class="text-center"><p>0.015; 1.36% in FY2024/25</p></td>
+<td class="text-center"><p>0.024; 1.36% in FY2024/25, 2.3% by FY2030/31</p></td>
+<td class="text-center"><p>1.4% (FY2024/25)</p></td>
+<td class="text-left"><p>IMF SIP 2025/108</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Government consumption <span class="math notranslate nohighlight">\(G/Y\)</span></p></td>
+<td class="text-center"><p>0.052 (closure)</p></td>
+<td class="text-center"><p>0.069 (closure)</p></td>
+<td class="text-center"><p>0.059 (FY2030/31, recurrent net of interest and cash transfers)</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 2b</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Cash transfers <span class="math notranslate nohighlight">\(TR/Y\)</span></p></td>
+<td class="text-center"><p>0.013 (FY2025/26 budget, held)</p></td>
+<td class="text-center"><p>0.010</p></td>
+<td class="text-center"><p>0.010 (FY2026/27 onward, excl. pensions)</p></td>
+<td class="text-left"><p>IMF CR 26/174</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Public pension outlays / <span class="math notranslate nohighlight">\(Y\)</span></p></td>
+<td class="text-center"><p>0.005 in FY2024/25; 0.008 steady state</p></td>
+<td class="text-center"><p>same</p></td>
+<td class="text-center"><p>0.005 (FY2024/25)</p></td>
+<td class="text-left"><p>IMF CR 26/174</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Public investment <span class="math notranslate nohighlight">\(I_g/Y\)</span></p></td>
+<td class="text-center"><p>0.058 (FY2025/26 budget, held)</p></td>
+<td class="text-center"><p>0.051</p></td>
+<td class="text-center"><p>0.058 (FY2025/26); 0.051 (FY2030/31 program)</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 2b</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Remittances <span class="math notranslate nohighlight">\(RM/Y\)</span></p></td>
+<td class="text-center"><p>0.056 (flat)</p></td>
+<td class="text-center"><p>0.056 → 0.041</p></td>
+<td class="text-center"><p>0.056 (FY2024/25); program 0.041 by FY2030/31</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 4b</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Foreign-owned capital <span class="math notranslate nohighlight">\(K_f/Y\)</span></p></td>
+<td class="text-center"><p>0.32 (0.24 initially)</p></td>
+<td class="text-center"><p>0.30</p></td>
+<td class="text-center"><p>~0.24 (FDI stock)</p></td>
+<td class="text-left"><p>UNCTAD / WB</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Capital-output <span class="math notranslate nohighlight">\(K/Y\)</span></p></td>
+<td class="text-center"><p>private 2.04 (2.04 initially); total incl. public 2.37</p></td>
+<td class="text-center"><p>private 2.10; total 2.39</p></td>
+<td class="text-center"><p>~2.2 (total)</p></td>
+<td class="text-left"><p>Penn World Table</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Household wealth <span class="math notranslate nohighlight">\(B/Y\)</span></p></td>
+<td class="text-center"><p>2.15 (steady state, matched); 1.98 (initial)</p></td>
+<td class="text-center"><p>2.06; 1.99 (initial)</p></td>
+<td class="text-center"><p>2.15 (K/Y less FDI stock plus domestic debt)</p></td>
+<td class="text-left"><p>PWT, UNCTAD, IMF</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Total investment <span class="math notranslate nohighlight">\((I+I_g)/Y\)</span></p></td>
+<td class="text-center"><p>0.30 (30.3–31.7% along the program years)</p></td>
+<td class="text-center"><p>0.30 (29.5–31.5%)</p></td>
+<td class="text-center"><p>20.1% (FY2024/25); 27% (program, FY2030/31)</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 1</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Private consumption <span class="math notranslate nohighlight">\(C/Y\)</span></p></td>
+<td class="text-center"><p>0.70</p></td>
+<td class="text-center"><p>0.66</p></td>
+<td class="text-center"><p>0.81 (FY2024/25; BGP ~0.65–0.70)</p></td>
+<td class="text-left"><p>WDI <code class="docutils literal notranslate"><span class="pre">NE.CON.PRVT.ZS</span></code></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Current account <span class="math notranslate nohighlight">\(CA/Y\)</span></p></td>
+<td class="text-center"><p>−3.0 to −2.8% along the program years; −3.1% steady state</p></td>
+<td class="text-center"><p>−1.5 to −2.9%; −2.7%</p></td>
+<td class="text-center"><p>−1.1 to −2.7%</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 4b</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Trade balance <span class="math notranslate nohighlight">\(NX/Y\)</span></p></td>
+<td class="text-center"><p>−4.1 to −4.5%; −5.5% steady state</p></td>
+<td class="text-center"><p>−1.6 to −3.5%; −3.2%</p></td>
+<td class="text-center"><p>−8.3 to −9.9% (goods and services)</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 4b</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Factor payments abroad <span class="math notranslate nohighlight">\(r_p(K_f + D_f)/Y\)</span></p></td>
+<td class="text-center"><p>5.8% → 5.6%</p></td>
+<td class="text-center"><p>5.7% → 5.3%</p></td>
+<td class="text-center"><p>~1% (interest on external public debt about 0.3, FDI income under 1)</p></td>
+<td class="text-left"><p>IMF CR 26/174, Tables 1 and 4b</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>Real return on capital <span class="math notranslate nohighlight">\(r\)</span></p></td>
+<td class="text-center"><p>0.090</p></td>
+<td class="text-center"><p>0.084</p></td>
+<td class="text-center"><p>high (capital-scarce); FDI return in Africa 6.3%</p></td>
+<td class="text-left"><p>model-implied MPK; UNCTAD</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>Real GDP growth</p></td>
+<td class="text-center"><p>7.6–8.0% over the program years</p></td>
+<td class="text-center"><p>7.6–8.0%</p></td>
+<td class="text-center"><p>9.2 → 7.7%</p></td>
+<td class="text-left"><p>IMF CR 26/174, Table 1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>What the history-anchored baseline finds.</strong>  With nothing imposed after the FY2025/26 budget, the model’s debt ratio still falls, from 50.5 to 34.9 percent of GDP by FY2030/31, against the program’s 28.6.  About three quarters of the program’s debt decline therefore comes from growth and the negative real rate eroding the legacy stock, and about a quarter — 6 points of GDP — from the measures the program adds: the revenue path (tax revenue flat at 9.1 percent of GDP in the baseline against 11.0 in the program), the phase-out of grants, and the shift of borrowing to concessional external creditors.  That is the finding the comparison exists to produce.  The current account runs at 3 percent of GDP against the program’s 1–2.7, because the baseline keeps remittances and grants where they are but also keeps public investment at the budget-year 5.8 percent; growth is 7.6–8.0 percent against the program’s 7.7–9.2, the difference being the post-float gold and services boom the IMF projects for the first two years and the model does not carry.  The household side is where the calibration targets live and it sits on them: personal income tax 1.36 percent of GDP in FY2024/25 against 1.4, pension outlays 0.50 against 0.5, household wealth 2.15 times GDP against the 2.15 anchor, wealth shares within 3.5 percent of WID’s, hours on the survey at every fitted age (<span class="xref std std-ref">Chap_House</span>).</p>
+<p><strong>What the program scenario matches.</strong>  The program scenario reproduces the program’s primary expenditure exactly, its tax revenue to within a point of GDP (the model’s FY2024/25 base is a point above the IMF’s tax line and follows the same increments), its external debt ratio to within 2.4 points, and — with the sovereign rate on the program-implied negative real rates — <strong>its debt ratio to within a point of GDP in every program year</strong>, landing at 29.6 percent in FY2030/31 against 28.6.  Remittances follow the program from 5.6 to 4.1 percent of GDP and the current account, a model outcome, runs from −1.5 to −2.9 percent of GDP against the program’s −1.1 to −2.7, within 1.1 points every year.  Because revenue and interest were built to reproduce the debt path, that match is a check of internal consistency rather than an independent test.  The household parameters are matched on the history-anchored steady state and shared, so in the program scenario household wealth settles at 2.06 times GDP rather than 2.15 (lower debt leaves households less government paper to hold) and the top percent’s wealth share is 23.4 against 22.6 in the baseline.</p>
+<p><strong>What neither matches, and why.</strong>  Two gaps are common to both.  <em>Investment</em> is 30–32 percent of GDP against the program’s 27, and total capital (private plus public) 2.4 times GDP against the Penn World Table’s 2.2.  The two are the same fact: on a balanced growth path investment must replace depreciation and equip growth, <span class="math notranslate nohighlight">\((g+\delta)(K+K_g)/Y \approx 0.12 \times 2.4 = 0.29\)</span>, and the model’s public capital stock (0.29–0.33 of GDP in the steady state, starting from the measured 0.67) is what keeps total capital above the Penn World Table — the two sources disagree with each other about how much public capital Ethiopia has, and the model follows the IMF’s public-capital stock.  <em>The trade deficit</em> is 4–5 percent of GDP in the baseline and 2–3 in the program scenario against 8–10 percent in the data, even where the current account is close.  The statements are consistent because of how the model prices the rest of the current account.  Its current account is net exports less the returns paid on foreign-owned capital and foreign-held public debt, plus remittances and grants; OG-Core pays both foreign claims the household portfolio return <span class="math notranslate nohighlight">\(r_p\)</span> (10–11 percent in real terms along the program years; <code class="docutils literal notranslate"><span class="pre">fiscal.get_debt_service_f</span></code> and <code class="docutils literal notranslate"><span class="pre">aggregates.get_capital_outflows</span></code>), so factor payments abroad are 5.7–5.8 percent of GDP in FY2024/25.  Ethiopia pays about 1 percent of GDP: interest on its external public debt is concessional (0.3 percent of GDP) and repatriated FDI income is small.  With the current account tied down by the same inflows, a model that pays 5 points of GDP more abroad in factor income must import 5 points less; the remaining point of the gap is official and other transfers in the balance of payments that the model does not carry (on-budget grants are in <code class="docutils literal notranslate"><span class="pre">alpha_FA</span></code>, off-budget and NGO transfers are not).  The trade-balance gap is therefore a convention of OG-Core’s open-economy block — foreign-held debt serviced at the market return rather than at the sovereign rate — and not a shortfall of external financing in the calibration.  Neither gap is a parameter away: the first follows from the single-capital-good, balanced-growth structure of the model and the second from its pricing of foreign claims, and both are reported here as limits rather than calibrated around.  The remaining rows are where they were: the long-run consumption share sits between Ethiopia’s crisis-depressed current value and a balanced-growth level, and the foreign-held debt share converges from the initial 0.63 toward <span class="math notranslate nohighlight">\(\zeta_D\)</span>.</p>
 </section>
 <section id="footnotes">
 <span id="seclwi-footnotes"></span><h2>Footnotes<a class="headerlink" href="#footnotes" title="Link to this heading">#</a></h2>
@@ -600,11 +1042,13 @@
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calibration-vintage-and-refresh-policy">Calibration vintage and refresh policy</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#economic-assumptions">Economic Assumptions</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#open-economy-parameters">Open Economy Parameters</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#foreign-holding-of-government-debt-in-the-initial-period">Foreign holding of government debt in the initial period</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#foreign-purchases-of-newly-issued-debt">Foreign purchases of newly issued debt</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#foreign-holdings-of-excess-capital">Foreign holdings of excess capital</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#world-interest-rate">World interest rate</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#government-debt-spending-and-transfers">Government Debt, Spending and Transfers</a><ul class="nav section-nav flex-column">
@@ -614,8 +1058,19 @@
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate-transfers">Aggregate transfers</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#government-expenditures">Government expenditures</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#foreign-aid">Foreign aid</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two-baselines-history-anchored-and-program">Two baselines: history-anchored and program</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-program-scenario-the-program-path-and-the-transition">The program scenario: the program path and the transition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-household-wealth">Initial household wealth</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#remittances">Remittances</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#level">Level</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#growth-path">Growth path</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#distribution-across-households">Distribution across households</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#steady-state-validation">Steady-state validation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#footnotes">Footnotes</a></li>
 </ul>
   </nav></div>
