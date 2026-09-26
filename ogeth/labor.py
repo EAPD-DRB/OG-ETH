@@ -1,195 +1,336 @@
 """
-------------------------------------------------------------------------
-Computes the average labor participation rate for each age cohort.
-------------------------------------------------------------------------
+Labor supply targets and the chi_n calibration for OG-ETH.
+
+chi_n, the age profile of the disutility of labor, is calibrated so that
+the model's average labor supply by age matches hours worked per person
+in Ethiopia's 2021 Labour Force and Migration Survey (LFMS). The
+calibration solves the steady state repeatedly, rescaling chi_n between
+solves by the ratio of marginal disutilities at the model's and the
+data's labor supply, which is the exact adjustment when consumption and
+prices are held fixed.
 """
 
+import copy
+import json
 import os
+
 import numpy as np
 import pandas as pd
-from scipy import interpolate
-import matplotlib.pyplot as plt
+from ogcore import SS, household
 
-CUR_DIR = os.path.abspath(os.path.dirname(__file__))
+from ogeth import income
+
+CUR_PATH = os.path.abspath(os.path.dirname(__file__))
+DATA_DIR = os.path.join(CUR_PATH, "data")
+
+LFMS_YEAR = 2021
+# OG-USA's convention: labor supply is the share of a 16-hour waking day,
+# seven days a week
+WEEKLY_TIME_ENDOWMENT = (24 - 8) * 7
+# LFMS five-year bands placed at their midpoint; the open 65+ band at 67
+HOURS_BAND_MIDPOINTS = {
+    "10-14": 12,
+    "15-19": 17,
+    "20-24": 22,
+    "25-29": 27,
+    "30-34": 32,
+    "35-39": 37,
+    "40-44": 42,
+    "45-49": 47,
+    "50-54": 52,
+    "55-59": 57,
+    "60-64": 62,
+    "65+": 67,
+}
+# beyond the survey's last band the target tapers with the NTA per-capita
+# labor income profile, and never below this share of the time endowment
+OLDEST_SURVEY_AGE = 67
+MIN_LABOR_SUPPLY = 0.02
+# ages over which the fit is judged; older households supply little labor
+# and their targets are extrapolated
+FIT_AGES = (20, 80)
+DEFAULT_MAX_ITER = 10
+DEFAULT_TOL = 0.02
+# the steady-state solver needs its interest-rate guess above the solution
+R_GUESS_MARGIN = 1.3
+# OG-Core caps the factor guess at this value; the solver's own sweep over
+# the guess covers the rest
+MAX_FACTOR_GUESS = 500000.0
+# OG-Core's upper bound on chi_n; it binds only at the oldest ages, where
+# the target is an extrapolation and little labor is supplied anyway
+MAX_CHI_N = 10000.0
 
 
-def get_labor_data(
-    year=2023, data_dir=os.path.join(CUR_DIR, "..", "ogeth", "data", "qlfs")
-):
+def factor_guess(factor):
     """
-    Read in "raw" Quarterly Labour Force Survey data to calculate moments.
+    A factor guess OG-Core accepts, from a solved factor.
 
     Args:
-        year (int): year of data to read in
-        data_dir (str): path to directory with QLFS data
+        factor (float): solved steady-state factor
 
     Returns:
-        df (Pandas DataFrame): QLFS data to compute labor supply from
+        guess (float): the factor, capped at MAX_FACTOR_GUESS
 
     """
-    # read in data for all quarters
-    df_list = []
-    for q in range(1, 5):
-        file = os.path.join(data_dir, f"qlfs-{year}-q{q}-worker-v1.csv")
-        df = pd.read_csv(file, encoding="latin-1", low_memory=False)
-        df_list.append(df)
-    df = pd.concat(df_list)
+    return float(min(factor, MAX_FACTOR_GUESS))
 
-    # rename some variables
-    df.rename(
-        columns={
-            "Q418HRSWRK": "hours",
-            # "Q14AGE": "age",
-            "age_grp1": "age_group",
-            # "Hrswrk": "hours2",
-            "Weight": "weight",
-        },
-        inplace=True,
-    )
-    # if hours is a string, take only part after space
-    df["hours"] = df["hours"].str.split().str[-1]
-    df["hours"] = pd.to_numeric(df["hours"], errors="coerce")
-    # create weighted mean hours by age
-    # replace missing hours with zero
-    df["hours"] = df["hours"].fillna(0)
-    # drop if hours are missing
-    # df = df[~df['hours'].isna()]
 
+def hours_per_person():
+    """
+    LFMS 2021 hours worked per week per person by age band: the
+    employment-to-population ratio times the mean weekly hours of the
+    employed.
+
+    Returns:
+        df (Pandas DataFrame): age_band, emp_pop_ratio,
+            mean_weekly_hours_employed, hours_per_person
+
+    """
+    df = pd.read_csv(os.path.join(DATA_DIR, "lfms2021_hours_by_age.csv"))
+    df["hours_per_person"] = df.emp_pop_ratio * df.mean_weekly_hours_employed
     return df
 
 
-def compute_labor_moments(df, S=80):
+def labor_supply_target(E, S, ltilde=1.0):
     """
-    Compute moments from labor data.
+    Average labor supply by model age, as a share of the time endowment,
+    from LFMS hours per person.
 
     Args:
-        df (Pandas DataFrame): QLFS data to compute labor supply from
-        S (int): number of periods of economic life for model households
+        E (int): age at which agents become economically active
+        S (int): number of model periods in a lifetime
+        ltilde (float): time endowment per period
 
     Returns:
-        labor_dist_out (Numpy array): fraction of time spent working
-            by age
+        target (Numpy array): average labor supply by age, length S
 
     """
-
-    # Find fraction of total time people work on average by age group
-    by_age = pd.DataFrame(
-        df.groupby("age_group").apply(
-            lambda x: (x["hours"] * x["weight"]).sum() / x["weight"].sum()
+    ages = income.model_ages(E, S)
+    df = hours_per_person()
+    x = df.age_band.map(HOURS_BAND_MIDPOINTS).to_numpy(dtype=float)
+    y = df.hours_per_person.to_numpy() / WEEKLY_TIME_ENDOWMENT * ltilde
+    order = np.argsort(x)
+    x, y = x[order], y[order]
+    target = np.interp(ages, x, y)
+    old = ages > OLDEST_SURVEY_AGE
+    if old.any():
+        nta = income.nta_labor_income(
+            "ETH", np.concatenate(([OLDEST_SURVEY_AGE], ages[old]))
         )
-    )
-    # give column name to hours
-    by_age.columns = ["hours"]
-    # drop indices in ['00-04', '05-09', '10-14', '14-Oct', '9-May']
-    by_age = by_age.drop(["00-04", "05-09", "10-14", "14-Oct", "9-May"])
-    # also drop age 15-19 since not in model
-    # by_age = by_age.drop('15-19')
-    # rename index for 75+ to 75-85 to be able to get midpoint
-    by_age = by_age.rename(index={"75+": "75-85"})
-    # compute midpoints of age groups
-    age_midpoints = (
-        pd.Series(by_age.index)
-        .str.split("-")
-        .apply(lambda x: (int(x[0]) + int(x[1])) / 2)
-    )
-
-    # get fraction of time endowment worked (assume time
-    # endowment is 24 hours minus required time to sleep)
-    by_age["frac_work"] = by_age["hours"] / ((24 - 8) * 7)
-
-    # fit a cubic spline to these data points -- only through age 57
-    # labor_dist = interpolate.interp1d(
-    #     age_midpoints[:-5], by_age['frac_work'][:-5], kind='cubic')
-    labor_dist = interpolate.interp1d(
-        age_midpoints, by_age["frac_work"], kind="cubic"
-    )
-    # now evaluate the spline at each age
-    labor_spline = labor_dist(np.linspace(20, 80, 60))
-
-    # Data have sufficient obs through age  57 (55-59 age group)
-    # Fit a line to the last few years of the average labor
-    # participation which extends from ages 57 to 100.
-    slope = (labor_spline[-1] - labor_spline[-8]) / (8 + 1)
-    # intercept = by_age['frac_work'][-1] - slope*len(by_age['frac_work'])
-    # extension = slope * (np.linspace(56, 80, 23)) + intercept
-    # to_dot = slope * (np.linspace(45, 56, 11)) + intercept
-
-    labor_dist_data = np.zeros(80)
-    labor_dist_data[:60] = labor_spline
-    labor_dist_data[60:] = labor_spline[-1] + slope * range(20)
-
-    # the above computes moments if the model period is a year
-    # the following adjusts those moments in case it is smaller
-    labor_dist_out = (
-        1  # filter.uniform_filter(labor_dist_data, size=int(80 / S))[
-    )
-    #     :: int(80 / S)
-    # ]
-
-    return labor_dist_data, age_midpoints, by_age, labor_dist_out
+        target[old] = np.interp(OLDEST_SURVEY_AGE, x, y) * nta[1:] / nta[0]
+    return np.maximum(target, MIN_LABOR_SUPPLY * ltilde)
 
 
-def VCV_moments(qlfs, n=1000, S=80):
+def average_labor_supply(n, omega_SS):
     """
-    Compute Variance-Covariance matrix for labor moments by
-    bootstrapping data.
+    Population-weighted average labor supply by age.
 
     Args:
-        cps (Pandas DataFrame): CPS data to compute labor supply from
-        S (int): number of periods of economic life for model households
-        n (int): number of bootstrap iterations to run
-        bin_weights (Numpy array): ability weight, length J
+        n (Numpy array): labor supply by age and group, size (S, J)
+        omega_SS (Numpy array): joint population distribution, size (S, J)
 
-    Output:
-        VCV (Numpy array): = variance-covariance matrix of labor
-            moments, size SxS
+    Returns:
+        n_avg (Numpy array): average labor supply by age, length S
 
     """
-    labor_moments_boot = np.zeros((n, S))
-    for i in range(n):
-        boot = qlfs[np.random.randint(2, size=len(qlfs.index)).astype(bool)]
-        _, _, _, labor_moments_boot[i, :] = compute_labor_moments(boot, S)
-
-    VCV = np.cov(labor_moments_boot.T)
-
-    return VCV
+    return (n * omega_SS).sum(axis=1) / omega_SS.sum(axis=1)
 
 
-def labor_data_graphs(
-    year=2023,
-    data_dir=os.path.join(CUR_DIR, "..", "ogeth", "data", "qlfs"),
-    S=80,
-    output_dir=None,
+def marginal_disutility(n, p):
+    """
+    Marginal disutility of labor with unit weights, from OG-Core's
+    elliptical utility function.
+
+    Args:
+        n (Numpy array): labor supply, length S
+        p (OG-Core Specifications object): model parameters
+
+    Returns:
+        mdu (Numpy array): marginal disutility at each labor supply
+
+    """
+    n = np.asarray(n, dtype=float)
+    return household.marg_ut_labor(n, np.ones_like(n), p)
+
+
+def chi_n_step(chi_n, n_model, n_target, p):
+    """
+    Rescale chi_n so that, at fixed consumption and prices, the labor
+    supply first-order condition holds at the target instead of the model
+    value.
+
+    Args:
+        chi_n (Numpy array): current disutility weights, length S
+        n_model (Numpy array): model average labor supply, length S
+        n_target (Numpy array): target average labor supply, length S
+        p (OG-Core Specifications object): model parameters
+
+    Returns:
+        chi_n_new (Numpy array): updated disutility weights, length S
+
+    """
+    return np.minimum(
+        chi_n
+        * marginal_disutility(n_model, p)
+        / marginal_disutility(n_target, p),
+        MAX_CHI_N,
+    )
+
+
+def steady_state_chi_n(p):
+    """
+    The steady-state row of chi_n, whatever its stored shape.
+
+    Args:
+        p (OG-Core Specifications object): model parameters
+
+    Returns:
+        chi_n (Numpy array): disutility weights by age, length S
+
+    """
+    chi_n = np.asarray(p.chi_n, dtype=float)
+    if chi_n.ndim == 2:
+        chi_n = chi_n[-1]
+    return chi_n.copy()
+
+
+def estimate_chi_n(
+    p,
+    client=None,
+    max_iter=DEFAULT_MAX_ITER,
+    tol=DEFAULT_TOL,
+    verbose=True,
 ):
     """
-    Plot labor supply data.
+    Calibrate chi_n to the LFMS labor supply profile by repeated
+    steady-state solves.
 
     Args:
-        weighted (Numpy array):
-        S (int): number of periods of economic life for model households
-        J (int): number of lifetime income groups
-        output_dir (str): path to save figures to
+        p (OG-Core Specifications object): model parameters
+        client (Dask client object): client for parallel computation
+        max_iter (int): maximum number of steady-state solves
+        tol (float): largest acceptable relative gap between model and
+            target labor supply over FIT_AGES
+        verbose (bool): print the gap after each solve
 
     Returns:
-        None
+        chi_n (Numpy array): calibrated disutility weights, length S
+        target (Numpy array): target labor supply by age, length S
+        history (list): one dict per solve with the chi_n used, the model
+            labor supply, the largest gap and the solved r, TR and factor
 
     """
-    # get labor data
-    interpolated_data, age_midpoints, by_age, _ = compute_labor_moments(
-        get_labor_data(year, data_dir), S
-    )
-    plt.plot(np.linspace(20, 100, 80), interpolated_data)
-    # add scatter plot of raw data
-    plt.scatter(age_midpoints, by_age["frac_work"], color="red", alpha=0.5)
-    plt.xlabel("Age")
-    plt.ylabel("Labor supply")
-    plt.title("Labor supply by age")
-    plt.legend(["Interpolated", "Data"])
-    if output_dir:
-        plt.savefig(
-            os.path.join(output_dir, "labor_dist_data.png"),
-            bbox_inches="tight",
-            dpi=300,
+    p = copy.deepcopy(p)
+    target = labor_supply_target(p.E, p.S, p.ltilde)
+    ages = income.model_ages(p.E, p.S)
+    fit = (ages >= FIT_AGES[0]) & (ages < FIT_AGES[1])
+    chi_n = steady_state_chi_n(p)
+    history = []
+    for iteration in range(max_iter):
+        ss = SS.run_SS(p, client=client)
+        n_model = average_labor_supply(ss["n"], p.omega_SS)
+        # ages where chi_n sits at OG-Core's cap cannot be fitted
+        gap = np.abs(n_model / target - 1)[fit & (chi_n < MAX_CHI_N)].max()
+        history.append(
+            {
+                "iteration": iteration,
+                "chi_n": chi_n.copy(),
+                "n_model": n_model,
+                "max_gap": gap,
+                "r": float(ss["r"]),
+                "TR": float(ss["TR"]),
+                "factor": float(ss["factor"]),
+            }
+        )
+        if verbose:
+            print(
+                f"chi_n iteration {iteration}: largest relative gap "
+                f"{gap:.3f}, r {ss['r']:.4f}, factor {ss['factor']:.0f}"
+            )
+        if gap < tol:
+            break
+        chi_n = chi_n_step(chi_n, n_model, target, p)
+        p.update_specifications(
+            {
+                "chi_n": chi_n.tolist(),
+                "initial_guess_r_SS": R_GUESS_MARGIN * float(ss["r"]),
+                "initial_guess_TR_SS": float(ss["TR"]),
+                "initial_guess_factor_SS": factor_guess(ss["factor"]),
+            }
         )
     else:
-        return plt
+        print(
+            f"chi_n did not converge in {max_iter} solves; keeping the "
+            "last solved profile"
+        )
+        chi_n = history[-1]["chi_n"]
+    return chi_n, target, history
+
+
+def fit_table(target, n_model, E, S):
+    """
+    Model and target labor supply averaged over the LFMS age bands.
+
+    Args:
+        target (Numpy array): target labor supply by age, length S
+        n_model (Numpy array): model labor supply by age, length S
+        E (int): age at which agents become economically active
+        S (int): number of model periods in a lifetime
+
+    Returns:
+        df (Pandas DataFrame): age_band, target, model, both as weekly
+            hours per person and as shares of the time endowment
+
+    """
+    ages = income.model_ages(E, S)
+    rows = []
+    bands = [(20, 25), (25, 30), (30, 35), (35, 40), (40, 45), (45, 50)]
+    bands += [(50, 55), (55, 60), (60, 65), (65, 70), (70, 80), (80, 100)]
+    for lo, hi in bands:
+        sel = (ages >= lo) & (ages < hi)
+        rows.append(
+            {
+                "age_band": f"{lo}-{hi - 1}",
+                "target": target[sel].mean(),
+                "model": n_model[sel].mean(),
+                "target_hours": target[sel].mean() * WEEKLY_TIME_ENDOWMENT,
+                "model_hours": n_model[sel].mean() * WEEKLY_TIME_ENDOWMENT,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def main():
+    """
+    Calibrate chi_n on the packaged parameters and write it, with the
+    steady-state guesses of the last solve, back into the packaged JSON.
+    """
+    import multiprocessing
+
+    from distributed import Client
+    from ogcore.parameters import Specifications
+
+    json_path = os.path.join(CUR_PATH, "ogeth_default_parameters.json")
+    num_workers = min(multiprocessing.cpu_count(), 7)
+    client = Client(n_workers=num_workers, threads_per_worker=1)
+    p = Specifications(baseline=True, num_workers=num_workers)
+    with open(json_path, encoding="utf-8") as f:
+        p.update_specifications(json.load(f))
+    chi_n, target, history = estimate_chi_n(p, client=client)
+    client.close()
+    last = history[-1]
+    print(fit_table(target, last["n_model"], p.E, p.S).round(3).to_string())
+    income.write_json_parameters(
+        json_path,
+        {
+            "chi_n": chi_n.tolist(),
+            "initial_guess_r_SS": round(R_GUESS_MARGIN * last["r"], 4),
+            "initial_guess_TR_SS": round(last["TR"], 5),
+            "initial_guess_factor_SS": round(factor_guess(last["factor"]), 0),
+        },
+    )
+    print(f"wrote chi_n to {json_path}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,9 @@
+indicator,year,sex,age_lo,age_hi,measure,slope,ratio,q1,q2,q3,q4,q5,source
+IMR,2024,all,,,,-0.6566101613812227,1.8461538461538463,48.0,36.0,51.0,33.0,26.0,"DHS Program indicator API, wealth-quintile breakdown (EAPD-DRB/Demographic-Gradients, data/gradient_library_latest.csv)"
+TFR,2024,all,,,,-0.7360694317423828,1.9655172413793105,5.7,4.4,4.2,3.9,2.9,"DHS Program indicator API, wealth-quintile breakdown (EAPD-DRB/Demographic-Gradients, data/gradient_library_latest.csv)"
+U5MR,2024,all,,,,-0.7030271928866371,1.911764705882353,65.0,48.0,66.0,43.0,34.0,"DHS Program indicator API, wealth-quintile breakdown (EAPD-DRB/Demographic-Gradients, data/gradient_library_latest.csv)"
+AMR,2007,all,15,29,mx,-0.8741,1.792,6.306,4.737,3.519,,,"2007 census household deaths module via IPUMS International (EAPD-DRB/Demographic-Gradients, data/adult_mortality_gradients.csv)"
+AMR,2007,all,30,44,mx,0.081,0.931,7.488,6.475,8.042,,,"2007 census household deaths module via IPUMS International (EAPD-DRB/Demographic-Gradients, data/adult_mortality_gradients.csv)"
+AMR,2007,all,45,59,mx,0.5776,0.661,8.485,7.704,12.84,,,"2007 census household deaths module via IPUMS International (EAPD-DRB/Demographic-Gradients, data/adult_mortality_gradients.csv)"
+AMR,2007,all,60,74,mx,0.4388,0.75,17.102,20.659,22.817,,,"2007 census household deaths module via IPUMS International (EAPD-DRB/Demographic-Gradients, data/adult_mortality_gradients.csv)"
+AMR,2007,all,15,59,45q15,0.0897,0.926,284.98,247.733,307.768,,,"2007 census household deaths module via IPUMS International (EAPD-DRB/Demographic-Gradients, data/adult_mortality_gradients.csv)"

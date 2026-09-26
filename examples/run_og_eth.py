@@ -1,4 +1,5 @@
 # imports
+import argparse
 import multiprocessing
 from distributed import Client
 import os
@@ -8,6 +9,7 @@ import copy
 from importlib.resources import files
 import matplotlib.pyplot as plt
 from ogeth.calibrate import Calibration
+from ogeth import macro_params
 from ogcore.parameters import Specifications
 from ogcore import output_tables as ot
 from ogcore import output_plots as op
@@ -22,7 +24,17 @@ dask.config.set(scheduler="synchronous")
 plt.style.use("ogcore.OGcorePlots")
 
 
-def main():
+def main(scenario=macro_params.DEFAULT_SCENARIO):
+    """
+    Run the baseline and a corporate-tax-cut reform.
+
+    Args:
+        scenario (str): ``"history"`` runs the packaged history-anchored
+            baseline; ``"program"`` overlays the IMF program paths
+            (``macro_params.scenario_params``) and writes its results under
+            ``OG-ETH-Example/program`` so the two can be compared
+    """
+    scenario = macro_params.check_scenario(scenario)
     # Define parameters to use for multiprocessing
     num_workers = min(multiprocessing.cpu_count(), 7)
     client = Client(n_workers=num_workers, threads_per_worker=1)
@@ -31,6 +43,8 @@ def main():
     # Directories to save data
     CUR_DIR = os.path.dirname(os.path.realpath(__file__))
     save_dir = os.path.join(CUR_DIR, "OG-ETH-Example")
+    if scenario != macro_params.DEFAULT_SCENARIO:
+        save_dir = os.path.join(save_dir, scenario)
     base_dir = os.path.join(save_dir, "OUTPUT_BASELINE")
     reform_dir = os.path.join(save_dir, "OUTPUT_REFORM")
 
@@ -54,6 +68,52 @@ def main():
     ):
         defaults = json.load(file)
     p.update_specifications(defaults)
+    # The packaged file is the history-anchored baseline; the program
+    # scenario overlays the IMF program's fiscal, borrowing and remittance
+    # paths and its long-run debt ratio (see macro.md).
+    if scenario != macro_params.DEFAULT_SCENARIO:
+        p.update_specifications(macro_params.scenario_params(p, scenario))
+        print(f"Running the {scenario} scenario; results in {save_dir}")
+    # Anchor initial household wealth to the data (see macro.md) where the
+    # installed OG-Core supports it (PSLmodels/OG-Core#1189); older releases
+    # start the transition from steady-state wealth.
+    if hasattr(p, "initial_wealth_ratio"):
+        p.update_specifications(
+            {"initial_wealth_ratio": macro_params.INITIAL_WEALTH_RATIO}
+        )
+    else:
+        print(
+            "Installed ogcore has no initial_wealth_ratio; the transition "
+            "starts from steady-state household wealth."
+        )
+    # Let the sovereign rate follow the program-implied negative real rates
+    # where the installed OG-Core exposes the floor (PSLmodels/OG-Core#1203);
+    # older releases clip it at zero.
+    if hasattr(p, "r_gov_floor"):
+        p.update_specifications({"r_gov_floor": macro_params.R_GOV_FLOOR})
+    else:
+        print(
+            "Installed ogcore has no r_gov_floor; the interest rate on "
+            "government debt is clipped at zero through the program years."
+        )
+    # Solver settings: a damped outer loop (nu) with Anderson acceleration
+    # of the time path where the installed OG-Core offers it; the calibrated
+    # heterogeneity in discount factors makes the transition converge slowly
+    # under plain functional iteration.
+    p.update_specifications({"nu": macro_params.NU})
+    if hasattr(p, "TPI_outer_method"):
+        p.update_specifications(
+            {
+                "TPI_outer_method": "anderson",
+                "TPI_anderson_m": macro_params.TPI_ANDERSON_M,
+                "TPI_anderson_beta": macro_params.TPI_ANDERSON_BETA,
+            }
+        )
+    else:
+        print(
+            "Installed ogcore has no Anderson acceleration for the time "
+            "path; using damped functional iteration."
+        )
     # Update parameters from calibrate.py Calibration class
     if is_connected():  # only update if connected to internet
         c = Calibration(
@@ -125,4 +185,11 @@ def main():
 
 if __name__ == "__main__":
     # execute only if run as a script
-    main()
+    parser = argparse.ArgumentParser(description=main.__doc__)
+    parser.add_argument(
+        "--scenario",
+        choices=macro_params.SCENARIOS,
+        default=macro_params.DEFAULT_SCENARIO,
+        help="baseline scenario to run (default: %(default)s)",
+    )
+    main(parser.parse_args().scenario)

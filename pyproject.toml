@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ogeth"
-version = "0.2.0"
+version = "0.3.0"
 authors = [
     {name = "Marcelo LaFleur, Richard W. Evans, and Jason DeBacker"},
 ]
@@ -47,7 +47,7 @@ dependencies = [
     "statsmodels",
     "linearmodels",
     "linecheck",
-    "ogcore>=0.14.11",
+    "ogcore>=0.20.0",
 ]
 
 [project.urls]
@@ -112,6 +112,10 @@ members = [
 
 [tool.uv.sources]
 ogeth = { workspace = true, editable = true }
+# OG-Core build carrying initial_wealth_ratio (PSLmodels/OG-Core#1189) and
+# r_gov_floor (PSLmodels/OG-Core#1203): OG-Core master merged into the #1189
+# branch. uv-only; the PyPI metadata above keeps ogcore>=0.20.0.
+ogcore = { git = "https://github.com/marcelolafleur/OG-Core.git", rev = "edaa78ab91f834bcc9d07803422e6d44af3a0204" }
 
 [dependency-groups]
 dev = [

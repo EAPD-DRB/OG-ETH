@@ -272,28 +272,27 @@ def test_get_macro_params_update_from_api_true(monkeypatch):
                 [("2024Q4", 50.0), ("2024Q3", 49.0), ("2024Q2", 48.0)]
             ),
         },
-        ilo_text="time,obs_value\n2024,40\n2023,39\n",
+        ilo_text="time,obs_value\n2025,40\n2024,39\n2023,38\n",
     )
 
     test_dict = macro_params.get_macro_params(update_from_api=True)
 
     assert isinstance(test_dict, dict)
-    # Debt (initial_debt_ratio, initial_foreign_debt_ratio, zeta_D) and
-    # IMF-sourced alpha_T/alpha_G are no longer pulled for OG-ETH (see
-    # macro_params.py / macro.md); only g_y_annual (WB WDI), gamma
-    # (ILOSTAT), and the deterministic r_gov_* are returned.
+    # Only g_y_annual (WB WDI) and gamma (ILOSTAT) are pulled for OG-ETH.
+    # Debt (initial_debt_ratio, initial_foreign_debt_ratio, zeta_D),
+    # IMF-sourced alpha_T/alpha_G, and the r_gov_* parameters are frozen at
+    # the documented values in ogeth_default_parameters.json (see
+    # macro_params.py / macro.md). r_gov is frozen because the committed
+    # r_gov_shift is re-centered for the debt-elastic premium, and returning
+    # the raw Li-Magud-Werner shift here would silently un-center it.
     assert sorted(test_dict.keys()) == sorted(
         [
-            "r_gov_shift",
-            "r_gov_scale",
             "g_y_annual",
             "gamma",
         ]
     )
     assert test_dict["g_y_annual"] == pytest.approx(0.25)
     assert test_dict["gamma"] == [pytest.approx(0.50)]
-    assert test_dict["r_gov_shift"] == [-0.01]
-    assert test_dict["r_gov_scale"] == [0.5]
 
 
 def test_get_imf_macro_params_overwrites_saved_file(monkeypatch, tmp_path):
@@ -341,6 +340,29 @@ def test_get_imf_macro_params_overwrites_saved_file(monkeypatch, tmp_path):
     saved_2024 = saved_data[saved_data["year"] == 2024].set_index("indicator")
     assert saved_2024.loc["G27_T", "value"] == pytest.approx(3.7)
     assert saved_2024.loc["G271_T", "value"] == pytest.approx(0.1)
+
+
+def test_estimate_r_gov_reproduces_frozen_values():
+    """
+    estimate_r_gov reproduces the committed r_gov_* defaults and the
+    debt-elastic premium is exactly zero at debt_ratio_ss (so the steady
+    state is unchanged).
+    """
+    d = macro_params.estimate_r_gov(debt_ratio_ss=0.30, r_gov_DY2=0.04)
+
+    assert d["r_gov_scale"][0] == pytest.approx(0.24484763593657788)
+    assert d["r_gov_shift"][0] == pytest.approx(-0.03736625043803518)
+    assert d["r_gov_DY"] == pytest.approx(-0.024)
+    assert d["r_gov_DY2"] == pytest.approx(0.04)
+
+    # Premium contribution net of the shift offset, evaluated at the target
+    # debt ratio, must equal the base (un-centered) Li-Magud-Werner level of
+    # +0.03376625 — i.e. the premium adds nothing at the steady state.
+    dbar = 0.30
+    net_constant = (
+        -d["r_gov_shift"][0] + d["r_gov_DY"] * dbar + d["r_gov_DY2"] * dbar**2
+    )
+    assert net_constant == pytest.approx(0.03376625043803518)
 
 
 def test_get_imf_macro_params_falls_back_to_last_available_year(monkeypatch):
