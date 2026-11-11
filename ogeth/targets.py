@@ -19,7 +19,7 @@ Two sets of targets:
   scored where the data are, not in the steady state.
 * ``SS_TARGETS`` are long-run anchors and the survey distributions that the
   steady state is matched to (hours by age and wealth shares are scored by
-  ``ogeth.calibrate``), plus moments reported as outcomes.
+  ``examples/tune.py``), plus moments reported as outcomes.
 """
 
 import numpy as np

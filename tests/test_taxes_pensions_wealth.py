@@ -112,38 +112,3 @@ def test_wealth_share_targets_floor_the_bottom_and_sum_to_one():
     assert shares[0] == pytest.approx(
         0.25 * 1 / (LAMBDAS * np.arange(1, 8)).sum()
     )
-
-
-def test_steady_state_moments_from_a_synthetic_solution():
-    from unittest.mock import MagicMock
-
-    from ogeth import calibrate
-
-    S, J = 80, 7
-    p = MagicMock()
-    p.omega_SS = np.full((S, J), 1 / S) * LAMBDAS.reshape(1, J)
-    ss = {
-        "Y": np.array(1.0),
-        "n": np.full((S, J), 0.3),
-        "b_s": np.ones((S, J)) * np.arange(1, J + 1),
-        "before_tax_income": np.ones((S, J)) * np.arange(1, J + 1),
-        "iit_revenue": np.array(0.05),
-        "agg_pension_outlays": np.array(0.005),
-        "B": np.array(2.1),
-        "r": 0.08,
-        "TR": 0.01,
-        "factor": 900000.0,
-    }
-    c_start = np.array([0, 0, 0, 0, 0, 0.1, 0.2])
-    c_end = np.array([0, 0, 0, 0, 0.04, 0.2, 0.2])
-    m = calibrate.steady_state_moments(ss, p, c_start, c_end)
-    np.testing.assert_allclose(m["n_model"], 0.3)
-    assert m["wealth_shares"].sum() == pytest.approx(1.0)
-    assert m["pension_outlays"] == pytest.approx(0.005)
-    assert m["wealth_ratio"] == pytest.approx(2.1)
-    # first-period PIT scales the steady-state take by the compliance-
-    # weighted income of the groups at the two dates
-    inc = LAMBDAS * np.arange(1, J + 1)
-    expected = 0.05 * (c_start * inc).sum() / (c_end * inc).sum()
-    assert m["pit_start"] == pytest.approx(expected)
-    assert m["r"] == 0.08 and m["factor"] == 900000.0

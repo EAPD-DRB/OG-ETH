@@ -989,14 +989,9 @@ PIT_FORMALIZATION_GAIN = round(0.012 * float(rebase_factors()[-1]), 5)
 # implies, because much of its income is business and self-employment income
 # outside Schedule A. The scale is calibrated so that personal income tax
 # collects PIT_REVENUE_TARGET of GDP in FY2024/25
-# (ogeth.calibrate.match_steady_state).
+# (examples/tune.py, scored on the first transition year).
 COMPLIANCE_SCALE = 0.198381
 PIT_REVENUE_TARGET = PIT_REVENUE_SHARE
-# The matching sees only the steady state; the first-period collections it
-# infers from the steady-state incidence came out 5 percent above the solved
-# transition's FY2024/25 value, so the steady-state target is raised by this
-# factor (measured on the solved transition of the packaged calibration).
-PIT_START_CORRECTION = 1.053
 
 # Pension coverage by lifetime-income group. Ethiopia's two schemes (PSSSA for
 # public servants, POESSA for private formal employees) cover only formal
@@ -1024,7 +1019,7 @@ PENSION_CAREER_YEARS = 40
 # formal groups hold 10 percent of households but 40 percent of labor income,
 # far more than the scheme's 800,000 pensioners and two percent of the
 # working-age population, so the scale is well below one. Calibrated by
-# ogeth.calibrate.match_steady_state.
+# examples/tune.py, scored on the first transition year.
 PENSION_COVERAGE_SCALE = 0.876028
 # Contributions: 7 percent from the employee and 11 from the employer
 # (Proclamations 1267/1268 of 2022). OG-Core's payroll tax can differ by
@@ -1042,11 +1037,6 @@ PENSION_COVERAGE_SCALE = 0.876028
 PAYROLL_STATUTORY_RATE = 0.18
 PAYROLL_REVENUE_SHARE = round(69.0 / 24030.0, 5)
 PAYROLL_COVERAGE_SCALE = 0.105
-# Pension outlays relative to GDP rise along the transition as the population
-# ages: in the solved transition they are 1.6 times higher in the steady state
-# than in FY2024/25. The data anchor is today's 0.5 percent of GDP, so the
-# steady-state target the matching uses is that much higher.
-PENSION_OUTLAYS_SS_TO_START = 1.6
 
 # Personal income tax: the statutory employment-income schedule (Schedule A)
 # in birr per month, as (upper bound, marginal rate) with an open last
