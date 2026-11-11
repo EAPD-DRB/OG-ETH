@@ -26,10 +26,13 @@ OG-ETH is an Ethiopia country calibration of the OG-Core overlapping-generations
 
 - Default suite (matches CI, skips the long example run): `uv run python -m pytest -m 'not local' -q` (or `make test`).
 - Targeted (fast): `uv run python -m pytest tests/test_macro_params.py tests/test_calibrate.py tests/test_update_baseline.py -q`.
-- Full example run (slow, ~35 min – 2 hr): `uv run python examples/run_og_eth.py`.
+- Full example run (baseline plus reform, about 35-45 min): `uv run python examples/run_og_eth.py` (add `--scenario program` for the IMF program scenario).
 
 ## Repo conventions
 
 - `pyproject.toml` is the source of truth for dependencies. `uv.lock` pins exact versions across machines and is checked in.
 - The packaged JSON default parameters are the standard baseline input for offline/default runs.
 - Calibration or data-source changes (macro parameters, demographics, earnings, industry I/O) should be validated with targeted tests and, where feasible, the relevant example flow.
+- Every ratio to GDP is to the rebased national accounts (base FY2024/25) at market prices; the IMF tables in `ogeth/macro_params.py` are kept as published (old base) and converted by `rebase_factors`. Data targets, with sources and the dial each one sets, are in `ogeth/targets.py`.
+- Tuning: `python examples/tune.py [overrides.json] --tpi --next next.json` solves the packaged parameters plus overrides and writes the next dial values; fold settled values into the JSON (and the scales into `macro_params.py`) so that `macro_params.scenario_params` reproduces the JSON (tests check this). Regenerate the warm-start seed with `examples/save_warm_start.py` after large moves.
+- Demographics and the parameters derived from them: `python -m ogeth.update_baseline --demographics-only` (offline UN archive unless a UN API token is registered).
