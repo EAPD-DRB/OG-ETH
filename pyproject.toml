@@ -47,7 +47,7 @@ dependencies = [
     "statsmodels",
     "linearmodels",
     "linecheck",
-    "ogcore>=0.20.0",
+    "ogcore>=0.24.4",
 ]
 
 [project.urls]
@@ -112,10 +112,13 @@ members = [
 
 [tool.uv.sources]
 ogeth = { workspace = true, editable = true }
-# OG-Core build carrying initial_wealth_ratio (PSLmodels/OG-Core#1189) and
-# r_gov_floor (PSLmodels/OG-Core#1203): OG-Core master merged into the #1189
-# branch. uv-only; the PyPI metadata above keeps ogcore>=0.20.0.
-ogcore = { git = "https://github.com/marcelolafleur/OG-Core.git", rev = "edaa78ab91f834bcc9d07803422e6d44af3a0204" }
+# OG-Core 0.24.4 (master 2d09808) plus two open speed fixes for the
+# household transition solves: PSLmodels/OG-Core#1276 (keep small-scale links
+# in the Jacobian sparsity pattern, per-group cache, per-run reset) and
+# PSLmodels/OG-Core#1277 (net taxes once per evaluation, cached Defined
+# Benefits lookups). Both leave results unchanged. uv-only; the PyPI metadata
+# above keeps ogcore>=0.24.4.
+ogcore = { git = "file:///Users/marcelolafleur/Projects/OG-Core-hh-speed", rev = "a1a87bd73bea2aad486676952663c00009173693" }
 
 [dependency-groups]
 dev = [

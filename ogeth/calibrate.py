@@ -9,6 +9,15 @@ import warnings
 CUR_PATH = os.path.abspath(os.path.dirname(__file__))
 # UN M49 code for Ethiopia, used for the UN population data
 UN_COUNTRY_CODE = "231"
+# Last year of UN data the demographics read. ogcore holds fertility,
+# mortality and immigration at final_data_year forever after, so the window
+# sets the long-run population growth rate: with start_year + 1 the model
+# froze Ethiopia's current growth (2.6 percent a year) as its steady state.
+# Reading the UN projection to its end lets growth fall as the projection
+# says. get_pop reads final_data_year + 1, and the Population-Data archive
+# (used when no UN API token is registered) ends in 2099, so 2098 is the
+# last usable year; ogcore also caps it at start_year + 74.
+DEMOG_FINAL_DATA_YEAR = 2098
 # Ethiopia's rows of the EAPD-DRB/Demographic-Gradients library: DHS
 # wealth-quintile tilts for fertility and infant mortality (2024 survey) and
 # the 2007 census household-deaths gradient for adult mortality by age band
@@ -594,7 +603,7 @@ class Calibration:
             99,
             country_id=UN_COUNTRY_CODE,
             initial_data_year=p.start_year - 1,
-            final_data_year=p.start_year + 1,
+            final_data_year=DEMOG_FINAL_DATA_YEAR,
             income_percentiles=p.lambdas.flatten(),
             GraphDiag=False,
             download_path=demographic_data_path,

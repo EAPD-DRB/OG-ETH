@@ -1,0 +1,24 @@
+country,year,age_band,mean_weekly_hours_employed,source
+ETH,2021,10-14,24.7,ESS Labour Force and Migration Survey 2021
+ETH,2021,15-19,26.7,ESS Labour Force and Migration Survey 2021
+ETH,2021,20-24,30.4,ESS Labour Force and Migration Survey 2021
+ETH,2021,25-29,32.1,ESS Labour Force and Migration Survey 2021
+ETH,2021,30-34,32.0,ESS Labour Force and Migration Survey 2021
+ETH,2021,35-39,31.6,ESS Labour Force and Migration Survey 2021
+ETH,2021,40-44,30.7,ESS Labour Force and Migration Survey 2021
+ETH,2021,45-49,29.7,ESS Labour Force and Migration Survey 2021
+ETH,2021,50-54,27.5,ESS Labour Force and Migration Survey 2021
+ETH,2021,55-59,27.1,ESS Labour Force and Migration Survey 2021
+ETH,2021,60-64,26.9,ESS Labour Force and Migration Survey 2021
+ETH,2021,65+,23.7,ESS Labour Force and Migration Survey 2021
+US,2010,15-19,29.99,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,20-24,29.99,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,25-29,38.46,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,30-34,38.46,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,35-39,39.26,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,40-44,39.26,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,45-49,39.49,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,50-54,39.49,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,55-59,38.22,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,60-64,38.22,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"
+US,2010,65+,31.54,"ILOSTAT HOW_TEMP_SEX_AGE_NB (CPS), via OG-PHL scripts/fetch_ilo_hours_by_age.py"

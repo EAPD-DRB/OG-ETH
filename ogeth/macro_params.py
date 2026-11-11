@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 import requests
 import datetime
-from io import StringIO
 from pathlib import Path
 
 # Solver settings used by the example scripts: the damping of OG-Core's
@@ -328,63 +327,11 @@ def get_macro_params(
     else:
         print("Not updating from World Bank API")
 
-    """
-    Retrieve labour share data from the United Nations ILOSTAT Data API
-    (see https://rshiny.ilo.org/dataexplorer9/?lang=en).
-    The series code is SDG_1041_NOC_RT_A (labour income share as a percent
-    of GDP). Total capital share equals 1 - labour share. We subtract
-    GAMMA_G_LIC, which matches the gamma_g value in
-    'default_parameters.json', to recover the private capital share gamma.
-    If this fails we will not update gamma in 'default_parameters.json'.
-    """
-    if update_from_api:
-        try:
-            target = (
-                "https://rplumber.ilo.org/data/indicator/"
-                + "?id=SDG_1041_NOC_RT_A"
-                + "&ref_area="
-                + str(country_iso)
-                + "&timefrom="
-                + str(data_start_date.year)
-                + "&timeto="
-                + str(data_end_date.year)
-                + "&type=both&format=.csv"
-            )
-            # Add headers
-            headers = {
-                "User-Agent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/91.0.4472.124 Safari/537.36"
-                )
-            }
-
-            print("Attempting to update gamma from ILOSTAT")
-            response = requests.get(target, headers=headers)
-            if response.status_code != 200:
-                print(f"Error: Received status code {response.status_code}")
-            else:
-                print("Request successful.")
-            csv_content = StringIO(response.text)
-            df_temp = pd.read_csv(csv_content)
-            ilo_data = df_temp[["time", "obs_value"]]
-            # find gamma (private capital share) by subtracting GAMMA_G_LIC
-            # from the ILOSTAT-derived total capital share.
-            labor_share = (
-                ilo_data.loc[
-                    ilo_data["time"] == data_end_date.year, "obs_value"
-                ].squeeze()
-                / 100
-            )
-            macro_parameters["gamma"] = [1 - labor_share - GAMMA_G_LIC]
-            print(
-                f"gamma updated from ILOSTAT API: {macro_parameters['gamma']}"
-            )
-        except Exception:
-            print("Failed to retrieve data from ILOSTAT")
-            print("Will not update gamma")
-    else:
-        print("Not updating from ILOSTAT API")
+    # gamma is deliberately NOT refreshed from the ILOSTAT labour share: the
+    # naive 1 - labour share (about 0.515 net of gamma_g) is biased by
+    # Ethiopia's self-employment, and the calibrated 0.30 is a triangulated
+    # Gollin-adjusted value (firms.md). A live refresh would silently
+    # overwrite it, so it is off the live path entirely.
 
     # alpha_T and alpha_G are NOT pulled from the IMF API for OG-ETH: the
     # IMF SDMX endpoint returns only 2002-vintage data for Ethiopia, and
@@ -604,8 +551,8 @@ def remittance_level_params(shares=None, scenario=None):
     scenario = check_scenario(scenario)
     long_run = shares[-1] if scenario == "program" else shares[0]
     return {
-        "alpha_RM_1": round(float(shares[0]) / 100, 6),
-        "alpha_RM_T": round(float(long_run) / 100, 6),
+        "alpha_RM_1": round(to_model(float(shares[0]) / 100), 6),
+        "alpha_RM_T": round(to_model(float(long_run) / 100), 6),
     }
 
 
@@ -697,12 +644,45 @@ def derived_remittance_params(p, scenario=None):
 # Long-run debt ratio of the program scenario: the IMF program's FY2030/31
 # debt ratio is 28.6 percent of GDP and the authorities' medium-term
 # objective a ratio near 30 percent (macro.md).
-PROGRAM_DEBT_RATIO_SS = 0.30
+
+# ---------------------------------------------------------------------------
+# GDP basis: the rebased national accounts
+#
+# Ethiopia rebased its national accounts on 4 November 2026 (Ministry of
+# National Strategy, with IMF technical assistance; announced by the Finance
+# Minister, ENA): base year FY2024/25, 2008 SNA, wider coverage of informal
+# mining and manufacturing, transport and digital services and regional
+# state-owned enterprises. FY2024/25 nominal GDP went from 15,094 to 24,030
+# billion birr (USD 126.5 to 201.4 billion at the NBE average rate of 119.3)
+# and FY2025/26 (preliminary) is 31,860 billion birr. Every ratio to GDP in
+# this calibration is to the rebased series.
+#
+# The IMF tables below are kept exactly as published, on the 2015/16 base
+# (IMF CR 26/174, June 2026, Table 1: FY2024/25 actual 15,094 billion birr;
+# FY2025/26 projection 19,268; FY2026/27 23,851; WEO October 2026 has the
+# same figures). A fiscal flow or stock in birr, or a balance-of-payments
+# flow in dollars, has the same numerator on either basis, so its rebased
+# ratio is the published ratio times old GDP / new GDP of that year. Years
+# the rebasing has not reached yet (FY2026/27 onward, still old-base IMF
+# projections) take the FY2025/26 factor: the revision is assumed to stay
+# where it was last measured until the IMF re-bases its projections.
+# National-accounts components (consumption, investment) are NOT converted
+# this way: the rebasing revised their numerators too, so they come from the
+# rebased accounts directly (GROSS_CAPITAL_FORMATION etc. below).
+# ---------------------------------------------------------------------------
+NOMINAL_GDP_OLD_BASE_BIRR_BN = {
+    "FY2023/24": 11752.0,
+    "FY2024/25": 15094.0,
+    "FY2025/26": 19268.0,
+    "FY2026/27": 23851.0,
+}
+NOMINAL_GDP_REBASED_BIRR_BN = {"FY2024/25": 24030.0, "FY2025/26": 31860.0}
 
 # Fiscal program path (IMF Country Report 26/174, fifth ECF review, Tables 1,
 # 2b and 4b). Ethiopian fiscal years FY2024/25 (model period 0, start year
 # 2025) through FY2030/31 (period 6); the last value of each series is held
-# for the long run. All figures are percent of GDP, general government.
+# for the long run. Published percent of OLD-base GDP, general government;
+# converted below.
 # ---------------------------------------------------------------------------
 PROGRAM_YEARS = [
     "FY2024/25",
@@ -713,49 +693,210 @@ PROGRAM_YEARS = [
     "FY2029/30",
     "FY2030/31",
 ]
-IMF_PUBLIC_DEBT = [50.5, 45.3, 40.8, 37.2, 34.0, 31.2, 28.6]
-IMF_REVENUE = [9.2, 10.8, 11.4, 11.8, 12.1, 12.2, 12.3]  # excl. grants
-IMF_TAX_REVENUE = [
-    7.8,
-    9.5,
-    10.1,
-    10.5,
-    10.8,
-    10.9,
-    11.0,
-]  # model has no nontax
-IMF_GRANTS = [1.7, 1.3, 0.9, 0.3, 0.3, 0.3, 0.1]
-IMF_EXPENDITURE = [12.0, 14.1, 13.5, 13.5, 14.0, 14.0, 14.0]
-IMF_RECURRENT = [7.1, 8.2, 8.0, 8.5, 8.6, 8.8, 8.9]
-IMF_INTEREST = [0.8, 1.3, 1.3, 1.3, 1.3, 1.4, 1.5]
-IMF_CAPITAL = [5.0, 5.8, 5.5, 5.0, 5.4, 5.2, 5.1]
+
+
+def rebase_factors(n=len(PROGRAM_YEARS)):
+    """
+    Old-base over rebased nominal GDP for each program year: the factor that
+    turns a published ratio to old-base GDP into a ratio to rebased GDP when
+    the numerator is unaffected by the rebasing.
+
+    Args:
+        n (int): number of years from FY2024/25
+
+    Returns:
+        Numpy array: length n; years past FY2025/26 hold its factor
+    """
+    known = [
+        NOMINAL_GDP_OLD_BASE_BIRR_BN[y] / NOMINAL_GDP_REBASED_BIRR_BN[y]
+        for y in ("FY2024/25", "FY2025/26")
+    ]
+    return np.array(known + [known[-1]] * (n - len(known)))[:n]
+
+
+def rebased(series):
+    """
+    Convert a published old-base percent-of-GDP series (one value per
+    program year from FY2024/25) to percent of rebased GDP.
+
+    Args:
+        series (array_like): published values
+
+    Returns:
+        list: rebased values, rounded to 4 decimals
+    """
+    x = np.asarray(series, dtype=float)
+    return [round(float(v), 4) for v in x * rebase_factors(x.size)]
+
+
+# Published, percent of old-base GDP (IMF CR 26/174 Tables 1 and 2b).
+# Public debt is the general-government gross debt of the IMF's World
+# Economic Outlook (October 2026, GGXWDG_NGDP, "2025" = FY2024/25), which
+# matches the general-government revenue, spending and interest the model's
+# budget uses. The program report's wider public debt (50.5 percent in
+# FY2024/25) adds about 7.2 points of NBE long-term foreign liabilities and
+# Ethio Telecom external debt that the budget does not service.
+IMF_PUBLIC_DEBT_PUBLISHED = [43.3, 40.7, 37.0, 34.2, 31.8, 29.7, 27.5]
+IMF_PUBLIC_DEBT_WIDE_PUBLISHED = [50.5, 45.3, 40.8, 37.2, 34.0, 31.2, 28.6]
+IMF_REVENUE_PUBLISHED = [9.2, 10.8, 11.4, 11.8, 12.1, 12.2, 12.3]
+IMF_TAX_REVENUE_PUBLISHED = [7.8, 9.5, 10.1, 10.5, 10.8, 10.9, 11.0]
+IMF_GRANTS_PUBLISHED = [1.7, 1.3, 0.9, 0.3, 0.3, 0.3, 0.1]
+IMF_EXPENDITURE_PUBLISHED = [12.0, 14.1, 13.5, 13.5, 14.0, 14.0, 14.0]
+IMF_RECURRENT_PUBLISHED = [7.1, 8.2, 8.0, 8.5, 8.6, 8.8, 8.9]
+IMF_INTEREST_PUBLISHED = [0.8, 1.3, 1.3, 1.3, 1.3, 1.4, 1.5]
+IMF_CAPITAL_PUBLISHED = [5.0, 5.8, 5.5, 5.0, 5.4, 5.2, 5.1]
+# goods and services balance (Table 1 "resource gap"; the Table 4b "trade
+# balance" row is goods only)
+IMF_TRADE_BALANCE_PUBLISHED = [-7.1, -9.0, -7.4, -7.0, -7.1, -6.9, -7.0]
+IMF_PRIVATE_TRANSFERS_PUBLISHED = [5.6, 6.0, 5.9, 5.3, 4.8, 4.6, 4.1]
+IMF_CURRENT_ACCOUNT_PUBLISHED = [-1.1, -2.5, -1.3, -1.5, -2.0, -2.0, -2.7]
+IMF_DOMESTIC_DEBT_PUBLISHED = [18.7, 15.4, 13.7, 12.6, 12.6, 12.5, 11.9]
+# real growth is a ratio of volumes, not converted (old base; the rebased
+# accounts put FY2025/26 at 7.7 percent, REBASED_REAL_GROWTH_FY2526)
 IMF_REAL_GDP_GROWTH = [9.2, 9.2, 7.8, 8.2, 8.2, 8.0, 7.7]
-IMF_TRADE_BALANCE = [
-    -8.3,
-    -9.9,
-    -8.6,
-    -8.4,
-    -8.5,
-    -8.3,
-    -8.3,
-]  # goods+services
-IMF_PRIVATE_TRANSFERS = [5.6, 6.0, 5.9, 5.3, 4.8, 4.6, 4.1]
-IMF_CURRENT_ACCOUNT = [-1.1, -2.5, -1.3, -1.5, -2.0, -2.0, -2.7]
-IMF_GROSS_INVESTMENT = [20.1, 28.7, 27.5, 27.2, 27.2, 27.4, 26.5]
-IMF_DOMESTIC_DEBT = [18.7, 15.4, 13.7, 12.6, 12.6, 12.5, 11.9]
+REBASED_REAL_GROWTH_FY2526 = 7.7
 
-# Cash transfers to households as a share of GDP. The IMF recurrent line
-# bundles the wage bill, goods and services, interest, and transfers; the
-# household-transfer part is the fuel and fertilizer subsidies (about 1
-# percent of GDP in FY2024/25, fuel subsidies eliminated by March 2026 and a
-# capped envelope in FY2026/27, fertilizer about 1 percent of GDP), the
-# Productive Safety Net Program (budget contribution about 0.4 percent of
-# GDP), and public pension payouts (about 0.5 percent of GDP). IMF CR
-# 26/174 paragraphs 9, 20-22 and Box on social safety nets.
-CASH_TRANSFERS = [2.0, 1.8, 1.5, 1.5, 1.5, 1.5, 1.5]
+# The same series in percent of rebased GDP: what the calibration uses
+IMF_PUBLIC_DEBT = rebased(IMF_PUBLIC_DEBT_PUBLISHED)
+IMF_REVENUE = rebased(IMF_REVENUE_PUBLISHED)  # excl. grants
+IMF_TAX_REVENUE = rebased(IMF_TAX_REVENUE_PUBLISHED)
+IMF_GRANTS = rebased(IMF_GRANTS_PUBLISHED)
+IMF_EXPENDITURE = rebased(IMF_EXPENDITURE_PUBLISHED)
+IMF_RECURRENT = rebased(IMF_RECURRENT_PUBLISHED)
+IMF_INTEREST = rebased(IMF_INTEREST_PUBLISHED)
+IMF_CAPITAL = rebased(IMF_CAPITAL_PUBLISHED)
+IMF_TRADE_BALANCE = rebased(IMF_TRADE_BALANCE_PUBLISHED)
+IMF_PRIVATE_TRANSFERS = rebased(IMF_PRIVATE_TRANSFERS_PUBLISHED)
+IMF_CURRENT_ACCOUNT = rebased(IMF_CURRENT_ACCOUNT_PUBLISHED)
+IMF_DOMESTIC_DEBT = rebased(IMF_DOMESTIC_DEBT_PUBLISHED)
+# foreign-held share of general-government debt in FY2024/25: external debt
+# (31.8 percent of old GDP in the program's wider perimeter) less the 7.2
+# points outside general government, over 43.3
+GG_FOREIGN_DEBT_SHARE = round(
+    (31.8 - (IMF_PUBLIC_DEBT_WIDE_PUBLISHED[0] - IMF_PUBLIC_DEBT_PUBLISHED[0]))
+    / IMF_PUBLIC_DEBT_PUBLISHED[0],
+    4,
+)
 
-# Long-run grants (percent of GDP) once the program's donor surge fades.
-LONG_RUN_GRANTS = 0.3
+# Rebased expenditure-side national accounts, FY2024/25 (Ministry of National
+# Strategy rebasing report, as reported by Birr Metrics, BusinessDay and
+# Wazema and checked against the old-base NBE tables): private consumption
+# 15.47 trillion birr (64.4 percent), gross capital formation 8.49 trillion
+# (35.3 percent, fixed capital plus inventories; old base 20.1), gross
+# domestic saving 30.9 percent. Government consumption (about 4.7) and net
+# exports (about -4.5, matching the balance-of-payments goods and services
+# balance of USD -8.9 billion over USD 201.4 billion) are derived.
+PRIVATE_CONSUMPTION_REBASED = 64.4
+GROSS_CAPITAL_FORMATION_REBASED = 35.3
+GOVERNMENT_CONSUMPTION_REBASED = 4.7
+# program investment path for display only: the IMF's old-base path scaled
+# by the FY2024/25 level revision
+IMF_GROSS_INVESTMENT = [
+    round(x * GROSS_CAPITAL_FORMATION_REBASED / 20.1, 2)
+    for x in [20.1, 28.7, 27.5, 27.2, 27.2, 27.4, 26.5]
+]
+
+# Price basis. OG-Core's output Y is GDP at producer prices: the consumption
+# tax is collected on top of it, so GDP at market prices, the basis of every
+# data ratio, is Y plus the consumption tax. Shares OG-Core applies to its
+# own Y (alpha_G, alpha_T, alpha_I, alpha_FA, alpha_RM, the debt ratios,
+# initial wealth and public capital) are the data share times
+# MODEL_PER_MARKET_GDP, and model moments are scored over Y plus the
+# consumption tax (ogeth/targets.py). The consumption-tax share is the
+# FY2024/25 outturn of the revenue mapped to tau_c below, over rebased GDP.
+# General-government revenue outturn, FY2024/25, billions of birr (NBE Annual
+# Report 2024/25, Table 6.3, from Ministry of Finance data; IMF CR 26/174
+# Table 2a has the same totals). Each line is mapped to the model instrument
+# that taxes the same margin (taxes.md):
+#   personal income tax                         -> income tax (compliance)
+#   business profit tax, other income taxes
+#     (rental, withholding, interest, capital
+#     gains) and government investment income
+#     (NBE residual surplus, SOE dividends)     -> CIT collections factor
+#   indirect taxes, charges and fees, sales of
+#     goods and services                        -> consumption tax tau_c
+#   rural and urban land-use fees               -> flat wealth tax
+#   "other" non-tax (extraordinary items and
+#     pension contributions) and property sales -> not mapped: contributions
+#     are the payroll tax, the rest is one-off
+REVENUE_FY2425_BIRR_BN = {
+    "personal income tax": 194.3,
+    "business profit tax": 229.6,
+    "other income taxes": 52.9,
+    "land-use fees": 44.1,
+    "indirect taxes": 650.9,
+    "charges and fees": 39.4,
+    "government investment income": 20.0,
+    "sales of goods and services": 32.8,
+    "reimbursements and property sales": 4.7,
+    "other non-tax incl. pension contributions": 117.8,
+    "grants": 185.0,
+}
+
+
+def revenue_share(*lines, year="FY2024/25"):
+    """
+    Revenue lines as a share of rebased GDP at market prices.
+
+    Args:
+        *lines (str): keys of REVENUE_FY2425_BIRR_BN to add up
+        year (str): fiscal year of the GDP denominator
+
+    Returns:
+        float: share of GDP
+    """
+    total = sum(REVENUE_FY2425_BIRR_BN[k] for k in lines)
+    return round(total / NOMINAL_GDP_REBASED_BIRR_BN[year], 5)
+
+
+PIT_REVENUE_SHARE = revenue_share("personal income tax")
+CIT_REVENUE_SHARE = revenue_share(
+    "business profit tax", "other income taxes", "government investment income"
+)
+CONS_TAX_SHARE = revenue_share(
+    "indirect taxes", "charges and fees", "sales of goods and services"
+)
+WEALTH_TAX_SHARE = revenue_share("land-use fees")
+MODEL_PER_MARKET_GDP = 1 / (1 - CONS_TAX_SHARE)
+
+
+def to_model(share):
+    """
+    Convert a share of GDP at market prices into the share of OG-Core's Y.
+
+    Args:
+        share (scalar or array_like): share of market-price GDP
+
+    Returns:
+        same type: share of the model's Y
+    """
+    if np.ndim(share):
+        return [float(x) * MODEL_PER_MARKET_GDP for x in share]
+    return float(share) * MODEL_PER_MARKET_GDP
+
+
+# Long-run debt ratio of the program scenario: 30 percent of old-base GDP,
+# rebased with the latest factor, in model units
+PROGRAM_DEBT_RATIO_SS = round(to_model(0.30 * float(rebase_factors()[-1])), 4)
+# Initial general-government debt and its foreign-held share, FY2024/25, in
+# model units (end of the year before the first model period)
+INITIAL_DEBT_RATIO = round(to_model(IMF_PUBLIC_DEBT[0] / 100), 4)
+
+# Cash transfers to households as a share of GDP, published percent of
+# old-base GDP. The IMF recurrent line bundles the wage bill, goods and
+# services, interest, and transfers; the household-transfer part is the fuel
+# and fertilizer subsidies (about 1 percent of GDP in FY2024/25, fuel
+# subsidies eliminated by March 2026 and a capped envelope in FY2026/27,
+# fertilizer about 1 percent of GDP), the Productive Safety Net Program
+# (budget contribution about 0.4 percent of GDP), and public pension payouts
+# (about 0.5 percent of GDP). IMF CR 26/174 paragraphs 9, 20-22 and Box on
+# social safety nets.
+CASH_TRANSFERS_PUBLISHED = [2.0, 1.8, 1.5, 1.5, 1.5, 1.5, 1.5]
+CASH_TRANSFERS = rebased(CASH_TRANSFERS_PUBLISHED)
+
+# Long-run grants once the program's donor surge fades: 0.3 percent of
+# old-base GDP, rebased with the latest factor
+LONG_RUN_GRANTS = round(0.3 * float(rebase_factors(7)[-1]), 4)
 
 # Required real return of foreign investors in Ethiopian capital (OG-Core's
 # world_int_rate_annual). The 4 percent risk-free benchmark understates it for
@@ -790,24 +931,58 @@ R_GOV_FLOOR = -0.10
 # solved baseline steady state of examples/run_og_eth.py.
 R_SS_FOR_R_GOV = 0.0901
 
-# Formalization along the program. The informality calibration (taxes.md)
-# grades income-tax compliance by lifetime-income group: the bottom five
-# groups pay none of the tax owed, group 6 half, the top group all. The
-# program's revenue gains are direct-tax heavy -- in the first nine months of
-# FY2025/26 federal direct taxes grew 78 percent against 41 percent for
-# domestic VAT and 5 percent for import taxes (IMF CR 26/174, p. 15) -- so
-# part of the gain is modelled as the tax base broadening: group 6 moves
-# from half to full compliance and group 5 from none to a fifth over the
-# seven program years, linearly, and stays there. Lifetime income proxies
-# formality, so this is the margin of the formal sector moving down the
-# income distribution.
-NONCOMPLIANCE_START = [1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.0]
-NONCOMPLIANCE_END = [1.0, 1.0, 1.0, 1.0, 0.8, 0.0, 0.0]
+# Informality. 77.65 percent of the employed are in informal employment
+# (ILOSTAT harmonised series, SDG 8.3.1, from the 2021 Labour Force and
+# Migration Survey; 84.4 percent in agriculture, 65.9 outside it). The
+# informality calibration (taxes.md) grades income-tax compliance by
+# lifetime-income group, with lifetime income as the proxy for formality:
+# the formal 22.35 percent are the richest households, so groups 5-7 (the
+# top 20 percent) are formal and group 4 is 23.5 percent formal.
+INFORMAL_EMPLOYMENT_SHARE = 0.7765
+LAMBDAS = [0.25, 0.25, 0.2, 0.1, 0.1, 0.09, 0.01]
+
+
+def formal_share_by_group(informal_share, lambdas=LAMBDAS):
+    """
+    Share of each lifetime-income group that is formal when the formal
+    share of the population sits at the top of the lifetime-income
+    distribution.
+
+    Args:
+        informal_share (scalar): informal share of the employed
+        lambdas (array_like): population shares of the groups, poorest
+            first
+
+    Returns:
+        list: formal share of each group, between 0 and 1
+    """
+    lam = np.asarray(lambdas, dtype=float)
+    top = np.cumsum(lam[::-1])[::-1]  # share at or above each group's floor
+    formal = 1.0 - float(informal_share)
+    above = top - lam  # share strictly above each group
+    share = np.clip((formal - above) / lam, 0.0, 1.0)
+    return [round(float(x), 4) for x in share]
+
+
+# The program's revenue gains are direct-tax heavy -- in the first nine
+# months of FY2025/26 federal direct taxes grew 78 percent against 41
+# percent for domestic VAT and 5 percent for import taxes (IMF CR 26/174,
+# p. 15) -- so in the program scenario part of the gain is the tax base
+# broadening: another 6.5 percent of households (the size of the old
+# calibration's broadening) become formal over the seven program years,
+# linearly, and stay so. The history-anchored baseline holds the start.
+NONCOMPLIANCE_START = [
+    round(1 - x, 4) for x in formal_share_by_group(INFORMAL_EMPLOYMENT_SHARE)
+]
+NONCOMPLIANCE_END = [
+    round(1 - x, 4)
+    for x in formal_share_by_group(INFORMAL_EMPLOYMENT_SHARE - 0.065)
+]
 # Personal-income-tax revenue the formalization adds by the end of the
 # program, percent of GDP, read off the solved transition of the packaged
 # calibration (personal income tax 1.4 -> 2.6 percent of GDP by FY2030/31;
 # a first estimate from steady-state incidence, 0.7, undershot it).
-PIT_FORMALIZATION_GAIN = 0.012
+PIT_FORMALIZATION_GAIN = round(0.012 * float(rebase_factors()[-1]), 5)
 # With the statutory schedule as the tax function, the compliance vectors
 # above give the *shape* of the formal tax boundary and this scale its
 # level: even the top percent remits only part of the tax the schedule
@@ -816,7 +991,7 @@ PIT_FORMALIZATION_GAIN = 0.012
 # collects PIT_REVENUE_TARGET of GDP in FY2024/25
 # (ogeth.calibrate.match_steady_state).
 COMPLIANCE_SCALE = 0.198381
-PIT_REVENUE_TARGET = 0.014
+PIT_REVENUE_TARGET = PIT_REVENUE_SHARE
 # The matching sees only the steady state; the first-period collections it
 # infers from the steady-state incidence came out 5 percent above the solved
 # transition's FY2024/25 value, so the steady-state target is raised by this
@@ -851,6 +1026,22 @@ PENSION_CAREER_YEARS = 40
 # working-age population, so the scale is well below one. Calibrated by
 # ogeth.calibrate.match_steady_state.
 PENSION_COVERAGE_SCALE = 0.876028
+# Contributions: 7 percent from the employee and 11 from the employer
+# (Proclamations 1267/1268 of 2022). OG-Core's payroll tax can differ by
+# lifetime-income group, so the effective rate is the statutory rate on the
+# pension-covered groups (the coverage shape above) times a contribution
+# scale, zero for the informal groups. The scale is calibrated to
+# contributions: about 69 billion birr in FY2024/25, 0.29 percent of rebased
+# GDP (POESSA about 29 billion, Reporter 2025; PSSSA about 40 billion,
+# extrapolated from 30.5 billion collected in 2023, Addis Fortune). The
+# contributions sit inside the 117.8 billion "other" non-tax line of the
+# budget outturn. The model's formal groups earn about 40 percent of labor
+# income, far more than the real covered wage bill, so the scale is well
+# below the pension coverage scale. Contribution data are the least certain
+# fiscal anchor here (no official FY2024/25 scheme accounts were found).
+PAYROLL_STATUTORY_RATE = 0.18
+PAYROLL_REVENUE_SHARE = round(69.0 / 24030.0, 5)
+PAYROLL_COVERAGE_SCALE = 0.105
 # Pension outlays relative to GDP rise along the transition as the population
 # ages: in the solved transition they are 1.6 times higher in the steady state
 # than in FY2024/25. The data anchor is today's 0.5 percent of GDP, so the
@@ -881,12 +1072,16 @@ PIT_SCHEDULE_2025 = [
 # Capital income is taxed under Schedule D at flat rates, 10 percent on
 # dividends and 5 percent on interest; the model uses the dividend rate.
 CAPITAL_INCOME_TAX_RATE = 0.10
-# The model's birr are FY2025/26 birr: mean_income_data is GDP per adult of
-# that year (IMF CR 26/174, Table 1, nominal GDP in billions of birr; World
-# Bank population and age structure, 2024, grown one year), and the FY2024/25
-# schedule's thresholds are scaled up by nominal income growth per head
-# between the two years so that they bite at the same real incomes.
-NOMINAL_GDP_BIRR_BN = {"FY2024/25": 19268.0, "FY2025/26": 23851.0}
+# The model's birr are FY2024/25 birr, the start year and the rebased base
+# year: mean_income_data is rebased GDP per adult of that year (24,030
+# billion birr over the adult population in the middle of the fiscal year,
+# World Bank population and age structure, 2024, grown half a year).
+# Proclamation 979/2016 applies as written in FY2024/25; the thresholds of
+# Proclamation 1395/2025, written in FY2025/26 birr, are deflated by the
+# rebased growth of nominal GDP per head between the two years
+# (31,860 / 24,030, less population growth) so that they bite at the same
+# real incomes. The population is the UN figure the model's demographics use
+# (the Ministry of Finance uses 110.6 million).
 POPULATION_2024 = 132.06e6
 ADULT_SHARE_2024 = (
     0.4986  # aged 20 and over: 1 - 0.3906 (0-14) - 0.1108 (15-19)
@@ -904,11 +1099,11 @@ GS_FLAT_PHI2 = 2.0e4
 # other instruments: 60 percent to consumption taxes (VAT reform, excises,
 # customs) and 40 percent to corporate income tax collections (tax
 # administration), following the outturn composition above. FY2024/25 model
-# collections these are scaled against: consumption taxes 3.85 and CIT 1.71
-# percent of GDP.
+# collections these are scaled against: the FY2024/25 outturn mapped to each
+# instrument (CONS_TAX_SHARE, CIT_REVENUE_SHARE).
 INDIRECT_SHARE_OF_REVENUE_GAIN = 0.6
-BASE_CONS_TAX_REVENUE = 0.0385
-BASE_CIT_REVENUE = 0.0171
+BASE_CONS_TAX_REVENUE = CONS_TAX_SHARE
+BASE_CIT_REVENUE = CIT_REVENUE_SHARE
 
 
 def program_spending_paths():
@@ -935,11 +1130,12 @@ def program_spending_paths():
         tr = tr - PENSIONS_SHARE_OF_GDP / 100
     ig = np.array(IMF_CAPITAL) / 100
     fa = np.array(IMF_GRANTS) / 100
+    # shares of market-price GDP -> shares of the model's Y
     return {
-        "alpha_G": (list(g) + [g[-1]]),
-        "alpha_T": (list(tr) + [tr[-1]]),
-        "alpha_I": (list(ig) + [ig[-1]]),
-        "alpha_FA": (list(fa) + [LONG_RUN_GRANTS / 100]),
+        "alpha_G": to_model(list(g) + [g[-1]]),
+        "alpha_T": to_model(list(tr) + [tr[-1]]),
+        "alpha_I": to_model(list(ig) + [ig[-1]]),
+        "alpha_FA": to_model(list(fa) + [LONG_RUN_GRANTS / 100]),
     }
 
 
@@ -1125,21 +1321,23 @@ def flat_gs_parameters(rate):
 
 def mean_income_per_adult():
     """
-    GDP per adult in FY2025/26 birr, the mean_income_data that converts the
+    Rebased GDP per adult in FY2024/25 birr, the mean_income_data that
+    converts the
     model's income units into the birr the tax schedule is written in.
 
     Returns:
         float: birr per year
     """
-    adults = POPULATION_2024 * (1 + POPULATION_GROWTH) * ADULT_SHARE_2024
-    return NOMINAL_GDP_BIRR_BN["FY2025/26"] * 1e9 / adults
+    adults = POPULATION_2024 * (1 + POPULATION_GROWTH / 2) * ADULT_SHARE_2024
+    return NOMINAL_GDP_REBASED_BIRR_BN["FY2024/25"] * 1e9 / adults
 
 
 def statutory_tax_params():
     """
     Income-tax function parameters from the statutory schedules: the
-    FY2024/25 schedule (in FY2025/26 birr) in the first period and the
-    2025 schedule thereafter for effective and labor marginal rates, a flat
+    FY2024/25 schedule in the first period and the 2025 schedule (deflated
+    to FY2024/25 birr) thereafter for effective and labor marginal rates,
+    a flat
     dividend rate on capital income, and the birr-per-model-unit anchor.
 
     Returns:
@@ -1147,10 +1345,13 @@ def statutory_tax_params():
             mean_income_data
     """
     nominal_growth_per_head = (
-        NOMINAL_GDP_BIRR_BN["FY2025/26"] / NOMINAL_GDP_BIRR_BN["FY2024/25"]
+        NOMINAL_GDP_REBASED_BIRR_BN["FY2025/26"]
+        / NOMINAL_GDP_REBASED_BIRR_BN["FY2024/25"]
     ) / (1 + POPULATION_GROWTH)
-    phi_2016 = fit_gs_parameters(PIT_SCHEDULE_2016, nominal_growth_per_head)
-    phi_2025 = fit_gs_parameters(PIT_SCHEDULE_2025)
+    phi_2016 = fit_gs_parameters(PIT_SCHEDULE_2016)
+    phi_2025 = fit_gs_parameters(
+        PIT_SCHEDULE_2025, 1 / nominal_growth_per_head
+    )
     labor = [[phi_2016], [phi_2025]]
     return {
         "tax_func_type": "GS",
@@ -1180,7 +1381,31 @@ def defined_benefit_params():
         "retirement_age": [PENSION_RETIREMENT_AGE],
         "yr_contrib": PENSION_CAREER_YEARS,
         "avg_earn_num_years": PENSION_AVERAGING_YEARS,
-        "alpha_db": replacement / PENSION_CAREER_YEARS,
+        # OG-Core >= 0.21 takes alpha_db by year and lifetime-income group
+        "alpha_db": [[replacement / PENSION_CAREER_YEARS]],
+    }
+
+
+def payroll_tax_params(payroll_coverage_scale=None):
+    """
+    Effective payroll tax by lifetime-income group: the statutory pension
+    contribution rate on the covered groups times the contribution scale.
+
+    Args:
+        payroll_coverage_scale (scalar): defaults to PAYROLL_COVERAGE_SCALE
+
+    Returns:
+        dict: tau_payroll as a (1, J) nested list
+    """
+    if payroll_coverage_scale is None:
+        payroll_coverage_scale = PAYROLL_COVERAGE_SCALE
+    return {
+        "tau_payroll": [
+            [
+                round(PAYROLL_STATUTORY_RATE * c * payroll_coverage_scale, 6)
+                for c in PENSION_COVERAGE
+            ]
+        ]
     }
 
 
@@ -1197,9 +1422,10 @@ LONG_RUN_ZETA_D = 0.15
 # pensions to retired formal-sector workers, the fertilizer subsidy to farming
 # households. OG-Core's eta matrix allocates aggregate transfers across ages
 # and lifetime-income groups; the default is population-proportional.
-PSNP_SHARE_OF_GDP = 0.4
-PENSIONS_SHARE_OF_GDP = 0.5
-FERTILIZER_SUBSIDY_SHARE_OF_GDP = 0.6
+# published percent of old-base GDP, rebased with the FY2024/25 factor
+PSNP_SHARE_OF_GDP = rebased([0.4])[0]
+PENSIONS_SHARE_OF_GDP = rebased([0.5])[0]
+FERTILIZER_SUBSIDY_SHARE_OF_GDP = rebased([0.6])[0]
 PSNP_GROUPS = [0]  # poorest quarter of households
 FARM_GROUPS = [0, 1, 2]  # bottom 70 percent: smallholder agriculture
 PENSION_GROUPS = [5, 6]  # the formal groups, as in PENSION_COVERAGE
@@ -1214,6 +1440,8 @@ def program_zeta_D_path():
         list: length 7 plus the long-run value (period 0 uses period 1's)
     """
     tot = np.array(IMF_PUBLIC_DEBT)
+    # general-government external debt: the total less domestic debt (the
+    # same in both perimeters)
     ext = tot - np.array(IMF_DOMESTIC_DEBT)
     share = np.clip(np.diff(ext) / np.diff(tot), 0.0, 1.0)
     return [float(share[0])] + [float(x) for x in share] + [LONG_RUN_ZETA_D]
@@ -1279,12 +1507,17 @@ def implied_real_rate_on_debt(g_y, g_n):
     d = np.array(IMF_PUBLIC_DEBT) / 100
     rev = np.array(IMF_REVENUE) / 100
     sp = program_spending_paths()
+
+    def mkt(key):
+        # spending paths are in model units; the identity is in data units
+        return np.array(sp[key][:7]) / MODEL_PER_MARKET_GDP
+
     pb = (
         rev
-        + np.array(sp["alpha_FA"][:7])
-        - np.array(sp["alpha_G"][:7])
-        - np.array(sp["alpha_T"][:7])
-        - np.array(sp["alpha_I"][:7])
+        + mkt("alpha_FA")
+        - mkt("alpha_G")
+        - mkt("alpha_T")
+        - mkt("alpha_I")
     )
     if PENSIONS_ON:
         # pension benefits are primary spending too, paid by the scheme
@@ -1308,7 +1541,8 @@ def r_gov_shift_path(g_y, g_n, r_gov_scale, r_gov_DY2, debt_ratio_ss, r_ss):
     Returns:
         list: r_gov_shift path, length 7 + R_GOV_CONVERGENCE_PERIODS + 1
     """
-    d = np.array(IMF_PUBLIC_DEBT) / 100
+    # debt ratios in model units, the units of OG-Core's premium term
+    d = np.array(to_model(np.array(IMF_PUBLIC_DEBT) / 100))
     r_prog = implied_real_rate_on_debt(g_y, g_n)
     targets = np.concatenate(
         [
@@ -1372,37 +1606,77 @@ def fiscal_program_params(p, r_ss=None):
         PROGRAM_DEBT_RATIO_SS,
         r_ss,
     )
-    out["initial_debt_ratio"] = IMF_PUBLIC_DEBT[0] / 100
+    out["initial_debt_ratio"] = INITIAL_DEBT_RATIO
+    out["initial_foreign_debt_ratio"] = GG_FOREIGN_DEBT_SHARE
     out["debt_ratio_ss"] = PROGRAM_DEBT_RATIO_SS
     out["r_gov_DY"] = -2 * float(p.r_gov_DY2) * PROGRAM_DEBT_RATIO_SS
     out["tG1"] = len(PROGRAM_YEARS)
     out.update(remittance_level_params(scenario="program"))
-    out.update(statutory_tax_params())
-    if PENSIONS_ON:
-        out.update(defined_benefit_params())
+    out.update(common_params())
     return out
 
 
 # ---------------------------------------------------------------------------
-# Initial household wealth
+# Capital stocks, depreciation and initial household wealth
 #
-# OG-Core (from PSLmodels/OG-Core#1189) can anchor aggregate household wealth
-# in the first period of the transition to a multiple of steady-state GDP,
-# B(0) = initial_wealth_ratio x Y_ss. Household wealth in the model is
-# domestically owned capital plus domestically held government debt, so the
-# data counterpart is K/Y less the foreign-owned capital stock plus the
-# domestically held debt: the Penn World Table capital-output ratio of about
-# 2.2, less inward FDI stock of about 0.24 of GDP (UNCTAD), plus domestic
-# public debt of 18.7 percent of GDP (IMF CR 26/174, Table 2: 50.5 total less
-# 31.8 external). Until the ogcore release that carries #1189, the example
-# script applies the value only when the installed ogcore supports it.
-# ---------------------------------------------------------------------------
-PWT_CAPITAL_OUTPUT_RATIO = 2.2
-FDI_STOCK_TO_GDP = 0.24
-DOMESTIC_DEBT_TO_GDP = 0.187
-INITIAL_WEALTH_RATIO = round(
-    PWT_CAPITAL_OUTPUT_RATIO - FDI_STOCK_TO_GDP + DOMESTIC_DEBT_TO_GDP, 3
+# Total capital: Penn World Table 11.0 (October 2025) capital stock at
+# current PPPs over output, cn / cgdpo = 2.167 in 2023, the latest year (2.17
+# to 2.26 over 2020-2023). Public capital: IMF Investment and Capital Stock
+# Dataset (April 2025) general-government stock, 0.667 of GDP in 2019, its
+# latest year. Both are measured against the old national accounts; the
+# rebased accounts have not yet produced capital stocks, and the new
+# expenditure accounts revise investment up by more than GDP (gross capital
+# formation 35.3 against 20.1 percent of GDP in FY2024/25). We assume the
+# stocks are revised in proportion to GDP, so the capital-output ratios carry
+# over; this is the provisional element of the calibration and is reported
+# as such (macro.md). The private stock is the total less public capital.
+PWT_CAPITAL_OUTPUT_RATIO = 2.167
+PUBLIC_CAPITAL_OUTPUT_RATIO = 0.667
+PRIVATE_CAPITAL_OUTPUT_RATIO = round(
+    PWT_CAPITAL_OUTPUT_RATIO - PUBLIC_CAPITAL_OUTPUT_RATIO, 3
 )
+# Depreciation of private capital: PWT 11.0's depreciation rate of the total
+# stock, 0.0414 in 2023, less public capital's share depreciating at
+# delta_g = 0.02 (OG-Core's default public-capital rate, kept), so that
+# delta_p (K - K_g) + delta_g K_g = 0.0414 K.
+PWT_DEPRECIATION_RATE = 0.0414
+DELTA_G_ANNUAL = 0.02
+DELTA_ANNUAL = round(
+    (
+        PWT_DEPRECIATION_RATE
+        - PUBLIC_CAPITAL_OUTPUT_RATIO
+        / PWT_CAPITAL_OUTPUT_RATIO
+        * DELTA_G_ANNUAL
+    )
+    / (1 - PUBLIC_CAPITAL_OUTPUT_RATIO / PWT_CAPITAL_OUTPUT_RATIO),
+    4,
+)
+# Foreign-owned capital: UNCTAD World Investment Report 2026 inward FDI
+# stock, USD 42.5 billion at end-2024 and 46.3 billion at end-2025
+# (estimates); the mid-year average over rebased FY2024/25 GDP of USD 201.4
+# billion. Ethiopia publishes no international investment position, so the
+# FDI stock is the foreign-owned capital measure.
+FDI_STOCK_USD_BN = (42.528 + 46.324) / 2
+FDI_STOCK_TO_GDP = round(FDI_STOCK_USD_BN / 201.42, 4)
+# foreign-owned share of private capital in FY2024/25, the zeta_K target
+FOREIGN_CAPITAL_SHARE = round(
+    FDI_STOCK_TO_GDP / PRIVATE_CAPITAL_OUTPUT_RATIO, 4
+)
+# Domestically held general-government debt, FY2024/25
+DOMESTIC_DEBT_TO_GDP = round(IMF_DOMESTIC_DEBT[0] / 100, 4)
+# OG-Core (0.22 and later, PSLmodels/OG-Core#1254) anchors aggregate
+# household wealth in the first period of the transition to a multiple of
+# that period's GDP. Household wealth in the model is domestically owned
+# private capital plus domestically held government debt, so the data
+# counterpart is private K/Y less the foreign-owned stock plus domestic debt,
+# converted to the model's output basis.
+INITIAL_WEALTH_RATIO = round(
+    to_model(
+        PRIVATE_CAPITAL_OUTPUT_RATIO - FDI_STOCK_TO_GDP + DOMESTIC_DEBT_TO_GDP
+    ),
+    3,
+)
+INITIAL_KG_RATIO = round(to_model(PUBLIC_CAPITAL_OUTPUT_RATIO), 3)
 
 
 # ---------------------------------------------------------------------------
@@ -1423,7 +1697,7 @@ DEFAULT_SCENARIO = "history"
 HISTORY_KNOWN_YEARS = 2
 # History-anchored long-run debt ratio: the measured FY2024/25 ratio, so the
 # closure rule stabilizes debt where it starts rather than at a plan.
-HISTORY_DEBT_RATIO_SS = IMF_PUBLIC_DEBT[0] / 100
+HISTORY_DEBT_RATIO_SS = INITIAL_DEBT_RATIO
 
 
 def check_scenario(scenario):
@@ -1622,14 +1896,43 @@ def history_anchored_params(p, r_ss=None):
         HISTORY_DEBT_RATIO_SS,
         r_ss,
     )
-    out["initial_debt_ratio"] = IMF_PUBLIC_DEBT[0] / 100
+    out["initial_debt_ratio"] = INITIAL_DEBT_RATIO
+    out["initial_foreign_debt_ratio"] = GG_FOREIGN_DEBT_SHARE
     out["debt_ratio_ss"] = HISTORY_DEBT_RATIO_SS
     out["r_gov_DY"] = -2 * float(p.r_gov_DY2) * HISTORY_DEBT_RATIO_SS
     out["tG1"] = len(PROGRAM_YEARS)
     out.update(remittance_level_params(scenario="history"))
+    out.update(common_params())
+    return out
+
+
+def common_params():
+    """
+    Parameters both scenarios share: the statutory income tax, the pension
+    scheme and its contributions, capital, depreciation and the initial
+    conditions.
+
+    Returns:
+        dict: ready for Specifications.update_specifications
+    """
+    out = {}
     out.update(statutory_tax_params())
     if PENSIONS_ON:
         out.update(defined_benefit_params())
+        out.update(payroll_tax_params())
+    out.update(
+        {
+            "delta_annual": DELTA_ANNUAL,
+            "delta_g_annual": DELTA_G_ANNUAL,
+            "initial_Kg_ratio": INITIAL_KG_RATIO,
+            "initial_wealth_ratio": INITIAL_WEALTH_RATIO,
+            "r_gov_floor": R_GOV_FLOOR,
+            "nu": NU,
+            "TPI_outer_method": "anderson",
+            "TPI_anderson_m": TPI_ANDERSON_M,
+            "TPI_anderson_beta": TPI_ANDERSON_BETA,
+        }
+    )
     return out
 
 
