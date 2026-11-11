@@ -51,10 +51,11 @@ from ogeth.warm_start import enable, solve_ss_from
 
 # Damping of the dials tuned to first-year moments: revenue is close to
 # proportional to its rate or scale, so those take the full step; the
-# investment share responds to patience with an elasticity well above one,
-# so the discount-factor level moves by a fraction of the gap, bounded.
-LEVEL_DAMPING = 0.15
-LEVEL_STEP = 1.02
+# first-year investment share moves about 1.25 times as much as the level
+# of the discount factors in logs (measured between tuning runs), so the
+# level takes the inverse of that, bounded.
+LEVEL_DAMPING = 0.8
+LEVEL_STEP = 1.04
 DIAL_BOUNDS = (0.5, 2.0)
 
 
