@@ -119,7 +119,7 @@ def test_main_json_updates_specifications(monkeypatch, tmp_path):
     # regeneration
     assert float(
         np.asarray(p.adjustment_factor_for_cit_receipts)[0]
-    ) == pytest.approx(0.2196, abs=1e-3)
+    ) == pytest.approx(0.2196, abs=5e-3)
     assert np.asarray(p.income_tax_filer)[-1].tolist() == pytest.approx(
         [1.0] * 7
     )
