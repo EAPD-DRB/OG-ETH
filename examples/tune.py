@@ -90,7 +90,7 @@ def scales_from(p):
     }
 
 
-def next_overrides(p, ss, tm):
+def next_overrides(p, ss, tm, state=None):
     """
     The dial values for the next iteration.
 
@@ -98,6 +98,8 @@ def next_overrides(p, ss, tm):
         p (Specifications): parameters just solved
         ss (dict): solved steady state
         tm (dict): first-period transition moments (may be None)
+        state (dict): the wealth-share step state carried between runs
+            (per-group damping and the sign of each group's last gap)
 
     Returns:
         dict: overrides for the next tune.py run
@@ -116,7 +118,20 @@ def next_overrides(p, ss, tm):
     fit = target > income.WEALTH_SHARE_FLOOR
     model = income.implied_wealth_shares(np.asarray(ss["b_s"]), p.omega_SS)
     beta = np.asarray(p.beta_annual, dtype=float).flatten()
-    step = np.clip((target / model) ** BETA_DAMPING, 1 / BETA_STEP, BETA_STEP)
+    # A group's wealth share is very elastic to its own beta and the shares
+    # interact through r, so a fixed step overshoots and oscillates: each
+    # group's damping halves whenever its gap changes sign between runs.
+    state = state or {}
+    damping = np.asarray(
+        state.get("damping", [BETA_DAMPING] * len(beta)), dtype=float
+    )
+    sign = np.sign(target - model)
+    if "sign" in state:
+        damping = np.where(
+            sign * np.asarray(state["sign"]) < 0, damping / 2, damping
+        )
+    bound = BETA_STEP ** (damping / BETA_DAMPING)
+    step = np.clip((target / model) ** damping, 1 / bound, bound)
     beta = beta * np.where(fit, step, 1.0)
     fitted = np.flatnonzero(fit)
     for j in np.flatnonzero(~fit):
@@ -179,6 +194,7 @@ def next_overrides(p, ss, tm):
     )
     out.update(mp.payroll_tax_params(sc["payroll"]))
     out["_scales"] = sc
+    out["_beta_state"] = {"damping": damping.tolist(), "sign": sign.tolist()}
     return out
 
 
@@ -207,11 +223,13 @@ def main():
     ) as file:
         p.update_specifications(json.load(file))
     overrides = {}
+    beta_state = None
     if args.overrides:
         with open(args.overrides) as f:
             overrides = json.load(f)
         overrides.pop("_scales", None)
         overrides.pop("_r_ss", None)
+        beta_state = overrides.pop("_beta_state", None)
         p.update_specifications(overrides)
     print(f"label {args.label}; overrides: {sorted(overrides)}", flush=True)
 
@@ -278,7 +296,7 @@ def main():
     with open(os.path.join(out, "dashboard.json"), "w") as f:
         json.dump(summary, f, indent=2, default=float)
     if args.next:
-        nxt = next_overrides(p, ss, tm)
+        nxt = next_overrides(p, ss, tm, beta_state)
         with open(args.next, "w") as f:
             json.dump(nxt, f, default=float)
         print(f"next overrides -> {args.next}; scales {nxt['_scales']}")
