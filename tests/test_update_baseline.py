@@ -115,11 +115,11 @@ def test_main_json_updates_specifications(monkeypatch, tmp_path):
     assert np.asarray(p.capital_income_tax_noncompliance_rate)[
         0
     ].tolist() == pytest.approx(start.tolist())
-    # the CIT collections factor is a path along the IMF program; its
-    # FY2024/25 anchor must survive a regeneration
+    # the CIT collections factor's tuned FY2024/25 value must survive a
+    # regeneration
     assert float(
         np.asarray(p.adjustment_factor_for_cit_receipts)[0]
-    ) == pytest.approx(0.327)
+    ) == pytest.approx(0.2196, abs=1e-3)
     assert np.asarray(p.income_tax_filer)[-1].tolist() == pytest.approx(
         [1.0] * 7
     )

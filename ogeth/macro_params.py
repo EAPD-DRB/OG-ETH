@@ -929,7 +929,7 @@ R_GOV_CONVERGENCE_PERIODS = 4
 R_GOV_FLOOR = -0.10
 # Steady-state return on capital the r_gov_shift path is evaluated at: the
 # solved baseline steady state of examples/run_og_eth.py.
-R_SS_FOR_R_GOV = 0.0901
+R_SS_FOR_R_GOV = 0.072898
 
 # Informality. 77.65 percent of the employed are in informal employment
 # (ILOSTAT harmonised series, SDG 8.3.1, from the 2021 Labour Force and
@@ -990,7 +990,7 @@ PIT_FORMALIZATION_GAIN = round(0.012 * float(rebase_factors()[-1]), 5)
 # outside Schedule A. The scale is calibrated so that personal income tax
 # collects PIT_REVENUE_TARGET of GDP in FY2024/25
 # (examples/tune.py, scored on the first transition year).
-COMPLIANCE_SCALE = 0.198381
+COMPLIANCE_SCALE = 0.053202
 PIT_REVENUE_TARGET = PIT_REVENUE_SHARE
 
 # Pension coverage by lifetime-income group. Ethiopia's two schemes (PSSSA for
@@ -1020,7 +1020,7 @@ PENSION_CAREER_YEARS = 40
 # far more than the scheme's 800,000 pensioners and two percent of the
 # working-age population, so the scale is well below one. Calibrated by
 # examples/tune.py, scored on the first transition year.
-PENSION_COVERAGE_SCALE = 0.876028
+PENSION_COVERAGE_SCALE = 0.499155
 # Contributions: 7 percent from the employee and 11 from the employer
 # (Proclamations 1267/1268 of 2022). OG-Core's payroll tax can differ by
 # lifetime-income group, so the effective rate is the statutory rate on the
@@ -1036,7 +1036,7 @@ PENSION_COVERAGE_SCALE = 0.876028
 # fiscal anchor here (no official FY2024/25 scheme accounts were found).
 PAYROLL_STATUTORY_RATE = 0.18
 PAYROLL_REVENUE_SHARE = round(69.0 / 24030.0, 5)
-PAYROLL_COVERAGE_SCALE = 0.105
+PAYROLL_COVERAGE_SCALE = 0.130277
 
 # Personal income tax: the statutory employment-income schedule (Schedule A)
 # in birr per month, as (upper bound, marginal rate) with an open last

@@ -121,7 +121,9 @@ def test_cit_collections_factor(p):
     revenue and held there in the history baseline; the program scenario
     raises it along the IMF revenue path (tests/test_fiscal_program.py)."""
     factor = np.asarray(p.adjustment_factor_for_cit_receipts)
-    assert float(factor[0]) == pytest.approx(0.327)
+    # tuned so that corporate income tax plus the other capital-income lines
+    # collect 1.26 percent of rebased GDP in FY2024/25 (examples/tune.py)
+    assert float(factor[0]) == pytest.approx(0.2196, abs=1e-3)
     assert np.allclose(factor, factor[0])
     prog = mp.program_revenue_paths(0.06, float(factor[0]))
     assert prog["adjustment_factor_for_cit_receipts"][-1] > float(factor[0])

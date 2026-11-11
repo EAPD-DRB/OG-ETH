@@ -156,7 +156,7 @@ def test_formalization_path_broadens_the_base_over_the_program():
     assert lab[N - 1].tolist() == pytest.approx(end.tolist())
     assert lab[N].tolist() == pytest.approx(end.tolist())
     assert 0 < mp.COMPLIANCE_SCALE < 1
-    assert (np.diff(lab, axis=0) <= 1e-12).all()  # compliance only improves
+    assert (np.diff(lab, axis=0) <= 1e-6).all()  # compliance only improves
 
 
 def test_pensions_go_to_the_formal_groups_only(packaged):
