@@ -48,6 +48,8 @@ def test_spending_paths_reproduce_imf_primary_expenditure():
         + np.array(sp["alpha_T"][:N])
         + np.array(sp["alpha_I"][:N])
     )
+    # the paths are shares of the model's Y; the IMF's of market-price GDP
+    primary = primary / mp.MODEL_PER_MARKET_GDP
     if mp.PENSIONS_ON:
         # pension benefits are paid by the pension system, not as transfers
         primary = primary + mp.PENSIONS_SHARE_OF_GDP / 100
@@ -56,14 +58,31 @@ def test_spending_paths_reproduce_imf_primary_expenditure():
 
 
 def test_program_paths_start_at_fy2024_25_values(packaged):
-    """Period 0 is FY2024/25: 50.5 percent debt, 5.0 percent capital
-    spending, 1.7 percent grants (IMF CR 26/174, Tables 1 and 2b)."""
-    assert packaged["initial_debt_ratio"] == pytest.approx(0.505)
-    assert packaged["alpha_I"][0] == pytest.approx(0.050)
-    assert packaged["alpha_FA"][0] == pytest.approx(0.017)
-    assert packaged["alpha_G"][0] == pytest.approx(0.043)
-    cash = 0.020 - (mp.PENSIONS_SHARE_OF_GDP / 100 if mp.PENSIONS_ON else 0)
-    assert packaged["alpha_T"][0] == pytest.approx(cash)
+    """Period 0 is FY2024/25: general-government debt 43.3, capital spending
+    5.0, grants 1.7 and recurrent spending net of interest and transfers 4.3
+    percent of old-base GDP (IMF WEO Oct 2026; CR 26/174 Tables 1 and 2b),
+    times old over rebased GDP (15,094 / 24,030), in model units."""
+    f = 15094.0 / 24030.0
+    assert mp.rebase_factors()[0] == pytest.approx(f)
+    assert packaged["initial_debt_ratio"] == pytest.approx(
+        mp.to_model(0.433 * f), abs=1e-4
+    )
+    assert packaged["initial_foreign_debt_ratio"] == pytest.approx(
+        (31.8 - 7.2) / 43.3, abs=1e-4
+    )
+    assert packaged["alpha_I"][0] == pytest.approx(
+        mp.to_model(0.050 * f), abs=1e-5
+    )
+    assert packaged["alpha_FA"][0] == pytest.approx(
+        mp.to_model(0.017 * f), abs=1e-5
+    )
+    assert packaged["alpha_G"][0] == pytest.approx(
+        mp.to_model((0.071 - 0.008 - 0.020) * f), abs=1e-5
+    )
+    cash = 0.020 * f - (
+        mp.PENSIONS_SHARE_OF_GDP / 100 if mp.PENSIONS_ON else 0
+    )
+    assert packaged["alpha_T"][0] == pytest.approx(mp.to_model(cash), abs=1e-5)
 
 
 def test_closure_starts_after_the_program_horizon(packaged):
@@ -159,7 +178,9 @@ def test_implied_real_rate_on_debt_is_negative_through_the_program(params):
     on the legacy debt: inflation and concessional terms."""
     r = mp.implied_real_rate_on_debt(params.g_y, params.g_n)
     assert r.shape == (N - 1,)
-    assert (r < 0).all() and (r > -0.06).all()
+    # deeply negative in the first two program years, close to zero after
+    assert (r[:2] < -0.02).all()
+    assert (r > -0.06).all() and (r < 0.01).all()
 
 
 def test_r_gov_path_targets_the_program_implied_rates(params):
@@ -170,7 +191,8 @@ def test_r_gov_path_targets_the_program_implied_rates(params):
     prog = mp.fiscal_program_params(params)
     shift = np.asarray(prog["r_gov_shift"])[1:N]
     scale = float(np.asarray(params.r_gov_scale).flatten()[0])
-    d = np.array(mp.IMF_PUBLIC_DEBT[1:]) / 100
+    # the premium term is in model units of debt
+    d = np.array(mp.to_model(np.array(mp.IMF_PUBLIC_DEBT[1:]) / 100))
     r_gov = (
         scale * mp.R_SS_FOR_R_GOV
         - shift
@@ -179,7 +201,7 @@ def test_r_gov_path_targets_the_program_implied_rates(params):
     )
     assert prog["debt_ratio_ss"] == pytest.approx(mp.PROGRAM_DEBT_RATIO_SS)
     assert prog["alpha_RM_T"] == pytest.approx(
-        mp.IMF_PRIVATE_TRANSFERS[-1] / 100
+        mp.to_model(mp.IMF_PRIVATE_TRANSFERS[-1] / 100), abs=1e-6
     )
     implied = mp.implied_real_rate_on_debt(params.g_y, params.g_n)
     assert np.allclose(r_gov, implied, atol=1e-9)
@@ -248,14 +270,23 @@ def test_packaged_fiscal_paths_match_the_derivation(packaged, params):
 
 
 def test_initial_wealth_ratio_is_built_from_its_components():
-    """B/Y = K/Y (PWT) - foreign-owned capital (FDI stock) + domestic debt."""
+    """B/Y = private K/Y (PWT 11.0 total 2.167 less IMF ICSD public 0.667) -
+    foreign-owned capital (UNCTAD FDI stock, mid-FY2024/25, over rebased USD
+    GDP) + domestically held general-government debt, in model units."""
+    assert mp.PRIVATE_CAPITAL_OUTPUT_RATIO == pytest.approx(2.167 - 0.667)
+    assert mp.FDI_STOCK_TO_GDP == pytest.approx(
+        (42.528 + 46.324) / 2 / 201.42, abs=1e-4
+    )
     assert mp.INITIAL_WEALTH_RATIO == pytest.approx(
-        mp.PWT_CAPITAL_OUTPUT_RATIO
-        - mp.FDI_STOCK_TO_GDP
-        + mp.DOMESTIC_DEBT_TO_GDP,
+        mp.to_model(
+            mp.PRIVATE_CAPITAL_OUTPUT_RATIO
+            - mp.FDI_STOCK_TO_GDP
+            + mp.DOMESTIC_DEBT_TO_GDP
+        ),
         abs=1e-3,
     )
-    assert 1.5 < mp.INITIAL_WEALTH_RATIO < 3.0
+    # OG-Core's valid range for initial_wealth_ratio
+    assert 0.8 < mp.INITIAL_WEALTH_RATIO < 7.0
 
 
 def test_zeta_d_path_follows_the_external_share_of_the_debt_decline():

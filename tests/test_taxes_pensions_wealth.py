@@ -52,11 +52,10 @@ def test_statutory_tax_params_shape_and_anchor():
     assert len(t["etr_params"]) == 2 and len(t["etr_params"][0][0]) == 3
     assert t["mtrx_params"] == t["etr_params"]
     assert t["mtry_params"][0][0][0] == pytest.approx(0.10)
-    # GDP per adult in FY2025/26 birr: 23,851 billion over about 67.7
-    # million adults
-    assert t["mean_income_data"] == pytest.approx(353_000, rel=0.01)
-    # the FY2024/25 schedule is expressed in FY2025/26 birr, so its
-    # thresholds sit above the 2016 proclamation's 600 birr a month
+    # rebased GDP per adult in FY2024/25 birr: 24,030 billion over about
+    # 66.7 million adults
+    assert t["mean_income_data"] == pytest.approx(360_000, rel=0.01)
+    # the FY2024/25 schedule applies as written (600 birr a month exempt)
     phi16 = t["etr_params"][0][0]
     etr_low = mp.gs_rates(12 * 700, phi16, "etr")
     assert etr_low < mp.gs_rates(12 * 3000, phi16, "etr")
@@ -69,15 +68,22 @@ def test_defined_benefit_parameters():
     assert d["retirement_age"] == [60]
     assert d["yr_contrib"] == 40 and d["avg_earn_num_years"] == 3
     # 30 percent after ten years plus 1.25 percent for each of the other 30
-    assert d["yr_contrib"] * d["alpha_db"] == pytest.approx(0.675)
+    # alpha_db is entered by year and lifetime-income group (OG-Core 0.21+)
+    assert np.array(d["alpha_db"]).shape == (1, 1)
+    assert d["yr_contrib"] * d["alpha_db"][0][0] == pytest.approx(0.675)
 
 
 def test_compliance_paths_scale_compliance_not_noncompliance():
     paths = mp.program_compliance_paths(compliance_scale=0.5)
     start = np.array(paths["labor_income_tax_noncompliance_rate"][0])
     end = np.array(paths["labor_income_tax_noncompliance_rate"][-1])
-    assert start.tolist() == pytest.approx([1, 1, 1, 1, 1, 0.75, 0.5])
-    assert end.tolist() == pytest.approx([1, 1, 1, 1, 0.9, 0.5, 0.5])
+    formal = np.array(mp.formal_share_by_group(mp.INFORMAL_EMPLOYMENT_SHARE))
+    assert formal.tolist() == pytest.approx([0, 0, 0, 0.235, 1, 1, 1])
+    assert start.tolist() == pytest.approx((1 - 0.5 * formal).tolist())
+    # the program scenario makes another 6.5 percent of households formal
+    assert end.tolist() == pytest.approx(
+        [1, 1, 1, 1 - 0.5 * 0.885, 0.5, 0.5, 0.5]
+    )
     cov = np.array(paths["replacement_rate_adjust"][0])
     assert cov.tolist() == pytest.approx(
         (np.array(mp.PENSION_COVERAGE) * mp.PENSION_COVERAGE_SCALE).tolist()

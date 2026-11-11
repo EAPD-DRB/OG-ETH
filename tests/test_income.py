@@ -222,15 +222,20 @@ def test_packaged_e_is_the_reshaped_matrix(packaged):
     assert means[0] == pytest.approx(0.176, abs=0.005)
     assert means[-1] == pytest.approx(10.47, abs=0.05)
     gini = income.implied_gini(e, omega, lambdas)
-    assert gini == pytest.approx(0.511, abs=0.005)
+    # the per-hour age profile and the 2098 demographics move the implied
+    # Gini of earnings slightly above WID's 0.516 income Gini
+    assert gini == pytest.approx(0.526, abs=0.005)
     profile = (e * omega).sum(axis=1) / omega.sum(axis=1)
     thirties, fifties, sixties = (
         profile[10:20].mean(),
         profile[30:40].mean(),
         profile[40:50].mean(),
     )
-    assert fifties / thirties < 1.2
-    assert sixties / thirties < 0.8
+    # pay per hour peaks in the forties and stays high into the fifties
+    # (the employed work fewer hours with age: 32 a week in their thirties,
+    # 27 in their fifties, LFMS 2021), then falls after 60
+    assert 1.1 < fifties / thirties < 1.4
+    assert sixties / thirties < 0.9
 
 
 def test_write_json_parameters_only_touches_requested_keys(tmp_path):

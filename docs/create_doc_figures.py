@@ -556,8 +556,8 @@ def statutory_tax_functions(save_path=None):
         save_path = os.path.join(plot_path, "statutory_tax_functions.png")
     params = mp.statutory_tax_params()
     growth = (
-        mp.NOMINAL_GDP_BIRR_BN["FY2025/26"]
-        / mp.NOMINAL_GDP_BIRR_BN["FY2024/25"]
+        mp.NOMINAL_GDP_REBASED_BIRR_BN["FY2025/26"]
+        / mp.NOMINAL_GDP_REBASED_BIRR_BN["FY2024/25"]
     ) / (1 + mp.POPULATION_GROWTH)
     incomes = np.logspace(np.log10(12_000), np.log10(5_000_000), 400)
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -567,16 +567,16 @@ def statutory_tax_functions(save_path=None):
     ]:
         for label, schedule, scale, phi, color in [
             (
-                "Proclamation 979/2016 (FY2024/25), in FY2025/26 birr",
+                "Proclamation 979/2016 (FY2024/25)",
                 mp.PIT_SCHEDULE_2016,
-                growth,
+                1.0,
                 params["etr_params"][0][0],
                 "C0",
             ),
             (
-                "Proclamation 1395/2025 (from FY2025/26)",
+                "Proclamation 1395/2025 (from FY2025/26), in FY2024/25 birr",
                 mp.PIT_SCHEDULE_2025,
-                1.0,
+                1 / growth,
                 params["etr_params"][1][0],
                 "C3",
             ),
