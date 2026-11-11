@@ -162,6 +162,16 @@ def next_overrides(p, ss, tm):
             )
         ]
     out["beta_annual"] = np.clip(beta, *BETA_BOUNDS).tolist()
+    # the sovereign-rate shift path is evaluated at the solved return
+    out["r_gov_shift"] = mp.history_r_gov_shift_path(
+        p.g_y,
+        p.g_n,
+        float(np.asarray(p.r_gov_scale).flatten()[0]),
+        float(p.r_gov_DY2),
+        mp.HISTORY_DEBT_RATIO_SS,
+        float(np.squeeze(ss["r"])),
+    )
+    out["_r_ss"] = float(np.squeeze(ss["r"]))
     out.update(
         mp.compliance_paths(
             mp.DEFAULT_SCENARIO, sc["compliance"], sc["pension"]
@@ -201,6 +211,7 @@ def main():
         with open(args.overrides) as f:
             overrides = json.load(f)
         overrides.pop("_scales", None)
+        overrides.pop("_r_ss", None)
         p.update_specifications(overrides)
     print(f"label {args.label}; overrides: {sorted(overrides)}", flush=True)
 
