@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ogeth"
-version = "0.3.0"
+version = "0.4.0"
 authors = [
     {name = "Marcelo LaFleur, Richard W. Evans, and Jason DeBacker"},
 ]

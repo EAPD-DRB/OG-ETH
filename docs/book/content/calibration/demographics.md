@@ -206,6 +206,9 @@ The effects on the packaged demographics are modest, for two reasons. The fertil
 (SecDemogPopSSTP)=
 ## Population steady-state and transition path
 
+**The data window.**  OG-Core holds fertility, mortality and immigration constant from `final_data_year` on, so the window decides the long-run population growth rate.  Earlier versions of OG-ETH read two years of UN data (`final_data_year = start_year + 1`) and froze Ethiopia's current growth, about 2.6 percent a year, as the steady state.  The demographics now read the UN World Population Prospects 2024 projection to **2098** (`calibrate.DEMOG_FINAL_DATA_YEAR`): OG-Core reads `final_data_year + 1`, and the Population-Data archive it falls back to without a UN API token ends in 2099.  Population growth then falls as the projection says, from 3.5 percent in the first model years to 2.3 percent after 25 years, 1.4 percent after 50 and 0.7 percent after 75, and the steady-state growth rate is the projection's end-of-century rate, about −0.1 percent.  The steady state is therefore an old, slowly shrinking population, and the transition carries Ethiopia's demographic dividend explicitly.
+
+
   This model requires information about mortality rates $\rho_{s,t}$ in order to solve for the household's problem each period. It also requires the steady-state stationary population distribution $\bar{\omega}_{s}$ and population growth rate $\bar{g}_n$ as well as the full transition path of the stationary population distribution $\hat{\omega}_{s,t}$ and population grow rate $\tilde{g}_{n,t}$ from the current state to the steady-state. To solve for the steady-state and the transition path of the stationary population distribution, we write the stationary population dynamic equations {eq}`EqPopLawofmotionStat` and their matrix representation {eq}`EqPopLOMstatmat`.
 
   ```{math}

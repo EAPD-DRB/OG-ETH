@@ -132,7 +132,12 @@ def next_overrides(p, ss, tm, state=None):
         )
     bound = BETA_STEP ** (damping / BETA_DAMPING)
     step = np.clip((target / model) ** damping, 1 / bound, bound)
+    level = np.exp(np.dot(lambdas, np.log(beta)))
     beta = beta * np.where(fit, step, 1.0)
+    # the wealth-share step moves relative patience only: the level (the
+    # population-weighted geometric mean) is restored, so it answers to
+    # first-year investment alone
+    beta = beta * level / np.exp(np.dot(lambdas, np.log(beta)))
     fitted = np.flatnonzero(fit)
     for j in np.flatnonzero(~fit):
         beta[j] = beta[fitted[np.argmin(np.abs(fitted - j))]]
