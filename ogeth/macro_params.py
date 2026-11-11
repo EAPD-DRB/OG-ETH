@@ -789,12 +789,6 @@ GG_FOREIGN_DEBT_SHARE = round(
 PRIVATE_CONSUMPTION_REBASED = 64.4
 GROSS_CAPITAL_FORMATION_REBASED = 35.3
 GOVERNMENT_CONSUMPTION_REBASED = 4.7
-# program investment path for display only: the IMF's old-base path scaled
-# by the FY2024/25 level revision
-IMF_GROSS_INVESTMENT = [
-    round(x * GROSS_CAPITAL_FORMATION_REBASED / 20.1, 2)
-    for x in [20.1, 28.7, 27.5, 27.2, 27.2, 27.4, 26.5]
-]
 
 # Price basis. OG-Core's output Y is GDP at producer prices: the consumption
 # tax is collected on top of it, so GDP at market prices, the basis of every

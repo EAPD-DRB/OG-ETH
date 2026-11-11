@@ -246,9 +246,9 @@ def calibration_vs_data(
     panels = [
         ("Public debt (% of GDP)", 100 * ratio("D"), program.IMF_PUBLIC_DEBT),
         (
-            "Tax revenue (% of GDP)",
+            "Revenue excl. grants (% of GDP)",
             100 * ratio("total_tax_revenue"),
-            program.IMF_TAX_REVENUE,
+            program.IMF_REVENUE,
         ),
         (
             "Primary expenditure (% of GDP)",
@@ -282,7 +282,9 @@ def calibration_vs_data(
         (
             "Gross investment incl. public (% of GDP)",
             100 * (ratio("I_total") + ratio("I_g")),
-            program.IMF_GROSS_INVESTMENT,
+            # only FY2024/25 is measured on the rebased basis
+            [program.GROSS_CAPITAL_FORMATION_REBASED]
+            + [np.nan] * (len(program.PROGRAM_YEARS) - 1),
         ),
         (
             "Public debt held abroad (% of GDP)",
@@ -294,19 +296,18 @@ def calibration_vs_data(
         ),
     ]
     fig, axes = plt.subplots(4, 2, figsize=(11, 13))
-    for ax, (title, model, data) in zip(axes.flat, panels):
+    for ax, (panel_title, model, data) in zip(axes.flat, panels):
         ax.plot(years[: len(model)], model, label="OG-ETH")
         ax.plot(
             years_prog, data, "o--", label="IMF CR 26/174 program", color="C3"
         )
-        ax.set_title(title)
+        ax.set_title(panel_title)
         ax.axvspan(years_prog[0], years_prog[-1], color="grey", alpha=0.08)
     axes.flat[0].legend(loc="best")
     if title is None:
         title = (
-            "OG-ETH history-anchored baseline vs. the IMF program path "
-            "(shaded: program years; the model imposes nothing from the "
-            "program after the FY2025/26 budget)"
+            "History-anchored baseline vs. the IMF program "
+            "(rebased GDP; shaded: program years)"
         )
     fig.suptitle(title)
     fig.tight_layout()
@@ -804,7 +805,7 @@ def program_scenario_vs_data(output_dir=None, save_path=None):
         output_dir,
         save_path,
         title=(
-            "OG-ETH program scenario vs. the IMF program path (shaded: "
-            "program years, fiscal paths imposed from the program)"
+            "Program scenario vs. the IMF program "
+            "(rebased GDP; shaded: program years)"
         ),
     )
