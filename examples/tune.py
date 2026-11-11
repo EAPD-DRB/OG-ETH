@@ -55,6 +55,11 @@ from ogeth.warm_start import enable, solve_ss_from
 # of the discount factors in logs (measured between tuning runs), so the
 # level takes the inverse of that, bounded.
 LEVEL_DAMPING = 0.4
+# bequest weight of the floored group: the share responds less than one for
+# one, so a full-ratio step bounded at a factor of two per solve
+CHI_B_DAMPING = 1.0
+CHI_B_STEP = 2.0
+CHI_B_BOUNDS = (0.01, 10000.0)
 # halving the wealth-share damping on every sign change stops here, so a
 # group that oscillated early can still close its gap
 BETA_DAMPING_FLOOR = 0.05
@@ -147,6 +152,25 @@ def next_overrides(p, ss, tm, state=None):
     fitted = np.flatnonzero(fit)
     for j in np.flatnonzero(~fit):
         beta[j] = beta[fitted[np.argmin(np.abs(fitted - j))]]
+    # A floored group (the bottom quarter, a net debtor in the data) shares
+    # its neighbour's patience, and its own wealth share is matched with its
+    # bequest weight: with OG-USA's chi_b = 80 the poorest elderly, whose
+    # transfers and remittances far exceed their consumption, save nearly
+    # all of them for bequests, which both overstates the group's wealth and
+    # leaves their first-year problem badly conditioned.
+    chi_b = np.asarray(p.chi_b, dtype=float).flatten().copy()
+    floored = ~fit
+    chi_b[floored] = np.clip(
+        chi_b[floored]
+        * np.clip(
+            (target[floored] / model[floored]) ** CHI_B_DAMPING,
+            1 / CHI_B_STEP,
+            CHI_B_STEP,
+        ),
+        CHI_B_BOUNDS[0],
+        CHI_B_BOUNDS[1],
+    )
+    out["chi_b"] = chi_b.tolist()
     sc = scales_from(p)
     if tm is not None:
         t = {k: v[0] for k, v in TRANSITION_TARGETS.items()}
