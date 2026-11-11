@@ -55,6 +55,9 @@ from ogeth.warm_start import enable, solve_ss_from
 # of the discount factors in logs (measured between tuning runs), so the
 # level takes the inverse of that, bounded.
 LEVEL_DAMPING = 0.4
+# halving the wealth-share damping on every sign change stops here, so a
+# group that oscillated early can still close its gap
+BETA_DAMPING_FLOOR = 0.05
 LEVEL_STEP = 1.04
 DIAL_BOUNDS = (0.5, 2.0)
 
@@ -129,7 +132,9 @@ def next_overrides(p, ss, tm, state=None):
     sign = np.sign(target - model)
     if "sign" in state:
         damping = np.where(
-            sign * np.asarray(state["sign"]) < 0, damping / 2, damping
+            sign * np.asarray(state["sign"]) < 0,
+            np.maximum(damping / 2, BETA_DAMPING_FLOOR),
+            damping,
         )
     bound = BETA_STEP ** (damping / BETA_DAMPING)
     step = np.clip((target / model) ** damping, 1 / bound, bound)

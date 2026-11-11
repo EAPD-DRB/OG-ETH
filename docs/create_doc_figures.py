@@ -208,10 +208,16 @@ def calibration_vs_data(
     horizon = n + 9
     years = np.arange(start_year, start_year + horizon)
 
+    # GDP at market prices: the model's output plus the consumption tax,
+    # the basis of every data ratio (ogeth/targets.py)
+    y_mkt = np.asarray(tpi["Y"])[:horizon] + np.asarray(
+        tpi["cons_tax_revenue"]
+    )[:horizon].reshape(horizon, -1).sum(axis=1)
+
     def ratio(key):
         return (
             np.asarray(tpi[key])[:horizon].reshape(horizon, -1).sum(axis=1)
-            / np.asarray(tpi["Y"])[:horizon]
+            / y_mkt
         )
 
     Y = np.asarray(tpi["Y"])[: horizon + 1]
@@ -222,10 +228,20 @@ def calibration_vs_data(
     # less the returns paid on foreign-owned capital and foreign-held debt
     # (OG-Core prices both at the household portfolio return r_p) plus
     # remittances and grants
-    net_exports = 1 - ratio("C") - ratio("I_total") - ratio("I_g") - ratio("G")
+    net_exports = (
+        np.asarray(tpi["Y"])[:horizon] / y_mkt
+        - ratio("C")
+        - ratio("I_total")
+        - ratio("I_g")
+        - ratio("G")
+    )
     r_p = np.asarray(tpi["r_p"])[:horizon]
     factor_payments = r_p * (ratio("K_f") + ratio("D_f"))
-    grants = np.asarray(params.alpha_FA).flatten()[:horizon]
+    grants = (
+        np.asarray(params.alpha_FA).flatten()[:horizon]
+        * np.asarray(tpi["Y"])[:horizon]
+        / y_mkt
+    )
     current_account = net_exports - factor_payments + ratio("RM") + grants
     panels = [
         ("Public debt (% of GDP)", 100 * ratio("D"), program.IMF_PUBLIC_DEBT),
