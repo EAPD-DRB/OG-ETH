@@ -240,6 +240,6 @@ OG-ETH history-anchored baseline against the IMF fifth-review program path, both
 | 119–122 (`fixper` = 120) | 2.6e-4 |
 | 123 to the end | 6.6e-8 |
 
-(SecLWI_footnotes)=
+(SecMacro_footnotes)=
 ## Footnotes
 The following are the footnotes for this section.

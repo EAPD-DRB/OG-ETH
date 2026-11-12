@@ -10,6 +10,11 @@ logo                     : '..//OG-ETH_logo.png'
 execute:
   execute_notebooks      : force
 
+# Tutorial materials linked from the book on GitHub rather than built into it
+exclude_patterns:
+  - content/UNtutorial/materials/*
+  - content/UNtutorial/solutions/*
+
 ###############################################################################
 # Parse and render settings
 parse:
