@@ -108,10 +108,25 @@ def test_targets_carry_sources_and_dials():
     )
 
 
+def test_capital_stocks_are_rebased():
+    """Total K/Y by perpetual inventory on PWT 11.0 with the rebasing's
+    investment gap phased in from FY2015/16; public capital (IMF ICSD 0.667
+    of old-base GDP) converted like other fiscal stocks."""
+    assert mp.TOTAL_CAPITAL_OUTPUT_RATIO == pytest.approx(2.514, abs=1e-3)
+    assert mp.PUBLIC_CAPITAL_OUTPUT_RATIO == pytest.approx(
+        0.667 * 15094 / 24030, abs=1e-3
+    )
+    # no revision rolls the old-base stock forward; the full-history gap is
+    # the upper bound; the central case sits between
+    low = mp.rebased_capital_output_ratio(None)
+    high = mp.rebased_capital_output_ratio(1970)
+    assert 1.9 < low < mp.TOTAL_CAPITAL_OUTPUT_RATIO < high < 3.1
+
+
 def test_capital_and_depreciation_are_sourced(packaged):
     """delta for private capital from PWT 11.0's 0.0414 on total capital,
-    with public capital (IMF ICSD 0.667 of GDP) at delta_g 0.02."""
-    kg = mp.PUBLIC_CAPITAL_OUTPUT_RATIO / mp.PWT_CAPITAL_OUTPUT_RATIO
+    with public capital at delta_g 0.02."""
+    kg = mp.PUBLIC_CAPITAL_OUTPUT_RATIO / mp.TOTAL_CAPITAL_OUTPUT_RATIO
     assert mp.DELTA_ANNUAL * (1 - kg) + 0.02 * kg == pytest.approx(
         0.0414, abs=1e-4
     )

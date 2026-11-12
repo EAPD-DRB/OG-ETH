@@ -270,10 +270,13 @@ def test_packaged_fiscal_paths_match_the_derivation(packaged, params):
 
 
 def test_initial_wealth_ratio_is_built_from_its_components():
-    """B/Y = private K/Y (PWT 11.0 total 2.167 less IMF ICSD public 0.667) -
-    foreign-owned capital (UNCTAD FDI stock, mid-FY2024/25, over rebased USD
-    GDP) + domestically held general-government debt, in model units."""
-    assert mp.PRIVATE_CAPITAL_OUTPUT_RATIO == pytest.approx(2.167 - 0.667)
+    """B/Y = private K/Y (rebased total less rebased IMF ICSD public
+    capital) - foreign-owned capital (UNCTAD FDI stock, mid-FY2024/25, over
+    rebased USD GDP) + domestically held general-government debt, in model
+    units."""
+    assert mp.PRIVATE_CAPITAL_OUTPUT_RATIO == pytest.approx(
+        mp.TOTAL_CAPITAL_OUTPUT_RATIO - mp.PUBLIC_CAPITAL_OUTPUT_RATIO
+    )
     assert mp.FDI_STOCK_TO_GDP == pytest.approx(
         (42.528 + 46.324) / 2 / 201.42, abs=1e-4
     )

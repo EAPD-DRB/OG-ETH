@@ -1603,21 +1603,105 @@ def fiscal_program_params(p, r_ss=None):
 # ---------------------------------------------------------------------------
 # Capital stocks, depreciation and initial household wealth
 #
-# Total capital: Penn World Table 11.0 (October 2025) capital stock at
-# current PPPs over output, cn / cgdpo = 2.167 in 2023, the latest year (2.17
-# to 2.26 over 2020-2023). Public capital: IMF Investment and Capital Stock
-# Dataset (April 2025) general-government stock, 0.667 of GDP in 2019, its
-# latest year. Both are measured against the old national accounts; the
-# rebased accounts have not yet produced capital stocks, and the new
-# expenditure accounts revise investment up by more than GDP (gross capital
-# formation 35.3 against 20.1 percent of GDP in FY2024/25). We assume the
-# stocks are revised in proportion to GDP, so the capital-output ratios carry
-# over; this is the provisional element of the calibration and is reported
-# as such (macro.md). The private stock is the total less public capital.
+# Total capital. Penn World Table 11.0 (October 2025) puts the capital stock
+# at current PPPs over output, cn / cgdpo, at 2.167 in 2023, its latest year
+# (2.17 to 2.26 over 2020-2023), measured against the old national accounts.
+# The rebased accounts have not produced capital stocks or back series yet,
+# and they revise gross capital formation up far more than GDP: 35.3 against
+# 20.1 percent of GDP in FY2024/25 (179 percent in birr), which the Ministry
+# attributes to investment by regional state-owned enterprises and non-profit
+# institutions that the old accounts missed. The old accounts themselves had
+# investment at 35-38 percent of GDP in 2013-2017, falling to 20 percent by
+# FY2024/25, so the undercount built up after the old base year rather than
+# running through the whole history.
+#
+# We therefore rebuild the stock by perpetual inventory from PWT's investment
+# and GDP at constant national prices (ogeth/data/pwt110_eth_capital.csv,
+# Ethiopia rows of PWT 11.0, PWT year t = FY t-1/t), extended to FY2024/25
+# with the old-base investment share (20.1, and 21.15 for FY2023/24,
+# interpolated from PWT's 22.2 in FY2022/23) and real growth (8.1 and 9.2),
+# and add the rebasing's investment gap, 15.2 points of GDP in FY2024/25,
+# phased in linearly from zero in FY2015/16, the old base year. The ratio of
+# the revised to the unrevised stock-output ratio scales PWT's 2023 level.
+# The result, 2.51, sits in a range of 2.02 (no revision before FY2024/25,
+# the stock rolled forward on the old accounts) to 2.98 (the gap in every
+# year since 1970); phasing in from 2019 or 2011 gives 2.40 or 2.66. It
+# should be replaced by the Ministry's capital stocks or back series when
+# they are published.
 PWT_CAPITAL_OUTPUT_RATIO = 2.167
-PUBLIC_CAPITAL_OUTPUT_RATIO = 0.667
+OLD_BASE_GCF_SHARE = 0.201
+CAPITAL_REVISION_START_YEAR = 2016
+# old-base investment share and real growth for the years after PWT's last
+OLD_BASE_EXTENSION = {2024: (0.2115, 0.081), 2025: (OLD_BASE_GCF_SHARE, 0.092)}
+
+
+def rebased_capital_output_ratio(revision_start=CAPITAL_REVISION_START_YEAR):
+    """
+    Total capital-output ratio in FY2024/25 on the rebased accounts, by
+    perpetual inventory on PWT 11.0 investment with the rebasing's investment
+    gap phased in linearly from ``revision_start`` (None for no revision).
+
+    Args:
+        revision_start (int or None): PWT year in which the gap starts from
+            zero, reaching its FY2024/25 size in 2025
+
+    Returns:
+        ky (float): total capital over GDP in FY2024/25
+    """
+    pwt = pd.read_csv(
+        Path(__file__).parent / "data" / "pwt110_eth_capital.csv",
+        index_col="year",
+    )
+    share = pwt.v_gfcf / pwt.v_gdp
+    # real investment share per point of nominal share
+    real_per_nominal = (pwt.q_gfcf / pwt.q_gdp) / share
+    years = list(pwt.index) + list(OLD_BASE_EXTENSION)
+    q_gdp = list(pwt.q_gdp)
+    shares = list(share)
+    for s_old, growth in OLD_BASE_EXTENSION.values():
+        q_gdp.append(q_gdp[-1] * (1 + growth))
+        shares.append(s_old)
+    rpn = list(real_per_nominal) + [real_per_nominal.iloc[-1]] * len(
+        OLD_BASE_EXTENSION
+    )
+    delta = float(pwt.delta.iloc[-1])
+    gap = GROSS_CAPITAL_FORMATION_REBASED / 100 - OLD_BASE_GCF_SHARE
+    last = years[-1]
+
+    def stock_output(with_gap):
+        ky = {}
+        k = None
+        for y, qy, s, r in zip(years, q_gdp, shares, rpn):
+            extra = 0.0
+            if with_gap and revision_start is not None:
+                extra = gap * min(
+                    max((y - revision_start) / (last - revision_start), 0.0),
+                    1.0,
+                )
+            inv = (s + extra) * r * qy
+            # first year: the stock in steady state at the decade's growth
+            k = inv / (delta + 0.03) if k is None else k * (1 - delta) + inv
+            ky[y] = k / qy
+        return ky
+
+    unrevised = stock_output(False)
+    revised = stock_output(True)
+    return PWT_CAPITAL_OUTPUT_RATIO * revised[last] / unrevised[2023]
+
+
+TOTAL_CAPITAL_OUTPUT_RATIO = round(rebased_capital_output_ratio(), 3)
+# Public capital: IMF Investment and Capital Stock Dataset (April 2025)
+# general-government stock, 0.667 of old-base GDP in 2019, its latest year,
+# held at that ratio to FY2024/25. The stock is accumulated budget capital
+# spending, in birr, which rebasing does not change, so its ratio converts
+# like every other fiscal stock (times 0.628).
+PUBLIC_CAPITAL_OUTPUT_RATIO_OLD_BASE = 0.667
+PUBLIC_CAPITAL_OUTPUT_RATIO = round(
+    PUBLIC_CAPITAL_OUTPUT_RATIO_OLD_BASE * rebase_factors()[0], 3
+)
+# The private stock is the total less public capital.
 PRIVATE_CAPITAL_OUTPUT_RATIO = round(
-    PWT_CAPITAL_OUTPUT_RATIO - PUBLIC_CAPITAL_OUTPUT_RATIO, 3
+    TOTAL_CAPITAL_OUTPUT_RATIO - PUBLIC_CAPITAL_OUTPUT_RATIO, 3
 )
 # Depreciation of private capital: PWT 11.0's depreciation rate of the total
 # stock, 0.0414 in 2023, less public capital's share depreciating at
@@ -1629,10 +1713,10 @@ DELTA_ANNUAL = round(
     (
         PWT_DEPRECIATION_RATE
         - PUBLIC_CAPITAL_OUTPUT_RATIO
-        / PWT_CAPITAL_OUTPUT_RATIO
+        / TOTAL_CAPITAL_OUTPUT_RATIO
         * DELTA_G_ANNUAL
     )
-    / (1 - PUBLIC_CAPITAL_OUTPUT_RATIO / PWT_CAPITAL_OUTPUT_RATIO),
+    / (1 - PUBLIC_CAPITAL_OUTPUT_RATIO / TOTAL_CAPITAL_OUTPUT_RATIO),
     4,
 )
 # Foreign-owned capital: UNCTAD World Investment Report 2026 inward FDI
