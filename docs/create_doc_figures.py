@@ -215,7 +215,7 @@ def calibration_vs_data(
     )[:horizon].reshape(horizon, -1).sum(axis=1)
 
     def ratio(key):
-        if key not in tpi:  # an ogcore without concessional debt
+        if key not in tpi:  # an ogcore without external debt at its own rate
             return np.zeros(horizon)
         return (
             np.asarray(tpi[key])[:horizon].reshape(horizon, -1).sum(axis=1)
@@ -229,7 +229,7 @@ def calibration_vs_data(
     # the model's current account: the goods-market residual (net exports)
     # less the returns paid on foreign-owned capital and foreign-held market
     # debt (OG-Core prices both at the household portfolio return r_p) and
-    # the interest on concessional debt, plus remittances and grants
+    # the interest on external debt, plus remittances and grants
     net_exports = (
         np.asarray(tpi["Y"])[:horizon] / y_mkt
         - ratio("C")
@@ -239,7 +239,7 @@ def calibration_vs_data(
     )
     r_p = np.asarray(tpi["r_p"])[:horizon]
     factor_payments = r_p * (ratio("K_f") + ratio("D_f")) + ratio(
-        "debt_service_ODA"
+        "debt_service_ext"
     )
     grants = (
         np.asarray(params.alpha_FA).flatten()[:horizon]
@@ -250,7 +250,7 @@ def calibration_vs_data(
     panels = [
         (
             "Public debt (% of GDP)",
-            100 * (ratio("D") + ratio("D_ODA")),
+            100 * (ratio("D") + ratio("D_ext")),
             program.IMF_PUBLIC_DEBT,
         ),
         (
@@ -296,7 +296,7 @@ def calibration_vs_data(
         ),
         (
             "Public debt held abroad (% of GDP)",
-            100 * (ratio("D_f") + ratio("D_ODA")),
+            100 * (ratio("D_f") + ratio("D_ext")),
             list(
                 np.array(program.IMF_PUBLIC_DEBT)
                 - np.array(program.IMF_DOMESTIC_DEBT)

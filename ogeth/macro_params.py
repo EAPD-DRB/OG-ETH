@@ -778,31 +778,30 @@ GG_FOREIGN_DEBT_SHARE = round(
     4,
 )
 
-# Concessional external debt (OG-Core's alpha_ODA and r_ODA_annual,
-# PSLmodels/OG-Core#1125). Most of the external debt is owed to official
-# lenders on concessional terms: IDA holds about 39 percent and official
-# non-Paris Club creditors 31 percent, and non-official creditors hold 10
-# percent (IMF CR 26/174, DSA paragraph on debt composition). We treat the
-# official share of general-government external debt as concessional debt,
-# paid abroad at its own low rate, and the rest of the debt (domestic debt
-# and the commercial external debt, chiefly the defaulted USD 1 billion
-# Eurobond) as market debt priced by r_gov. The World Bank's International
-# Debt Statistics put private creditors at 18 percent of public and publicly
-# guaranteed external debt (USD 6.0 of 34.0 billion, end-2024, of which bonds
-# 1.0); the gap to the IMF's 10 percent is mostly state-enterprise loans
-# backed by export credit agencies, outside general government.
-NON_OFFICIAL_EXTERNAL_SHARE = 0.10
+# Government debt contracted abroad (OG-Core's alpha_D_ext and
+# r_D_ext_annual, PSLmodels/OG-Core#1125): debt borrowed directly from
+# foreign lenders at its own interest rate, outside the domestic market and
+# households' portfolio. All of general-government external debt is of this
+# kind. Most of it is owed to official lenders on concessional terms (IDA
+# about 39 percent, official non-Paris Club creditors 31 percent), and
+# non-official creditors hold 10 percent (IMF CR 26/174, DSA paragraph on
+# debt composition), chiefly the defaulted USD 1 billion Eurobond. The World
+# Bank's International Debt Statistics put private creditors at 18 percent
+# of public and publicly guaranteed external debt (USD 6.0 of 34.0 billion,
+# end-2024, of which bonds 1.0); the gap to the IMF's 10 percent is mostly
+# state-enterprise loans backed by export credit agencies, outside general
+# government. The rate below is the DSA's average across all of it.
 # The public DSA of IMF CR 26/174 (Table 2, public sector debt), fiscal years
 # ending June: FY2024/25 to FY2030/31, then 2036 and 2046.
 DSA_YEARS = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2036, 2046]
-# Public external debt, percent of old-base GDP. Concessional debt falls with
+# Public external debt, percent of old-base GDP. The external debt falls with
 # it: amortization outpaces new concessional loans as the program's
 # financing surge ends and growth erodes the ratio. Ethiopia's income was 74
 # percent of IDA's operational cut-off when the program was approved (CR
 # 26/174), so concessional terms continue over the DSA horizon (the grant
 # element of new external borrowing stays at about 47 percent to FY2044/45,
 # Text Table 3) and end with IDA graduation after it: beyond 2046 the ratio
-# falls to zero at its 2036-2046 pace (CONCESSIONAL_DEBT_PATH).
+# falls to zero at its 2036-2046 pace (external_debt_path).
 DSA_EXTERNAL_DEBT = [31.8, 29.9, 27.2, 24.7, 21.5, 18.8, 16.8, 9.2, 4.1]
 # Average nominal interest rate on external debt, percent (USD terms). The
 # rise from 0.7 to 2.6 percent is the end of the restructuring's interest
@@ -812,7 +811,7 @@ DSA_EXTERNAL_DEBT = [31.8, 29.9, 27.2, 24.7, 21.5, 18.8, 16.8, 9.2, 4.1]
 # rate on the stock, not as a separate grant (alpha_FA holds cash grants
 # only, IMF Table 2b).
 DSA_EXTERNAL_RATE = [0.7, 1.8, 2.6, 2.1, 1.9, 1.8, 1.6, 1.3, 0.9]
-# Real rate on concessional debt in the model's units of output: the USD
+# Real rate on external debt in the model's units of output: the USD
 # nominal rate less US inflation (2 percent, the Federal Reserve's target),
 # with the real exchange rate held constant beyond the FY2024/25 float.
 US_INFLATION = 0.02
@@ -920,34 +919,21 @@ def to_model(share):
 
 # Long-run debt ratio of the program scenario: 30 percent of old-base GDP,
 # rebased with the latest factor, in model units. Like the history anchor it
-# is all market debt in the long run, concessional debt having been repaid.
+# is all market debt in the long run, external debt having been repaid.
 PROGRAM_DEBT_RATIO_SS = round(to_model(0.30 * float(rebase_factors()[-1])), 4)
 # Initial general-government debt and its foreign-held share, FY2024/25, in
 # model units (end of the year before the first model period)
 INITIAL_DEBT_RATIO = round(to_model(IMF_PUBLIC_DEBT[0] / 100), 4)
-# Its split, FY2024/25, model units: concessional debt (the official share of
-# the external debt), and market debt (OG-Core's D: the rest) with its
-# foreign-held part, the non-official external debt. OG-Core's
-# initial_foreign_debt_ratio and zeta_D are shares of market debt; new
-# market debt keeps the initial foreign share, the program ruling out new
-# non-concessional external borrowing beyond the Koysha dam loan (CR 26/174,
-# continuous performance criterion).
-CONCESSIONAL_DEBT_RATIO = round(
-    INITIAL_DEBT_RATIO
-    * GG_FOREIGN_DEBT_SHARE
-    * (1 - NON_OFFICIAL_EXTERNAL_SHARE),
-    4,
-)
-INITIAL_MARKET_DEBT_RATIO = round(
-    INITIAL_DEBT_RATIO - CONCESSIONAL_DEBT_RATIO, 4
-)
-MARKET_FOREIGN_DEBT_SHARE = round(
-    INITIAL_DEBT_RATIO
-    * GG_FOREIGN_DEBT_SHARE
-    * NON_OFFICIAL_EXTERNAL_SHARE
-    / INITIAL_MARKET_DEBT_RATIO,
-    4,
-)
+# Its split, FY2024/25, model units: external debt (OG-Core's D_ext), and
+# market debt (OG-Core's D), which is domestic debt, 18.7 percent of
+# old-base GDP. OG-Core's initial_foreign_debt_ratio and zeta_D are shares
+# of market debt held by non-residents: birr Treasury bills and bonds are
+# held by the central bank, banks and pension funds (CR 26/174), and the
+# securities market opened to non-residents only in 2025, so the share is
+# zero.
+EXTERNAL_DEBT_RATIO = round(INITIAL_DEBT_RATIO * GG_FOREIGN_DEBT_SHARE, 4)
+INITIAL_MARKET_DEBT_RATIO = round(INITIAL_DEBT_RATIO - EXTERNAL_DEBT_RATIO, 4)
+MARKET_FOREIGN_DEBT_SHARE = 0.0
 
 # Cash transfers to households as a share of GDP, published percent of
 # old-base GDP. The IMF recurrent line bundles the wage bill, goods and
@@ -981,10 +967,10 @@ WORLD_INT_RATE_ANNUAL = 0.063
 # mean 4.7, which the DSA's average real rate on domestic debt reaches by
 # 2036 (4.6). Its 2046 value (6.6) is not used: by then the DSA has public
 # debt down to 13.6 percent of GDP and a thin domestic market, while the
-# model holds debt at its FY2024/25 ratio. With concessional debt in the
-# FY2024/25 stock at about 1 percent real, the blended rate is near the 2
+# model holds debt at its FY2024/25 ratio. With external debt in the
+# FY2024/25 stock near -1 percent real, the blended rate is near the 2
 # percent long-run effective rate on all public debt this calibration used
-# before concessional debt was modelled.
+# before external debt was modelled at its own rate.
 LONG_RUN_R_GOV = round(sum(DSA_MARGINAL_DOMESTIC_REAL_RATES) / 200, 4)
 # OG-Core clips the sovereign rate at ``r_gov_floor`` (a parameter since
 # PSLmodels/OG-Core#1203). The shift path targets the measured real rate on
@@ -1531,15 +1517,16 @@ def dsa_annual(values, last_year=None):
     return np.interp(years, DSA_YEARS, values)
 
 
-def concessional_debt_path():
+def external_debt_path():
     """
-    Concessional debt as a share of OG-Core's Y (alpha_ODA), one value per
-    year from FY2024/25: the FY2024/25 stock (CONCESSIONAL_DEBT_RATIO) moved
-    with the DSA's public external debt ratio to 2046, then down to zero at
-    the DSA's 2036-2046 pace, after which OG-Core holds the last value (zero).
+    Government debt contracted abroad as a share of OG-Core's Y
+    (alpha_D_ext), one value per year from FY2024/25: the FY2024/25 stock
+    (EXTERNAL_DEBT_RATIO) moved with the DSA's public external debt ratio to
+    2046, then down to zero at the DSA's 2036-2046 pace, after which OG-Core
+    holds the last value (zero).
 
     Returns:
-        list: alpha_ODA path
+        list: alpha_D_ext path
     """
     ext = dsa_annual(DSA_EXTERNAL_DEBT)
     pace = (DSA_EXTERNAL_DEBT[-2] - DSA_EXTERNAL_DEBT[-1]) / (
@@ -1551,17 +1538,17 @@ def concessional_debt_path():
         tail.append(level)
         level -= pace
     path = np.concatenate([ext, tail, [0.0]]) / DSA_EXTERNAL_DEBT[0]
-    return [round(float(x) * CONCESSIONAL_DEBT_RATIO, 6) for x in path]
+    return [round(float(x) * EXTERNAL_DEBT_RATIO, 6) for x in path]
 
 
-def concessional_rate_path():
+def external_rate_path():
     """
-    Real interest rate on concessional debt (r_ODA_annual), one value per year
+    Real interest rate on external debt (r_D_ext_annual), one value per year
     from FY2024/25 to 2046, held after: the DSA's average nominal rate on
     external debt less US inflation.
 
     Returns:
-        list: r_ODA_annual path
+        list: r_D_ext_annual path
     """
     return [
         round(float(x) / 100 - US_INFLATION, 6)
@@ -1569,18 +1556,18 @@ def concessional_rate_path():
     ]
 
 
-def concessional_params():
+def external_debt_params():
     """
-    OG-Core's concessional-debt parameters and the market-debt split of the
+    OG-Core's external-debt parameters and the market-debt part of the
     initial debt, the same in both scenarios.
 
     Returns:
-        dict: alpha_ODA, r_ODA_annual, initial_debt_ratio,
+        dict: alpha_D_ext, r_D_ext_annual, initial_debt_ratio,
             initial_foreign_debt_ratio
     """
     return {
-        "alpha_ODA": concessional_debt_path(),
-        "r_ODA_annual": concessional_rate_path(),
+        "alpha_D_ext": external_debt_path(),
+        "r_D_ext_annual": external_rate_path(),
         "initial_debt_ratio": INITIAL_MARKET_DEBT_RATIO,
         "initial_foreign_debt_ratio": MARKET_FOREIGN_DEBT_SHARE,
     }
@@ -1605,20 +1592,24 @@ def market_r_gov_shift_path(
     """
     Level-shift path for the sovereign rate on market debt, r_gov =
     r_gov_scale r - shift + premium, that puts r_gov on market_rate_targets
-    with the debt-elastic premium centred on the long-run market-debt anchor
-    debt_ratio_ss. OG-Core adds r_gov_DY d + r_gov_DY2 d^2 with r_gov_DY =
-    -2 r_gov_DY2 D, which equals r_gov_DY2 (d - D)^2 - r_gov_DY2 D^2; the
-    shift absorbs the constant, and, where an expected market-debt path is
+    with the debt-elastic premium centred on the long-run debt anchor
+    debt_ratio_ss. OG-Core evaluates the premium at all government debt,
+    market plus external; external debt is repaid by the late 2040s, so the
+    long-run anchor is all market debt. OG-Core adds r_gov_DY d +
+    r_gov_DY2 d^2 with r_gov_DY = -2 r_gov_DY2 D, which equals
+    r_gov_DY2 (d - D)^2 - r_gov_DY2 D^2; the shift absorbs the constant,
+    and, where an expected path of all government debt is
     given, the premium along it, so the target holds on that path. The
     market return r is approximated by its steady-state value.
 
     Args:
         r_gov_scale (scalar): pass-through of the market return
         r_gov_DY2 (scalar): curvature of the debt-elastic premium
-        debt_ratio_ss (scalar): long-run market-debt anchor (model units)
+        debt_ratio_ss (scalar): long-run debt anchor (model units)
         r_ss (scalar): steady-state market return
-        debt_path (array_like): expected market debt, model units, for the
-            first years of the path (None: the premium is zero along it)
+        debt_path (array_like): expected government debt, market plus
+            external, model units, for the first years of the path (None:
+            the premium is zero along it)
 
     Returns:
         list: r_gov_shift path, one value per year to 2036 plus the long run
@@ -1633,27 +1624,11 @@ def market_r_gov_shift_path(
     return [float(x) for x in shift]
 
 
-def program_market_debt_path():
-    """
-    Market debt along the IMF program, model units: general-government debt
-    less concessional debt, for the program years.
-
-    Returns:
-        Numpy array: length len(PROGRAM_YEARS)
-    """
-    total = np.array(to_model(np.array(IMF_PUBLIC_DEBT) / 100))
-    oda = np.array(concessional_debt_path()[: len(PROGRAM_YEARS)])
-    return total - oda
-
-
 def zeta_D_path():
     """
-    Foreign share of new market debt, both scenarios: the FY2024/25 foreign
-    share of market debt (MARKET_FOREIGN_DEBT_SHARE). Under the program the
-    government contracts no new non-concessional external debt beyond the
-    Koysha dam loan (CR 26/174), and new concessional loans are modelled
-    through alpha_ODA, so new market debt is domestic in the same proportion
-    as the stock.
+    Foreign share of new market debt, both scenarios: non-residents'
+    share of birr government securities (MARKET_FOREIGN_DEBT_SHARE, zero).
+    New borrowing abroad is modelled through alpha_D_ext.
 
     Returns:
         list: same length as the spending paths (program years plus the long
@@ -1696,9 +1671,9 @@ def fiscal_program_params(p, r_ss=None):
         float(p.r_gov_DY2),
         PROGRAM_DEBT_RATIO_SS,
         r_ss,
-        debt_path=program_market_debt_path(),
+        debt_path=to_model(np.array(IMF_PUBLIC_DEBT) / 100),
     )
-    out.update(concessional_params())
+    out.update(external_debt_params())
     out["debt_ratio_ss"] = PROGRAM_DEBT_RATIO_SS
     out["r_gov_DY"] = -2 * float(p.r_gov_DY2) * PROGRAM_DEBT_RATIO_SS
     out["tG1"] = len(PROGRAM_YEARS)
@@ -1873,9 +1848,9 @@ HISTORY_KNOWN_YEARS = 2
 # History-anchored long-run debt ratio: the measured FY2024/25 ratio of all
 # general-government debt, so the closure rule stabilizes debt where it
 # starts rather than at a plan. OG-Core's debt_ratio_ss anchors market debt;
-# concessional debt is repaid by the late 2040s (concessional_debt_path), so
+# external debt is repaid by the late 2040s (external_debt_path), so
 # in the long run all debt is market debt and the two anchors coincide.
-# Along the way the closure rule refinances the falling concessional stock
+# Along the way the closure rule refinances the falling external stock
 # with market debt.
 HISTORY_DEBT_RATIO_SS = INITIAL_DEBT_RATIO
 
@@ -2007,7 +1982,7 @@ def history_anchored_params(p, r_ss=None):
         HISTORY_DEBT_RATIO_SS,
         r_ss,
     )
-    out.update(concessional_params())
+    out.update(external_debt_params())
     out["debt_ratio_ss"] = HISTORY_DEBT_RATIO_SS
     out["r_gov_DY"] = -2 * float(p.r_gov_DY2) * HISTORY_DEBT_RATIO_SS
     out["tG1"] = len(PROGRAM_YEARS)

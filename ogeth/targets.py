@@ -82,9 +82,9 @@ TRANSITION_TARGETS = {
     ),
     "D/Y": (
         mp.IMF_PUBLIC_DEBT[0] / 100,
-        "initial_debt_ratio + alpha_ODA (imposed)",
+        "initial_debt_ratio + alpha_D_ext (imposed)",
         "general-government debt 43.3 percent of old-base GDP (IMF WEO "
-        "October 2026), rebased; market plus concessional debt",
+        "October 2026), rebased; market (domestic) plus external debt",
     ),
     # scored, not tuned
     "C/Y purch.": (
@@ -114,7 +114,7 @@ TRANSITION_TARGETS = {
         "check",
         "net primary income paid abroad USD 0.75 bn (IMF CR 26/174 Table 4a); "
         "the model counts payments on foreign-owned capital and market debt "
-        "at r_p and interest on concessional debt at r_ODA",
+        "at r_p and interest on external debt at r_D_ext",
     ),
     "total tax/Y": (
         (1172 + 39.4 + 32.8 + 20.0) / 24030 + mp.PAYROLL_REVENUE_SHARE,
@@ -151,7 +151,7 @@ def tpi_moments(tpi, t=0):
     """
 
     def at(key):
-        if key not in tpi:  # an ogcore without concessional debt
+        if key not in tpi:  # an ogcore without external debt at its own rate
             return 0.0
         x = np.asarray(tpi[key])
         x = x.reshape(x.shape[0], -1).sum(axis=1) if x.ndim > 1 else x
@@ -171,18 +171,18 @@ def tpi_moments(tpi, t=0):
         "(I+I_g)/Y": (at("I_total") + at("I_g")) / Y,
         "K_f/K": at("K_f") / at("K"),
         "B/Y": at("B") / Y,
-        "D/Y": (at("D") + at("D_ODA")) / Y,
+        "D/Y": (at("D") + at("D_ext")) / Y,
         "C/Y purch.": (at("C") + at("cons_tax_revenue")) / Y,
         "G/Y": at("G") / Y,
         "NX/Y": nx / Y,
         "RM/Y": at("RM") / Y,
         "factor payments/Y": (
-            r_p * (at("K_f") + at("D_f")) + at("debt_service_ODA")
+            r_p * (at("K_f") + at("D_f")) + at("debt_service_ext")
         )
         / Y,
         "total tax/Y": at("total_tax_revenue") / Y,
         "D market/Y": at("D") / Y,
-        "D_ODA/Y": at("D_ODA") / Y,
+        "D_ext/Y": at("D_ext") / Y,
         "K/Y": at("K") / Y,
         "r": at("r"),
         "r_gov": at("r_gov"),
@@ -214,7 +214,7 @@ def ss_moments(ss):
         "payroll/Y": sc("payroll_tax_revenue") / Y,
         "pensions/Y": sc("agg_pension_outlays") / Y,
         "total tax/Y": sc("total_tax_revenue") / Y,
-        "D/Y": (sc("D") + sc("D_ODA")) / Y,
+        "D/Y": (sc("D") + sc("D_ext")) / Y,
         "D market/Y": sc("D") / Y,
         "D_f/D": sc("D_f") / sc("D") if sc("D") else np.nan,
         "G/Y": sc("G") / Y,
