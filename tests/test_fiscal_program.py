@@ -251,7 +251,8 @@ def test_long_run_r_gov_is_the_dsa_rate_on_new_domestic_debt(params):
         + params.r_gov_DY * D
         + params.r_gov_DY2 * D**2
     )
-    assert long_run == pytest.approx(mp.LONG_RUN_R_GOV, abs=1e-9)
+    # R_SS_FOR_R_GOV is stored to six digits
+    assert long_run == pytest.approx(mp.LONG_RUN_R_GOV, abs=1e-6)
 
 
 def test_packaged_fiscal_paths_match_the_derivation(packaged, params):
