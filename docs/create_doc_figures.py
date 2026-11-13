@@ -208,10 +208,18 @@ def calibration_vs_data(
     horizon = n + 9
     years = np.arange(start_year, start_year + horizon)
 
+    # GDP at market prices: the model's output plus the consumption tax,
+    # the basis of every data ratio (ogeth/targets.py)
+    y_mkt = np.asarray(tpi["Y"])[:horizon] + np.asarray(
+        tpi["cons_tax_revenue"]
+    )[:horizon].reshape(horizon, -1).sum(axis=1)
+
     def ratio(key):
+        if key not in tpi:  # an ogcore without external debt at its own rate
+            return np.zeros(horizon)
         return (
             np.asarray(tpi[key])[:horizon].reshape(horizon, -1).sum(axis=1)
-            / np.asarray(tpi["Y"])[:horizon]
+            / y_mkt
         )
 
     Y = np.asarray(tpi["Y"])[: horizon + 1]
@@ -219,20 +227,36 @@ def calibration_vs_data(
         1 + np.asarray(params.g_n)[1 : horizon + 1]
     ) - 1
     # the model's current account: the goods-market residual (net exports)
-    # less the returns paid on foreign-owned capital and foreign-held debt
-    # (OG-Core prices both at the household portfolio return r_p) plus
-    # remittances and grants
-    net_exports = 1 - ratio("C") - ratio("I_total") - ratio("I_g") - ratio("G")
+    # less the returns paid on foreign-owned capital and foreign-held market
+    # debt (OG-Core prices both at the household portfolio return r_p) and
+    # the interest on external debt, plus remittances and grants
+    net_exports = (
+        np.asarray(tpi["Y"])[:horizon] / y_mkt
+        - ratio("C")
+        - ratio("I_total")
+        - ratio("I_g")
+        - ratio("G")
+    )
     r_p = np.asarray(tpi["r_p"])[:horizon]
-    factor_payments = r_p * (ratio("K_f") + ratio("D_f"))
-    grants = np.asarray(params.alpha_FA).flatten()[:horizon]
+    factor_payments = r_p * (ratio("K_f") + ratio("D_f")) + ratio(
+        "debt_service_ext"
+    )
+    grants = (
+        np.asarray(params.alpha_FA).flatten()[:horizon]
+        * np.asarray(tpi["Y"])[:horizon]
+        / y_mkt
+    )
     current_account = net_exports - factor_payments + ratio("RM") + grants
     panels = [
-        ("Public debt (% of GDP)", 100 * ratio("D"), program.IMF_PUBLIC_DEBT),
         (
-            "Tax revenue (% of GDP)",
+            "Public debt (% of GDP)",
+            100 * (ratio("D") + ratio("D_ext")),
+            program.IMF_PUBLIC_DEBT,
+        ),
+        (
+            "Revenue excl. grants (% of GDP)",
             100 * ratio("total_tax_revenue"),
-            program.IMF_TAX_REVENUE,
+            program.IMF_REVENUE,
         ),
         (
             "Primary expenditure (% of GDP)",
@@ -266,11 +290,13 @@ def calibration_vs_data(
         (
             "Gross investment incl. public (% of GDP)",
             100 * (ratio("I_total") + ratio("I_g")),
-            program.IMF_GROSS_INVESTMENT,
+            # only FY2024/25 is measured on the rebased basis
+            [program.GROSS_CAPITAL_FORMATION_REBASED]
+            + [np.nan] * (len(program.PROGRAM_YEARS) - 1),
         ),
         (
             "Public debt held abroad (% of GDP)",
-            100 * ratio("D_f"),
+            100 * (ratio("D_f") + ratio("D_ext")),
             list(
                 np.array(program.IMF_PUBLIC_DEBT)
                 - np.array(program.IMF_DOMESTIC_DEBT)
@@ -278,19 +304,18 @@ def calibration_vs_data(
         ),
     ]
     fig, axes = plt.subplots(4, 2, figsize=(11, 13))
-    for ax, (title, model, data) in zip(axes.flat, panels):
+    for ax, (panel_title, model, data) in zip(axes.flat, panels):
         ax.plot(years[: len(model)], model, label="OG-ETH")
         ax.plot(
             years_prog, data, "o--", label="IMF CR 26/174 program", color="C3"
         )
-        ax.set_title(title)
+        ax.set_title(panel_title)
         ax.axvspan(years_prog[0], years_prog[-1], color="grey", alpha=0.08)
     axes.flat[0].legend(loc="best")
     if title is None:
         title = (
-            "OG-ETH history-anchored baseline vs. the IMF program path "
-            "(shaded: program years; the model imposes nothing from the "
-            "program after the FY2025/26 budget)"
+            "History-anchored baseline vs. the IMF program "
+            "(rebased GDP; shaded: program years)"
         )
     fig.suptitle(title)
     fig.tight_layout()
@@ -556,8 +581,8 @@ def statutory_tax_functions(save_path=None):
         save_path = os.path.join(plot_path, "statutory_tax_functions.png")
     params = mp.statutory_tax_params()
     growth = (
-        mp.NOMINAL_GDP_BIRR_BN["FY2025/26"]
-        / mp.NOMINAL_GDP_BIRR_BN["FY2024/25"]
+        mp.NOMINAL_GDP_REBASED_BIRR_BN["FY2025/26"]
+        / mp.NOMINAL_GDP_REBASED_BIRR_BN["FY2024/25"]
     ) / (1 + mp.POPULATION_GROWTH)
     incomes = np.logspace(np.log10(12_000), np.log10(5_000_000), 400)
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -567,16 +592,16 @@ def statutory_tax_functions(save_path=None):
     ]:
         for label, schedule, scale, phi, color in [
             (
-                "Proclamation 979/2016 (FY2024/25), in FY2025/26 birr",
+                "Proclamation 979/2016 (FY2024/25)",
                 mp.PIT_SCHEDULE_2016,
-                growth,
+                1.0,
                 params["etr_params"][0][0],
                 "C0",
             ),
             (
-                "Proclamation 1395/2025 (from FY2025/26)",
+                "Proclamation 1395/2025 (from FY2025/26), in FY2024/25 birr",
                 mp.PIT_SCHEDULE_2025,
-                1.0,
+                1 / growth,
                 params["etr_params"][1][0],
                 "C3",
             ),
@@ -788,7 +813,7 @@ def program_scenario_vs_data(output_dir=None, save_path=None):
         output_dir,
         save_path,
         title=(
-            "OG-ETH program scenario vs. the IMF program path (shaded: "
-            "program years, fiscal paths imposed from the program)"
+            "Program scenario vs. the IMF program "
+            "(rebased GDP; shaded: program years)"
         ),
     )

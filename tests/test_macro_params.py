@@ -278,21 +278,16 @@ def test_get_macro_params_update_from_api_true(monkeypatch):
     test_dict = macro_params.get_macro_params(update_from_api=True)
 
     assert isinstance(test_dict, dict)
-    # Only g_y_annual (WB WDI) and gamma (ILOSTAT) are pulled for OG-ETH.
+    # Only g_y_annual (WB WDI) is pulled for OG-ETH; gamma is off the live
+    # path so a refresh cannot overwrite the triangulated value.
     # Debt (initial_debt_ratio, initial_foreign_debt_ratio, zeta_D),
     # IMF-sourced alpha_T/alpha_G, and the r_gov_* parameters are frozen at
     # the documented values in ogeth_default_parameters.json (see
     # macro_params.py / macro.md). r_gov is frozen because the committed
     # r_gov_shift is re-centered for the debt-elastic premium, and returning
     # the raw Li-Magud-Werner shift here would silently un-center it.
-    assert sorted(test_dict.keys()) == sorted(
-        [
-            "g_y_annual",
-            "gamma",
-        ]
-    )
+    assert sorted(test_dict.keys()) == ["g_y_annual"]
     assert test_dict["g_y_annual"] == pytest.approx(0.25)
-    assert test_dict["gamma"] == [pytest.approx(0.50)]
 
 
 def test_get_imf_macro_params_overwrites_saved_file(monkeypatch, tmp_path):

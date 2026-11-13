@@ -28,11 +28,16 @@ from ogeth import macro_params as remittances
 
 # IMF Country Report 26/174 (fifth ECF review, June 2026), Table 4a,
 # FY2024/25 actual: private transfers (net) US$7,037 million, 5.6 percent of
-# GDP. The World Bank WDI personal-remittances series (BX.TRF.PWKR.CD.DT)
-# puts the same inflow at US$7.14 billion for calendar 2024.
+# old-base GDP; on the rebased GDP (USD 201.4 billion) about 3.5 percent. The
+# World Bank WDI personal-remittances series (BX.TRF.PWKR.CD.DT) puts the
+# same inflow at US$7.14 billion for calendar 2024. alpha_RM is a share of
+# the model's Y (GDP at producer prices), so the market-price share is
+# converted.
 IMF_PRIVATE_TRANSFERS_USD_MN = 7037
-IMF_PRIVATE_TRANSFERS_SHARE_OF_GDP = 0.056
-EXPECTED_ALPHA_RM = 0.056
+IMF_PRIVATE_TRANSFERS_SHARE_OF_GDP = 0.056 * 15094.0 / 24030.0
+EXPECTED_ALPHA_RM = round(
+    remittances.to_model(IMF_PRIVATE_TRANSFERS_SHARE_OF_GDP), 6
+)
 
 
 @pytest.fixture(scope="module")
@@ -53,8 +58,12 @@ def params(packaged):
 
 def test_alpha_rm_matches_imf_private_transfers(packaged):
     """The level is the observed FY2024/25 private-transfers share of GDP."""
-    assert packaged["alpha_RM_1"] == EXPECTED_ALPHA_RM
-    assert packaged["alpha_RM_1"] == IMF_PRIVATE_TRANSFERS_SHARE_OF_GDP
+    assert packaged["alpha_RM_1"] == pytest.approx(EXPECTED_ALPHA_RM, abs=1e-5)
+    # close to the dollar figures on the rebased GDP
+    assert packaged["alpha_RM_1"] == pytest.approx(
+        remittances.to_model(IMF_PRIVATE_TRANSFERS_USD_MN / 201420.0),
+        abs=3e-4,
+    )
 
 
 def test_packaged_long_run_share_is_the_measured_level(packaged):
@@ -70,9 +79,10 @@ def test_program_long_run_share_is_the_program_endpoint():
     """Program scenario: the long-run share is the last program-year
     projection, held like the other program series (4.1 percent of GDP)."""
     expected = remittances.remittance_level_params(scenario="program")
-    assert expected["alpha_RM_1"] == pytest.approx(EXPECTED_ALPHA_RM)
+    assert expected["alpha_RM_1"] == pytest.approx(EXPECTED_ALPHA_RM, abs=1e-5)
     assert expected["alpha_RM_T"] == pytest.approx(
-        remittances.IMF_PRIVATE_TRANSFERS[-1] / 100
+        remittances.to_model(remittances.IMF_PRIVATE_TRANSFERS[-1] / 100),
+        abs=1e-6,
     )
 
 
@@ -102,9 +112,12 @@ def test_program_g_rm_moves_remittances_along_the_program_then_holds(
     )
     Y = np.ones(params.T + params.S)
     ratio = aggr.get_RM(Y, p, "TPI")[: params.T] / Y[: params.T]
-    program = remittances.program_remittance_shares() / 100
-    assert np.allclose(ratio[: program.size], program, atol=1e-12)
-    assert np.allclose(ratio[program.size :], p.alpha_RM_T, atol=1e-12)
+    # the glide is in market-price shares; alpha_RM in model units
+    program = np.array(
+        remittances.to_model(remittances.program_remittance_shares() / 100)
+    )
+    assert np.allclose(ratio[: program.size], program, atol=1e-6)
+    assert np.allclose(ratio[program.size :], p.alpha_RM_T, atol=1e-6)
 
 
 def test_program_shares_glide_between_the_anchors():

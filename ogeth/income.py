@@ -223,9 +223,67 @@ def per_worker_earnings(country, ages):
     )
 
 
+# Weekly hours of the employed by age, for the per-hour profile: Ethiopia's
+# only age profile is the 2021 Labour Force and Migration Survey, and the US
+# profile is ILOSTAT's earliest CPS year in the series used by OG-PHL, 2010
+# (the NTA years are 2005 and 2006).
+HOURS_YEAR = {"ETH": 2021, "US": 2010}
+
+
+def hours_employed(country, ages):
+    """
+    Mean weekly hours of the employed by age, interpolated from age bands
+    (band midpoints; the open 65+ band at 67, held beyond it).
+
+    Args:
+        country (str): "ETH" or "US"
+        ages (Numpy array): ages to evaluate at
+
+    Returns:
+        hours (Numpy array): weekly hours of an employed person
+    """
+    df = pd.read_csv(os.path.join(DATA_DIR, "hours_employed_by_age.csv"))
+    df = df[(df.country == country) & (df.year == HOURS_YEAR[country])]
+    if df.empty:
+        raise ValueError(f"No hours by age for {country}")
+    mid = []
+    for band in df.age_band:
+        if band.endswith("+"):
+            mid.append(float(band[:-1]) + 2.0)
+        else:
+            lo, hi = band.split("-")
+            mid.append((float(lo) + float(hi)) / 2)
+    x = np.array(mid)
+    order = np.argsort(x)
+    return np.interp(
+        ages, x[order], df.mean_weekly_hours_employed.to_numpy()[order]
+    )
+
+
+def per_hour_earnings(country, ages):
+    """
+    Labor income per hour worked by age: the NTA per-capita profile divided
+    by hours worked per person (employment ratio of the NTA year times the
+    weekly hours of the employed).
+
+    The model's labor supply is hours per person, calibrated to the survey
+    (ogeth/labor.py), so the ability profile must be pay per hour; dividing
+    only by the employment ratio would leave hours per worker in both e and
+    n and count them twice.
+
+    Args:
+        country (str): "ETH" or "US"
+        ages (Numpy array): ages to evaluate at
+
+    Returns:
+        earnings (Numpy array): labor income per hour worked by age
+    """
+    return per_worker_earnings(country, ages) / hours_employed(country, ages)
+
+
 def earnings_age_factor(ages):
     """
-    Ethiopia-to-US ratio of per-worker labor income by age.
+    Ethiopia-to-US ratio of labor income per hour worked by age.
 
     Each country's profile is normalized to its mean over REFERENCE_AGES
     before the ratio is taken, so the factor reshapes the age profile
@@ -243,8 +301,8 @@ def earnings_age_factor(ages):
     """
     ages = np.asarray(ages, dtype=float)
     ref = (ages >= REFERENCE_AGES[0]) & (ages < REFERENCE_AGES[1])
-    eth = per_worker_earnings("ETH", ages)
-    usa = per_worker_earnings("US", ages)
+    eth = per_hour_earnings("ETH", ages)
+    usa = per_hour_earnings("US", ages)
     factor = (eth / eth[ref].mean()) / (usa / usa[ref].mean())
     old = ages >= OLDEST_MEASURED_AGE
     hold = (ages >= OLDEST_MEASURED_AGE - 5) & ~old

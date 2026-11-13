@@ -35,9 +35,13 @@ from ogeth import macro_params as mp
 # shared by the labor and capital rows.
 # the shape of compliance across groups; the level is the calibrated
 # COMPLIANCE_SCALE in macro_params (see taxes.md)
+# formality by group from ILOSTAT's 77.65 percent informal employment (the
+# formal 22.35 percent at the top of the lifetime-income distribution), times
+# the calibrated compliance scale
 NONCOMPLIANCE_BY_GROUP = (
     1
-    - mp.COMPLIANCE_SCALE * (1 - np.array([1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.0]))
+    - mp.COMPLIANCE_SCALE
+    * np.array(mp.formal_share_by_group(mp.INFORMAL_EMPLOYMENT_SHARE))
 ).tolist()
 
 
@@ -90,11 +94,14 @@ def test_statutory_tax_functions(p):
         mp.CAPITAL_INCOME_TAX_RATE
     )
     assert p.mean_income_data == pytest.approx(mp.mean_income_per_adult())
-    # the 2025 schedule at the top decile's 55,000 birr a month is close to
-    # its 35 percent top rate; at the exemption threshold it is near zero
+    # the 2025 schedule, in FY2024/25 birr, at the top decile's 55,000 birr
+    # a month is close to its 35 percent top rate; at the exemption
+    # threshold (2,000 birr a month in FY2025/26 birr, about 1,550 in
+    # FY2024/25 birr) it is near zero
     top = mp.gs_rates(55_000 * 12, etr[-1, 0], "etr")
-    assert 0.30 < top < 0.35
-    assert mp.gs_rates(24_000, etr[-1, 0], "etr") < 0.04
+    assert 0.28 < top < 0.35
+    growth = (31860 / 24030) / (1 + mp.POPULATION_GROWTH)
+    assert mp.gs_rates(12 * 2000 / growth, etr[-1, 0], "etr") < 0.04
 
 
 def test_informality_noncompliance_by_group(p):
@@ -114,7 +121,9 @@ def test_cit_collections_factor(p):
     revenue and held there in the history baseline; the program scenario
     raises it along the IMF revenue path (tests/test_fiscal_program.py)."""
     factor = np.asarray(p.adjustment_factor_for_cit_receipts)
-    assert float(factor[0]) == pytest.approx(0.327)
+    # tuned so that corporate income tax plus the other capital-income lines
+    # collect 1.26 percent of rebased GDP in FY2024/25 (examples/tune.py)
+    assert float(factor[0]) == pytest.approx(0.2303, abs=5e-3)
     assert np.allclose(factor, factor[0])
     prog = mp.program_revenue_paths(0.06, float(factor[0]))
     assert prog["adjustment_factor_for_cit_receipts"][-1] > float(factor[0])

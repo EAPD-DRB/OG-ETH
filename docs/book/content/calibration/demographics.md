@@ -58,9 +58,27 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
   {numref}`Figure %s <FigFertRatesETH>` was created using the [`ogcore.demographics.get_fert()`](https://github.com/PSLmodels/OG-Core/blob/master/ogcore/demographics.py#L146) function, which downloaded the data from the United National Data Portal API and plotted it in Python.[^un_data_portal]
 
   ```{code-cell} ipython3
-  :tags: ["hide-input", "remove-output"]
+  :tags: ["hide-input", "remove-output", "skip-execution"]
+  # These cells show how docs/create_doc_figures.py draws the figures on this
+  # page; the book does not re-run them (they download UN data).
+  import json
   import os
+  from importlib.resources import files
+  import matplotlib.pyplot as plt
+  import numpy as np
   import ogcore.demographics as demog
+  from ogcore import parameter_plots as pp
+  from ogcore.parameters import Specifications
+
+  p = Specifications()
+  p.update_specifications(
+      json.loads(
+          files("ogeth")
+          .joinpath("ogeth_default_parameters.json")
+          .read_text(encoding="utf-8")
+      )
+  )
+  YEAR_TO_PLOT = int(p.start_year)
   plot_path = os.path.join(os.path.abspath(''), 'images')
 
   fert_rates, fig = demog.get_fert(
@@ -83,7 +101,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
   height: 400px
   name: FigFertRatesETH
   ---
-  Ethiopia fertility rates by age $\left(f_s\right)$ for $E+S=100$: year 2023
+  Ethiopia fertility rates by age $\left(f_s\right)$ for $E+S=100$: year 2025
   ```
 
   The fertility rates in the UN data are births per 1,000 women of age-$s$. We adjust the units of those rates to represent the number of births per total population of both men and women of age-$s$.
@@ -97,7 +115,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
   The mortality rates are a population-weighted average of the male and female mortality rates by one-year age increments reported by United Nations. The maximum age in years in our model is truncated to 100-years old. In addition, we constrain the mortality rate to be 1.0 or 100 percent at the maximum age of 100.
 
   ```{code-cell} ipython3
-  :tags: ["hide-input", "remove-output"]
+  :tags: ["hide-input", "remove-output", "skip-execution"]
 
   import matplotlib.pyplot as plt
   import os
@@ -126,7 +144,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
   height: 400px
   name: FigMortRatesETH
   ---
-  Ethiopia mortality rates by age $\left(\rho_{s,t}\right)$ for $E+S=100$: year 2023
+  Ethiopia mortality rates by age $\left(\rho_{s,t}\right)$ for $E+S=100$: year 2025
   ```
 
 
@@ -142,7 +160,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
   ```
 
   ```{code-cell} ipython3
-  :tags: ["hide-input", "remove-output"]
+  :tags: ["hide-input", "remove-output", "skip-execution"]
   import os
   import matplotlib.pyplot as plt
   import ogcore.demographics as demog
@@ -172,7 +190,7 @@ We discuss the approach to estimating fertility rates $f_{s,t}$, mortality rates
   height: 400px
   name: FigImmRatesETH
   ---
-  Ethiopia immigration rates by age $\left(i_s\right)$ for $E+S=100$: year 2023
+  Ethiopia immigration rates by age $\left(i_s\right)$ for $E+S=100$: year 2025
   ```
 
   We calculate our immigration rates for the consecutive-year-periods of population distribution data 2022 and 2023. The immigration rates $i_{s,t}$ that we use in our model are the the residuals described in {eq}`EqPopImmRates` implied by these two consecutive periods. {numref}`Figure %s <FigImmRatesETH>` shows the estimated immigration rates for $E+S=100$ and given the fertility rates from Section {ref}`SecDemogFert` and the mortality rates from Section {ref}`SecDemogMort`.
@@ -205,6 +223,9 @@ The effects on the packaged demographics are modest, for two reasons. The fertil
 
 (SecDemogPopSSTP)=
 ## Population steady-state and transition path
+
+**The data window.**  OG-Core holds fertility, mortality and immigration constant from `final_data_year` on, so the window decides the long-run population growth rate.  Earlier versions of OG-ETH read two years of UN data (`final_data_year = start_year + 1`) and froze Ethiopia's current growth, about 2.6 percent a year, as the steady state.  The demographics now read the UN World Population Prospects 2024 projection to **2098** (`calibrate.DEMOG_FINAL_DATA_YEAR`): OG-Core reads `final_data_year + 1`, and the Population-Data archive it falls back to without a UN API token ends in 2099.  Population growth then falls as the projection says, from 3.5 percent in the first model years to 2.3 percent after 25 years, 1.4 percent after 50 and 0.7 percent after 75, and the steady-state growth rate is the projection's end-of-century rate, about −0.1 percent.  The steady state is therefore an old, slowly shrinking population, and the transition carries Ethiopia's demographic dividend explicitly.
+
 
   This model requires information about mortality rates $\rho_{s,t}$ in order to solve for the household's problem each period. It also requires the steady-state stationary population distribution $\bar{\omega}_{s}$ and population growth rate $\bar{g}_n$ as well as the full transition path of the stationary population distribution $\hat{\omega}_{s,t}$ and population grow rate $\tilde{g}_{n,t}$ from the current state to the steady-state. To solve for the steady-state and the transition path of the stationary population distribution, we write the stationary population dynamic equations {eq}`EqPopLawofmotionStat` and their matrix representation {eq}`EqPopLOMstatmat`.
 
@@ -338,11 +359,10 @@ The effects on the packaged demographics are modest, for two reasons. The fertil
   ```
 
   ```{code-cell} ipython3
-  :tags: ["hide-input", "remove-output"]
+  :tags: ["hide-input", "remove-output", "skip-execution"]
   import os
   import ogcore.demographics as demog
   import matplotlib.pyplot as plt
-  YEAR_TO_PLOT = 2023
   plot_path = os.path.join(os.path.abspath(''), 'images')
   fig = pp.plot_pop_growth(
       p,

@@ -158,6 +158,7 @@ situations, in which case other contributors are here to help.
 
 (Sec_ContribFootnotes)=
 ## Footnotes
+The following are the footnotes for this section.
 
 [^recent_python]:`OG-ETH` is currently tested to run on Python 3.12 and 3.13. You do not need to manage the Python version yourself: `uv sync` reads the project's requirements and downloads a compatible interpreter automatically.
 

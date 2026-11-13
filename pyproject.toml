@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ogeth"
-version = "0.3.0"
+version = "0.4.0"
 authors = [
     {name = "Marcelo LaFleur, Richard W. Evans, and Jason DeBacker"},
 ]
@@ -47,7 +47,7 @@ dependencies = [
     "statsmodels",
     "linearmodels",
     "linecheck",
-    "ogcore>=0.20.0",
+    "ogcore>=0.24.4",
 ]
 
 [project.urls]
@@ -112,10 +112,15 @@ members = [
 
 [tool.uv.sources]
 ogeth = { workspace = true, editable = true }
-# OG-Core build carrying initial_wealth_ratio (PSLmodels/OG-Core#1189) and
-# r_gov_floor (PSLmodels/OG-Core#1203): OG-Core master merged into the #1189
-# branch. uv-only; the PyPI metadata above keeps ogcore>=0.20.0.
-ogcore = { git = "https://github.com/marcelolafleur/OG-Core.git", rev = "edaa78ab91f834bcc9d07803422e6d44af3a0204" }
+# OG-Core master (2d09808) plus four open pull requests, merged on the
+# branch integrate/eth-external-debt of marcelolafleur/OG-Core:
+# PSLmodels/OG-Core#1279 (government debt contracted abroad at its own
+# interest rate, alpha_D_ext and r_D_ext_annual, for Issue #1125),
+# PSLmodels/OG-Core#1280 (initial household wealth accelerated with the
+# prices under Anderson), and the speed fixes PSLmodels/OG-Core#1276 and
+# #1277 (household transition solves; results unchanged). uv-only; the PyPI
+# metadata above keeps ogcore>=0.24.4. Move to a release once they merge.
+ogcore = { git = "https://github.com/marcelolafleur/OG-Core", rev = "5b5c9c7279619112e88c7d165e17da9f178bc40c" }
 
 [dependency-groups]
 dev = [

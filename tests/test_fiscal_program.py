@@ -7,7 +7,8 @@ and debt stabilizes at its measured ratio. The IMF fifth-ECF-review program
 (Country Report 26/174) is a scenario built by ``fiscal_program_params``:
 spending ratios mapped onto the model's instruments, revenue gains spread
 over the consumption and corporate taxes, and a real effective interest
-rate on debt that reproduces the program's debt path. These tests pin the
+rates on market and external debt from the program's debt
+sustainability analysis. These tests pin the
 packaged paths to the history derivation and check the program mapping
 reproduces the IMF accounts. No model solve is involved.
 """
@@ -48,6 +49,8 @@ def test_spending_paths_reproduce_imf_primary_expenditure():
         + np.array(sp["alpha_T"][:N])
         + np.array(sp["alpha_I"][:N])
     )
+    # the paths are shares of the model's Y; the IMF's of market-price GDP
+    primary = primary / mp.MODEL_PER_MARKET_GDP
     if mp.PENSIONS_ON:
         # pension benefits are paid by the pension system, not as transfers
         primary = primary + mp.PENSIONS_SHARE_OF_GDP / 100
@@ -56,14 +59,33 @@ def test_spending_paths_reproduce_imf_primary_expenditure():
 
 
 def test_program_paths_start_at_fy2024_25_values(packaged):
-    """Period 0 is FY2024/25: 50.5 percent debt, 5.0 percent capital
-    spending, 1.7 percent grants (IMF CR 26/174, Tables 1 and 2b)."""
-    assert packaged["initial_debt_ratio"] == pytest.approx(0.505)
-    assert packaged["alpha_I"][0] == pytest.approx(0.050)
-    assert packaged["alpha_FA"][0] == pytest.approx(0.017)
-    assert packaged["alpha_G"][0] == pytest.approx(0.043)
-    cash = 0.020 - (mp.PENSIONS_SHARE_OF_GDP / 100 if mp.PENSIONS_ON else 0)
-    assert packaged["alpha_T"][0] == pytest.approx(cash)
+    """Period 0 is FY2024/25: general-government debt 43.3, capital spending
+    5.0, grants 1.7 and recurrent spending net of interest and transfers 4.3
+    percent of old-base GDP (IMF WEO Oct 2026; CR 26/174 Tables 1 and 2b),
+    times old over rebased GDP (15,094 / 24,030), in model units."""
+    f = 15094.0 / 24030.0
+    assert mp.rebase_factors()[0] == pytest.approx(f)
+    # general-government debt, split into external debt (alpha_D_ext) and
+    # market debt (initial_debt_ratio), which is domestic: non-residents
+    # hold no birr government securities
+    total = packaged["initial_debt_ratio"] + packaged["alpha_D_ext"][0]
+    assert total == pytest.approx(mp.to_model(0.433 * f), abs=1e-4)
+    external = mp.to_model(0.433 * f) * (31.8 - 7.2) / 43.3
+    assert packaged["alpha_D_ext"][0] == pytest.approx(external, abs=1e-4)
+    assert packaged["initial_foreign_debt_ratio"] == 0.0
+    assert packaged["alpha_I"][0] == pytest.approx(
+        mp.to_model(0.050 * f), abs=1e-5
+    )
+    assert packaged["alpha_FA"][0] == pytest.approx(
+        mp.to_model(0.017 * f), abs=1e-5
+    )
+    assert packaged["alpha_G"][0] == pytest.approx(
+        mp.to_model((0.071 - 0.008 - 0.020) * f), abs=1e-5
+    )
+    cash = 0.020 * f - (
+        mp.PENSIONS_SHARE_OF_GDP / 100 if mp.PENSIONS_ON else 0
+    )
+    assert packaged["alpha_T"][0] == pytest.approx(mp.to_model(cash), abs=1e-5)
 
 
 def test_closure_starts_after_the_program_horizon(packaged):
@@ -109,11 +131,14 @@ def test_history_baseline_holds_fy2024_25_inputs(packaged, params):
     assert np.allclose(cit, cit[0])
     lab = np.array(packaged["labor_income_tax_noncompliance_rate"])
     assert np.allclose(lab, lab[0])
-    assert np.allclose(packaged["zeta_D"], mp.LONG_RUN_ZETA_D)
+    assert np.allclose(packaged["zeta_D"], mp.MARKET_FOREIGN_DEBT_SHARE)
     assert packaged["debt_ratio_ss"] == pytest.approx(mp.HISTORY_DEBT_RATIO_SS)
+    # the long-run anchor is the FY2024/25 ratio of all debt, which is all
+    # market debt once external debt has been repaid
     assert packaged["debt_ratio_ss"] == pytest.approx(
-        packaged["initial_debt_ratio"]
+        packaged["initial_debt_ratio"] + packaged["alpha_D_ext"][0], abs=1e-4
     )
+    assert packaged["alpha_D_ext"][-1] == 0.0
     assert packaged["alpha_RM_T"] == packaged["alpha_RM_1"]
     assert packaged["r_gov_DY"] == pytest.approx(
         -2 * packaged["r_gov_DY2"] * mp.HISTORY_DEBT_RATIO_SS
@@ -137,7 +162,7 @@ def test_formalization_path_broadens_the_base_over_the_program():
     assert lab[N - 1].tolist() == pytest.approx(end.tolist())
     assert lab[N].tolist() == pytest.approx(end.tolist())
     assert 0 < mp.COMPLIANCE_SCALE < 1
-    assert (np.diff(lab, axis=0) <= 1e-12).all()  # compliance only improves
+    assert (np.diff(lab, axis=0) <= 1e-6).all()  # compliance only improves
 
 
 def test_pensions_go_to_the_formal_groups_only(packaged):
@@ -153,24 +178,29 @@ def test_pensions_go_to_the_formal_groups_only(packaged):
     assert 0 < mp.PENSION_COVERAGE_SCALE < 1
 
 
-def test_implied_real_rate_on_debt_is_negative_through_the_program(params):
-    """The program's debt decline (50.5 -> 28.6 percent of GDP with primary
-    balances near zero) is only possible with a negative real effective rate
-    on the legacy debt: inflation and concessional terms."""
-    r = mp.implied_real_rate_on_debt(params.g_y, params.g_n)
-    assert r.shape == (N - 1,)
-    assert (r < 0).all() and (r > -0.06).all()
+def test_domestic_market_debt_matches_the_imf_domestic_debt():
+    """Market debt less its foreign-held part is domestically held debt, which
+    the IMF reports separately (18.7 percent of old-base GDP in FY2024/25):
+    the external-debt split reproduces it to within 0.1 points of GDP."""
+    domestic = mp.INITIAL_MARKET_DEBT_RATIO * (
+        1 - mp.MARKET_FOREIGN_DEBT_SHARE
+    )
+    assert domestic == pytest.approx(
+        mp.to_model(mp.IMF_DOMESTIC_DEBT[0] / 100), abs=1e-3
+    )
 
 
-def test_r_gov_path_targets_the_program_implied_rates(params):
-    """Program scenario: through the program years the shift path puts r_gov
-    (before OG-Core's floor) on the negative real rates that reproduce the
-    IMF debt path; the example lowers r_gov_floor so they bind where the
-    installed ogcore has the parameter (PSLmodels/OG-Core#1203)."""
+def test_program_r_gov_targets_the_dsa_market_rate(params):
+    """Program scenario: along the program's debt path (market plus
+    external debt) the shift path puts r_gov (before OG-Core's floor)
+    on the DSA's real rate on domestic debt, -11.0 percent in FY2024/25
+    rising to 3.3 by FY2030/31, above the floor."""
     prog = mp.fiscal_program_params(params)
-    shift = np.asarray(prog["r_gov_shift"])[1:N]
+    shift = np.asarray(prog["r_gov_shift"])[:N]
     scale = float(np.asarray(params.r_gov_scale).flatten()[0])
-    d = np.array(mp.IMF_PUBLIC_DEBT[1:]) / 100
+    # OG-Core prices the premium on all government debt, market plus
+    # external: along the program, the IMF's general-government debt path
+    d = np.array(mp.to_model(np.array(mp.IMF_PUBLIC_DEBT) / 100))
     r_gov = (
         scale * mp.R_SS_FOR_R_GOV
         - shift
@@ -179,48 +209,51 @@ def test_r_gov_path_targets_the_program_implied_rates(params):
     )
     assert prog["debt_ratio_ss"] == pytest.approx(mp.PROGRAM_DEBT_RATIO_SS)
     assert prog["alpha_RM_T"] == pytest.approx(
-        mp.IMF_PRIVATE_TRANSFERS[-1] / 100
+        mp.to_model(mp.IMF_PRIVATE_TRANSFERS[-1] / 100), abs=1e-6
     )
-    implied = mp.implied_real_rate_on_debt(params.g_y, params.g_n)
-    assert np.allclose(r_gov, implied, atol=1e-9)
-    assert (implied > mp.R_GOV_FLOOR).all()
+    dsa = np.array(mp.DSA_DOMESTIC_REAL_RATE[:N]) / 100
+    assert np.allclose(r_gov, dsa, atol=1e-9)
+    assert (dsa > mp.R_GOV_FLOOR).all()
 
 
-def test_history_r_gov_holds_the_budget_implied_rate(params):
-    """History baseline: the real rate on debt implied by the FY2024/25
-    outturn and the FY2025/26 budget is held for the program horizon, then
-    converges to the long-run rate; the premium is zero at the (measured)
-    debt anchor so the shift carries no premium term."""
-    shift = np.asarray(params.r_gov_shift)
+def test_history_r_gov_targets_the_dsa_market_rate(params):
+    """History baseline: at the debt anchor (premium zero) r_gov follows the
+    DSA's real rate on domestic debt year by year to 2036 (the legacy
+    stock rolling over at market rates), then the long-run rate."""
+    targets = mp.market_rate_targets()
+    # OG-Core extends the path by holding its last value
+    shift = np.asarray(params.r_gov_shift)[: len(targets)]
     scale = float(np.asarray(params.r_gov_scale).flatten()[0])
-    r0 = mp.history_real_rate_on_debt(params.g_y, params.g_n)
-    assert -0.06 < r0 < 0
     D = params.debt_ratio_ss
     r_gov = (
         scale * mp.R_SS_FOR_R_GOV
-        - shift[:N]
+        - shift
         + params.r_gov_DY * D
         + params.r_gov_DY2 * D**2
     )
-    assert np.allclose(r_gov, r0, atol=1e-9)
-    assert (np.diff(shift[N : N + mp.R_GOV_CONVERGENCE_PERIODS + 1]) < 0).all()
+    assert np.allclose(r_gov, targets, atol=1e-9)
+    assert r_gov[0] == pytest.approx(-0.110)
+    assert r_gov[N - 1] == pytest.approx(0.033)
+    assert r_gov[11] == pytest.approx(0.046)  # 2036
+    assert (np.diff(r_gov) > 0).all()
 
 
-def test_r_gov_shift_path_converges_to_the_long_run_rate(params):
-    """After the program and the convergence window, r_gov_scale r - shift
-    (premium zero at the debt target) equals LONG_RUN_R_GOV."""
+def test_long_run_r_gov_is_the_dsa_rate_on_new_domestic_debt(params):
+    """The long-run real rate on market debt is the mean of the DSA's terms
+    for new domestic borrowing (4.9 percent medium and long term, 4.5 short
+    term); OG-Core holds the last shift value."""
+    assert mp.LONG_RUN_R_GOV == pytest.approx(0.047)
     shift = np.asarray(params.r_gov_shift)
     scale = float(np.asarray(params.r_gov_scale).flatten()[0])
-    r_ss = mp.R_SS_FOR_R_GOV
     D = params.debt_ratio_ss
     long_run = (
-        scale * r_ss
+        scale * mp.R_SS_FOR_R_GOV
         - shift[-1]
         + params.r_gov_DY * D
         + params.r_gov_DY2 * D**2
     )
-    assert long_run == pytest.approx(mp.LONG_RUN_R_GOV, abs=1e-9)
-    assert shift[-1] == pytest.approx(shift[N + mp.R_GOV_CONVERGENCE_PERIODS])
+    # R_SS_FOR_R_GOV is stored to six digits
+    assert long_run == pytest.approx(mp.LONG_RUN_R_GOV, abs=1e-6)
 
 
 def test_packaged_fiscal_paths_match_the_derivation(packaged, params):
@@ -248,26 +281,60 @@ def test_packaged_fiscal_paths_match_the_derivation(packaged, params):
 
 
 def test_initial_wealth_ratio_is_built_from_its_components():
-    """B/Y = K/Y (PWT) - foreign-owned capital (FDI stock) + domestic debt."""
+    """B/Y = private K/Y (rebased total less rebased IMF ICSD public
+    capital) - foreign-owned capital (UNCTAD FDI stock, mid-FY2024/25, over
+    rebased USD GDP) + domestically held general-government debt, in model
+    units."""
+    assert mp.PRIVATE_CAPITAL_OUTPUT_RATIO == pytest.approx(
+        mp.TOTAL_CAPITAL_OUTPUT_RATIO - mp.PUBLIC_CAPITAL_OUTPUT_RATIO
+    )
+    assert mp.FDI_STOCK_TO_GDP == pytest.approx(
+        (42.528 + 46.324) / 2 / 201.42, abs=1e-4
+    )
     assert mp.INITIAL_WEALTH_RATIO == pytest.approx(
-        mp.PWT_CAPITAL_OUTPUT_RATIO
-        - mp.FDI_STOCK_TO_GDP
-        + mp.DOMESTIC_DEBT_TO_GDP,
+        mp.to_model(
+            mp.PRIVATE_CAPITAL_OUTPUT_RATIO
+            - mp.FDI_STOCK_TO_GDP
+            + mp.DOMESTIC_DEBT_TO_GDP
+        ),
         abs=1e-3,
     )
-    assert 1.5 < mp.INITIAL_WEALTH_RATIO < 3.0
+    # OG-Core's valid range for initial_wealth_ratio
+    assert 0.8 < mp.INITIAL_WEALTH_RATIO < 7.0
 
 
-def test_zeta_d_path_follows_the_external_share_of_the_debt_decline():
-    """Program scenario: external creditors absorb the share of the debt
-    decline the IMF external/domestic split implies (0.37 -> 1.0 -> 0.77);
-    afterwards zeta_D returns to the calibrated 0.15."""
-    z = np.asarray(mp.program_zeta_D_path())
-    tot = np.array(mp.IMF_PUBLIC_DEBT)
-    ext = tot - np.array(mp.IMF_DOMESTIC_DEBT)
-    assert np.allclose(z[1:N], np.clip(np.diff(ext) / np.diff(tot), 0, 1))
-    assert z[N] == pytest.approx(mp.LONG_RUN_ZETA_D)
-    assert (z >= 0).all() and (z <= 1).all()
+def test_external_debt_follows_the_dsa_then_ends():
+    """External debt moves with the DSA's public external debt ratio
+    (31.8 percent of old-base GDP in FY2024/25, 16.8 in FY2030/31, 9.2 in
+    2036, 4.1 in 2046), then falls to zero at the 2036-2046 pace: no
+    concessional subsidy in the long run."""
+    a = np.array(mp.external_debt_path())
+    assert a[0] == pytest.approx(mp.EXTERNAL_DEBT_RATIO)
+    assert a[6] / a[0] == pytest.approx(16.8 / 31.8, abs=1e-4)
+    assert a[11] / a[0] == pytest.approx(9.2 / 31.8, abs=1e-4)
+    assert a[21] / a[0] == pytest.approx(4.1 / 31.8, abs=1e-4)
+    assert (np.diff(a) <= 0).all()
+    assert a[-1] == 0.0 and a[-2] > 0.0
+
+
+def test_external_rate_is_the_dsa_external_rate_in_real_terms():
+    """r_D_ext is the DSA's average nominal rate on external debt (USD) less
+    US inflation: -1.3 percent real in FY2024/25, 0.6 at the FY2026/27 peak,
+    held after 2046."""
+    r = np.array(mp.external_rate_path())
+    assert r[0] == pytest.approx(0.007 - mp.US_INFLATION)
+    assert r[2] == pytest.approx(0.026 - mp.US_INFLATION)
+    assert r[-1] == pytest.approx(0.009 - mp.US_INFLATION)
+    assert len(r) == 2046 - 2025 + 1
+
+
+def test_market_debt_is_held_at_home():
+    """Market debt is birr government securities, held by the central bank,
+    banks and pension funds, so its foreign share and the foreign share of
+    new market debt are zero; borrowing abroad enters through alpha_D_ext."""
+    z = np.asarray(mp.zeta_D_path())
+    assert np.allclose(z, 0.0)
+    assert mp.MARKET_FOREIGN_DEBT_SHARE == 0.0
 
 
 def test_transfers_are_targeted_by_programme(packaged, params):

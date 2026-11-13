@@ -7,6 +7,12 @@ parts:
 - caption: OG-ETH API
   chapters:
   - file: content/api/public_api
+    sections:
+    - file: content/api/calibrate
+    - file: content/api/income
+    - file: content/api/input_output
+    - file: content/api/macro_params
+    - file: content/api/utils
 - caption: Calibration
   chapters:
   - file: content/calibration/households

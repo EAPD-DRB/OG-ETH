@@ -8,14 +8,12 @@ import time
 import copy
 from importlib.resources import files
 import matplotlib.pyplot as plt
-from ogeth.calibrate import Calibration
-from ogeth import macro_params
+from ogeth import macro_params, warm_start
 from ogcore.parameters import Specifications
 from ogcore import output_tables as ot
 from ogcore import output_plots as op
 from ogcore.execute import runner
 from ogcore.utils import safe_read_pickle
-from ogeth.utils import is_connected
 import dask
 
 dask.config.set(scheduler="synchronous")
@@ -74,53 +72,15 @@ def main(scenario=macro_params.DEFAULT_SCENARIO):
     if scenario != macro_params.DEFAULT_SCENARIO:
         p.update_specifications(macro_params.scenario_params(p, scenario))
         print(f"Running the {scenario} scenario; results in {save_dir}")
-    # Anchor initial household wealth to the data (see macro.md) where the
-    # installed OG-Core supports it (PSLmodels/OG-Core#1189); older releases
-    # start the transition from steady-state wealth.
-    if hasattr(p, "initial_wealth_ratio"):
-        p.update_specifications(
-            {"initial_wealth_ratio": macro_params.INITIAL_WEALTH_RATIO}
-        )
+    # Initial household wealth (initial_wealth_ratio), the floor on the
+    # sovereign rate (r_gov_floor) and the solver settings (nu and Anderson
+    # acceleration of the time path) are in the packaged parameters. The
+    # steady state starts from a shipped solved state (ogeth/warm_start.py);
+    # without the seed it cold-starts.
+    if warm_start.enable():
+        print("Warm start enabled (ogeth/data/ss_warm_start.pkl).")
     else:
-        print(
-            "Installed ogcore has no initial_wealth_ratio; the transition "
-            "starts from steady-state household wealth."
-        )
-    # Let the sovereign rate follow the program-implied negative real rates
-    # where the installed OG-Core exposes the floor (PSLmodels/OG-Core#1203);
-    # older releases clip it at zero.
-    if hasattr(p, "r_gov_floor"):
-        p.update_specifications({"r_gov_floor": macro_params.R_GOV_FLOOR})
-    else:
-        print(
-            "Installed ogcore has no r_gov_floor; the interest rate on "
-            "government debt is clipped at zero through the program years."
-        )
-    # Solver settings: a damped outer loop (nu) with Anderson acceleration
-    # of the time path where the installed OG-Core offers it; the calibrated
-    # heterogeneity in discount factors makes the transition converge slowly
-    # under plain functional iteration.
-    p.update_specifications({"nu": macro_params.NU})
-    if hasattr(p, "TPI_outer_method"):
-        p.update_specifications(
-            {
-                "TPI_outer_method": "anderson",
-                "TPI_anderson_m": macro_params.TPI_ANDERSON_M,
-                "TPI_anderson_beta": macro_params.TPI_ANDERSON_BETA,
-            }
-        )
-    else:
-        print(
-            "Installed ogcore has no Anderson acceleration for the time "
-            "path; using damped functional iteration."
-        )
-    # Update parameters from calibrate.py Calibration class
-    if is_connected():  # only update if connected to internet
-        c = Calibration(
-            p, update_from_api=False
-        )  # =True will update data from online sources
-        updated_params = c.get_dict()
-        p.update_specifications(updated_params)
+        print("No warm-start seed found; cold-starting the steady state.")
 
     # Run model
     start_time = time.time()
