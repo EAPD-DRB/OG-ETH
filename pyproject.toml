@@ -112,13 +112,15 @@ members = [
 
 [tool.uv.sources]
 ogeth = { workspace = true, editable = true }
-# OG-Core 0.24.4 (master 2d09808) plus two open speed fixes for the
-# household transition solves: PSLmodels/OG-Core#1276 (keep small-scale links
-# in the Jacobian sparsity pattern, per-group cache, per-run reset) and
-# PSLmodels/OG-Core#1277 (net taxes once per evaluation, cached Defined
-# Benefits lookups). Both leave results unchanged. uv-only; the PyPI metadata
-# above keeps ogcore>=0.24.4.
-ogcore = { git = "file:///Users/marcelolafleur/Projects/OG-Core-hh-speed", rev = "a1a87bd73bea2aad486676952663c00009173693" }
+# OG-Core master (2d09808) plus concessional (ODA) government debt at its own
+# interest rate (branch concessional-debt, for PSLmodels/OG-Core#1125, 0.25.0)
+# and two open speed fixes for the household transition solves:
+# PSLmodels/OG-Core#1276 (keep small-scale links in the Jacobian sparsity
+# pattern, per-group cache, per-run reset) and PSLmodels/OG-Core#1277 (net
+# taxes once per evaluation, cached Defined Benefits lookups). The speed fixes
+# leave results unchanged. Local integration commit; uv-only; the PyPI
+# metadata above keeps ogcore>=0.24.4. Move to a public ref before any push.
+ogcore = { git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast", rev = "cf0e7928e0fc6421c97139d39aca354797c90671" }
 
 [dependency-groups]
 dev = [
