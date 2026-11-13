@@ -117,10 +117,12 @@ ogeth = { workspace = true, editable = true }
 # and two open speed fixes for the household transition solves:
 # PSLmodels/OG-Core#1276 (keep small-scale links in the Jacobian sparsity
 # pattern, per-group cache, per-run reset) and PSLmodels/OG-Core#1277 (net
-# taxes once per evaluation, cached Defined Benefits lookups). The speed fixes
-# leave results unchanged. Local integration commit; uv-only; the PyPI
+# taxes once per evaluation, cached Defined Benefits lookups), and initial
+# household wealth accelerated with the prices under Anderson when
+# initial_wealth_ratio is set (branch anderson-initial-wealth). The speed
+# fixes leave results unchanged. Local integration commit; uv-only; the PyPI
 # metadata above keeps ogcore>=0.24.4. Move to a public ref before any push.
-ogcore = { git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast", rev = "cf0e7928e0fc6421c97139d39aca354797c90671" }
+ogcore = { git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast", rev = "14a41048bbf252819c413b75183ef5ea862b1947" }
 
 [dependency-groups]
 dev = [
