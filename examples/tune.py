@@ -20,6 +20,10 @@ its own target:
     pension coverage scale             pension outlays/Y in FY2024/25
     payroll coverage scale             contributions/Y in FY2024/25
 
+The next-overrides file keeps every override of the run, with the dials
+replaced by their next values, so each step of a tuning sequence is one call
+of this script on the previous step's file.
+
 It sets dials and nothing more. Fold settled values into the packaged JSON
 (and the scales into ogeth/macro_params.py), commit, re-install, and take
 every reported number from run_og_eth.py.
@@ -213,9 +217,7 @@ def next_overrides(p, ss, tm, state=None):
         ]
     out["beta_annual"] = np.clip(beta, *BETA_BOUNDS).tolist()
     # the sovereign-rate shift path is evaluated at the solved return
-    out["r_gov_shift"] = mp.history_r_gov_shift_path(
-        p.g_y,
-        p.g_n,
+    out["r_gov_shift"] = mp.market_r_gov_shift_path(
         float(np.asarray(p.r_gov_scale).flatten()[0]),
         float(p.r_gov_DY2),
         mp.HISTORY_DEBT_RATIO_SS,
@@ -331,7 +333,10 @@ def main():
     with open(os.path.join(out, "dashboard.json"), "w") as f:
         json.dump(summary, f, indent=2, default=float)
     if args.next:
-        nxt = next_overrides(p, ss, tm, beta_state)
+        # every override of this run carries forward, the dials replaced by
+        # their next values, so a tuning sequence is one tune.py call per
+        # step with nothing to merge by hand
+        nxt = {**overrides, **next_overrides(p, ss, tm, beta_state)}
         with open(args.next, "w") as f:
             json.dump(nxt, f, default=float)
         print(f"next overrides -> {args.next}; scales {nxt['_scales']}")

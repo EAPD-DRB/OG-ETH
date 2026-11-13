@@ -778,6 +778,55 @@ GG_FOREIGN_DEBT_SHARE = round(
     4,
 )
 
+# Concessional external debt (OG-Core's alpha_ODA and r_ODA_annual,
+# PSLmodels/OG-Core#1125). Most of the external debt is owed to official
+# lenders on concessional terms: IDA holds about 39 percent and official
+# non-Paris Club creditors 31 percent, and non-official creditors hold 10
+# percent (IMF CR 26/174, DSA paragraph on debt composition). We treat the
+# official share of general-government external debt as concessional debt,
+# paid abroad at its own low rate, and the rest of the debt (domestic debt
+# and the commercial external debt, chiefly the defaulted USD 1 billion
+# Eurobond) as market debt priced by r_gov. The World Bank's International
+# Debt Statistics put private creditors at 18 percent of public and publicly
+# guaranteed external debt (USD 6.0 of 34.0 billion, end-2024, of which bonds
+# 1.0); the gap to the IMF's 10 percent is mostly state-enterprise loans
+# backed by export credit agencies, outside general government.
+NON_OFFICIAL_EXTERNAL_SHARE = 0.10
+# The public DSA of IMF CR 26/174 (Table 2, public sector debt), fiscal years
+# ending June: FY2024/25 to FY2030/31, then 2036 and 2046.
+DSA_YEARS = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2036, 2046]
+# Public external debt, percent of old-base GDP. Concessional debt falls with
+# it: amortization outpaces new concessional loans as the program's
+# financing surge ends and growth erodes the ratio. Ethiopia's income was 74
+# percent of IDA's operational cut-off when the program was approved (CR
+# 26/174), so concessional terms continue over the DSA horizon (the grant
+# element of new external borrowing stays at about 47 percent to FY2044/45,
+# Text Table 3) and end with IDA graduation after it: beyond 2046 the ratio
+# falls to zero at its 2036-2046 pace (CONCESSIONAL_DEBT_PATH).
+DSA_EXTERNAL_DEBT = [31.8, 29.9, 27.2, 24.7, 21.5, 18.8, 16.8, 9.2, 4.1]
+# Average nominal interest rate on external debt, percent (USD terms). The
+# rise from 0.7 to 2.6 percent is the end of the restructuring's interest
+# relief and the program's IMF and blended loans; it falls back as those are
+# repaid and IDA credits dominate. Its path is how the falling grant element
+# of the stock enters the model: concessionality shows up as a low interest
+# rate on the stock, not as a separate grant (alpha_FA holds cash grants
+# only, IMF Table 2b).
+DSA_EXTERNAL_RATE = [0.7, 1.8, 2.6, 2.1, 1.9, 1.8, 1.6, 1.3, 0.9]
+# Real rate on concessional debt in the model's units of output: the USD
+# nominal rate less US inflation (2 percent, the Federal Reserve's target),
+# with the real exchange rate held constant beyond the FY2024/25 float.
+US_INFLATION = 0.02
+# Average real interest rate on domestic debt, percent: deeply negative under
+# financial repression (sub-market mandatory bond purchases, -11.0 percent in
+# FY2024/25) and rising as legacy instruments roll over at market rates (the
+# policy and Treasury-bill rates turned positive in real terms by 2026, CR
+# 26/174 paragraph 12). This is the measured rate on market debt.
+DSA_DOMESTIC_REAL_RATE = [-11.0, -9.8, -5.1, -0.6, 1.0, 2.6, 3.3, 4.6, 6.6]
+# The DSA's terms for new domestic borrowing, its baseline 10-year
+# projections: 4.9 percent real on medium- and long-term debt and 4.5 percent
+# on short-term debt (Table: borrowing assumptions for the stress tests).
+DSA_MARGINAL_DOMESTIC_REAL_RATES = (4.9, 4.5)
+
 # Rebased expenditure-side national accounts, FY2024/25 (Ministry of National
 # Strategy rebasing report, as reported by Birr Metrics, BusinessDay and
 # Wazema and checked against the old-base NBE tables): private consumption
@@ -870,11 +919,35 @@ def to_model(share):
 
 
 # Long-run debt ratio of the program scenario: 30 percent of old-base GDP,
-# rebased with the latest factor, in model units
+# rebased with the latest factor, in model units. Like the history anchor it
+# is all market debt in the long run, concessional debt having been repaid.
 PROGRAM_DEBT_RATIO_SS = round(to_model(0.30 * float(rebase_factors()[-1])), 4)
 # Initial general-government debt and its foreign-held share, FY2024/25, in
 # model units (end of the year before the first model period)
 INITIAL_DEBT_RATIO = round(to_model(IMF_PUBLIC_DEBT[0] / 100), 4)
+# Its split, FY2024/25, model units: concessional debt (the official share of
+# the external debt), and market debt (OG-Core's D: the rest) with its
+# foreign-held part, the non-official external debt. OG-Core's
+# initial_foreign_debt_ratio and zeta_D are shares of market debt; new
+# market debt keeps the initial foreign share, the program ruling out new
+# non-concessional external borrowing beyond the Koysha dam loan (CR 26/174,
+# continuous performance criterion).
+CONCESSIONAL_DEBT_RATIO = round(
+    INITIAL_DEBT_RATIO
+    * GG_FOREIGN_DEBT_SHARE
+    * (1 - NON_OFFICIAL_EXTERNAL_SHARE),
+    4,
+)
+INITIAL_MARKET_DEBT_RATIO = round(
+    INITIAL_DEBT_RATIO - CONCESSIONAL_DEBT_RATIO, 4
+)
+MARKET_FOREIGN_DEBT_SHARE = round(
+    INITIAL_DEBT_RATIO
+    * GG_FOREIGN_DEBT_SHARE
+    * NON_OFFICIAL_EXTERNAL_SHARE
+    / INITIAL_MARKET_DEBT_RATIO,
+    4,
+)
 
 # Cash transfers to households as a share of GDP, published percent of
 # old-base GDP. The IMF recurrent line bundles the wage bill, goods and
@@ -901,26 +974,22 @@ LONG_RUN_GRANTS = round(0.3 * float(rebase_factors(7)[-1]), 4)
 # foreign-owned capital stock against the ~0.24 of GDP FDI stock (UNCTAD).
 WORLD_INT_RATE_ANNUAL = 0.063
 
-# Long-run real effective interest rate on public debt. Ethiopia's public
-# debt is mostly concessional external debt (average interest on new
-# FY2024/25 commitments 0.77 percent, MoF Bulletin 56) and domestic paper
-# whose real return has been deeply negative; the program's FY2030/31
-# interest bill (1.5 percent of GDP on 28.6 percent debt, a 5.2 percent
-# nominal effective rate) against a GDP deflator of 8.6 percent still implies
-# a negative real rate. We take 2 percent as the long-run real effective
-# rate once inflation settles at the authorities' single-digit objective and
-# domestic financing moves to market terms.
-LONG_RUN_R_GOV = 0.02
-# Periods after the program horizon over which r_gov converges to the
-# long-run rate above
-R_GOV_CONVERGENCE_PERIODS = 4
+# Long-run real interest rate on market debt (r_gov in the steady state).
+# Concessional debt is modelled at its own rate, so r_gov prices market debt
+# only, and its long-run value is the DSA's terms for new domestic borrowing:
+# 4.9 percent real on medium- and long-term debt and 4.5 on short-term, the
+# mean 4.7, which the DSA's average real rate on domestic debt reaches by
+# 2036 (4.6). Its 2046 value (6.6) is not used: by then the DSA has public
+# debt down to 13.6 percent of GDP and a thin domestic market, while the
+# model holds debt at its FY2024/25 ratio. With concessional debt in the
+# FY2024/25 stock at about 1 percent real, the blended rate is near the 2
+# percent long-run effective rate on all public debt this calibration used
+# before concessional debt was modelled.
+LONG_RUN_R_GOV = round(sum(DSA_MARGINAL_DOMESTIC_REAL_RATES) / 200, 4)
 # OG-Core clips the sovereign rate at ``r_gov_floor`` (a parameter since
-# PSLmodels/OG-Core#1203; the hard-coded 0.0 before that). The shipped shift
-# path targets the program-implied negative real rates, and the example
-# lowers the floor to R_GOV_FLOOR where the installed ogcore has the
-# parameter so they can bind; on an older ogcore the rate sits at zero
-# through the program years instead (documented in macro.md).
-R_GOV_FLOOR = -0.10
+# PSLmodels/OG-Core#1203). The shift path targets the measured real rate on
+# market debt, -11.0 percent in FY2024/25, so the floor sits below it.
+R_GOV_FLOOR = -0.12
 # Steady-state return on capital the r_gov_shift path is evaluated at: the
 # solved baseline steady state of examples/run_og_eth.py.
 R_SS_FOR_R_GOV = 0.074077
@@ -1393,14 +1462,6 @@ def payroll_tax_params(payroll_coverage_scale=None):
     }
 
 
-# Foreign share of net new government borrowing along the program. With debt
-# falling, zeta_D is the share of the decline borne by external creditors; the
-# IMF path has external debt falling from 31.8 to 16.7 percent of GDP while
-# domestic debt falls from 18.7 to 11.9, i.e. amortization to external
-# creditors carries most of the adjustment (CR 26/174, Table 1). The long-run
-# value is the calibrated 0.15 (macro.md).
-LONG_RUN_ZETA_D = 0.15
-
 # Cash transfers by programme, percent of GDP, long run (see CASH_TRANSFERS):
 # the Productive Safety Net Program goes to the poorest households, public
 # pensions to retired formal-sector workers, the fertilizer subsidy to farming
@@ -1413,22 +1474,6 @@ FERTILIZER_SUBSIDY_SHARE_OF_GDP = rebased([0.6])[0]
 PSNP_GROUPS = [0]  # poorest quarter of households
 FARM_GROUPS = [0, 1, 2]  # bottom 70 percent: smallholder agriculture
 PENSION_GROUPS = [5, 6]  # the formal groups, as in PENSION_COVERAGE
-
-
-def program_zeta_D_path():
-    """
-    zeta_D path: the external creditors' share of each program year's change
-    in the debt ratio, clipped to [0, 1], then LONG_RUN_ZETA_D.
-
-    Returns:
-        list: length 7 plus the long-run value (period 0 uses period 1's)
-    """
-    tot = np.array(IMF_PUBLIC_DEBT)
-    # general-government external debt: the total less domestic debt (the
-    # same in both perimeters)
-    ext = tot - np.array(IMF_DOMESTIC_DEBT)
-    share = np.clip(np.diff(ext) / np.diff(tot), 0.0, 1.0)
-    return [float(share[0])] + [float(x) for x in share] + [LONG_RUN_ZETA_D]
 
 
 def transfer_eta(omega_SS, lambdas, retire_age_index):
@@ -1468,89 +1513,153 @@ def derived_transfer_eta(p):
     return {"eta": transfer_eta(p.omega_SS, p.lambdas, retire_idx).tolist()}
 
 
-def implied_real_rate_on_debt(g_y, g_n):
+def dsa_annual(values, last_year=None):
     """
-    Real effective interest rate on public debt that reproduces the IMF
-    debt path given the program's primary balances and the model's growth.
-
-    In the model's detrended units debt evolves as
-    d_t = ((1 + r_t) d_{t-1} - pb_{t-1}) / (exp(g_y) (1 + g_n[t])), so the
-    rate that carries the ratio from one program year to the next is
-    r_t = (d_t growth_t + pb_{t-1}) / d_{t-1} - 1. The program's debt
-    decline works through inflation and nominal growth eroding a stock that
-    carries concessional and administered rates; in a real model that is a
-    negative real effective rate on the legacy debt.
+    Annual path, FY2024/25 onward, of a series published at the DSA's years
+    (DSA_YEARS), linearly interpolated between them.
 
     Args:
-        g_y (scalar): model-period productivity growth rate
-        g_n (array_like): population growth path
+        values (array_like): the series at DSA_YEARS
+        last_year (int): last fiscal year (ending) of the path; defaults to
+            the last DSA year
 
     Returns:
-        Numpy array: r_gov for periods 1..6 (period 0 has no predecessor)
+        Numpy array: one value per year from FY2024/25 to last_year
     """
-    d = np.array(IMF_PUBLIC_DEBT) / 100
-    rev = np.array(IMF_REVENUE) / 100
-    sp = program_spending_paths()
-
-    def mkt(key):
-        # spending paths are in model units; the identity is in data units
-        return np.array(sp[key][:7]) / MODEL_PER_MARKET_GDP
-
-    pb = (
-        rev
-        + mkt("alpha_FA")
-        - mkt("alpha_G")
-        - mkt("alpha_T")
-        - mkt("alpha_I")
-    )
-    if PENSIONS_ON:
-        # pension benefits are primary spending too, paid by the scheme
-        pb = pb - PENSIONS_SHARE_OF_GDP / 100
-    growth = np.exp(g_y) * (1 + np.asarray(g_n, dtype=float)[:7])
-    return np.array(
-        [(d[t] * growth[t] + pb[t - 1]) / d[t - 1] - 1 for t in range(1, 7)]
-    )
+    last_year = DSA_YEARS[-1] if last_year is None else last_year
+    years = np.arange(DSA_YEARS[0], last_year + 1)
+    return np.interp(years, DSA_YEARS, values)
 
 
-def r_gov_shift_path(g_y, g_n, r_gov_scale, r_gov_DY2, debt_ratio_ss, r_ss):
+def concessional_debt_path():
     """
-    Level-shift path for the sovereign rate, r_gov = r_gov_scale r - shift +
-    premium, that puts the real effective rate on debt on the program-implied
-    path, converges it linearly to LONG_RUN_R_GOV over
-    R_GOV_CONVERGENCE_PERIODS, and keeps the debt-elastic premium centered on
-    debt_ratio_ss (see macro.md). The market return r is approximated by its
-    steady-state value; along the transition r moves by at most a percentage
-    point, which the 0.24 scale turns into a few basis points of r_gov.
+    Concessional debt as a share of OG-Core's Y (alpha_ODA), one value per
+    year from FY2024/25: the FY2024/25 stock (CONCESSIONAL_DEBT_RATIO) moved
+    with the DSA's public external debt ratio to 2046, then down to zero at
+    the DSA's 2036-2046 pace, after which OG-Core holds the last value (zero).
 
     Returns:
-        list: r_gov_shift path, length 7 + R_GOV_CONVERGENCE_PERIODS + 1
+        list: alpha_ODA path
     """
-    # debt ratios in model units, the units of OG-Core's premium term
-    d = np.array(to_model(np.array(IMF_PUBLIC_DEBT) / 100))
-    r_prog = implied_real_rate_on_debt(g_y, g_n)
-    targets = np.concatenate(
-        [
-            [r_prog[0]],  # period 0: no program-implied value; use period 1
-            r_prog,
-            np.linspace(
-                r_prog[-1], LONG_RUN_R_GOV, R_GOV_CONVERGENCE_PERIODS + 2
-            )[1:],
-        ]
+    ext = dsa_annual(DSA_EXTERNAL_DEBT)
+    pace = (DSA_EXTERNAL_DEBT[-2] - DSA_EXTERNAL_DEBT[-1]) / (
+        DSA_YEARS[-1] - DSA_YEARS[-2]
     )
-    debt = np.concatenate(
-        [d, np.full(R_GOV_CONVERGENCE_PERIODS + 1, debt_ratio_ss)]
-    )
-    # OG-Core adds r_gov_DY d + r_gov_DY2 d^2 with r_gov_DY = -2 r_gov_DY2 D,
-    # which equals r_gov_DY2 (d - D)^2 - r_gov_DY2 D^2; the shift absorbs the
-    # constant so the premium is exactly zero at the target.
+    tail = []
+    level = ext[-1] - pace
+    while level > 0:
+        tail.append(level)
+        level -= pace
+    path = np.concatenate([ext, tail, [0.0]]) / DSA_EXTERNAL_DEBT[0]
+    return [round(float(x) * CONCESSIONAL_DEBT_RATIO, 6) for x in path]
+
+
+def concessional_rate_path():
+    """
+    Real interest rate on concessional debt (r_ODA_annual), one value per year
+    from FY2024/25 to 2046, held after: the DSA's average nominal rate on
+    external debt less US inflation.
+
+    Returns:
+        list: r_ODA_annual path
+    """
+    return [
+        round(float(x) / 100 - US_INFLATION, 6)
+        for x in dsa_annual(DSA_EXTERNAL_RATE)
+    ]
+
+
+def concessional_params():
+    """
+    OG-Core's concessional-debt parameters and the market-debt split of the
+    initial debt, the same in both scenarios.
+
+    Returns:
+        dict: alpha_ODA, r_ODA_annual, initial_debt_ratio,
+            initial_foreign_debt_ratio
+    """
+    return {
+        "alpha_ODA": concessional_debt_path(),
+        "r_ODA_annual": concessional_rate_path(),
+        "initial_debt_ratio": INITIAL_MARKET_DEBT_RATIO,
+        "initial_foreign_debt_ratio": MARKET_FOREIGN_DEBT_SHARE,
+    }
+
+
+def market_rate_targets():
+    """
+    Real interest rate on market debt that r_gov targets, one value per year:
+    the DSA's average real rate on domestic debt from FY2024/25 to 2036, then
+    LONG_RUN_R_GOV.
+
+    Returns:
+        Numpy array: targets, FY2024/25 to 2036 plus the long-run value
+    """
+    path = dsa_annual(DSA_DOMESTIC_REAL_RATE, last_year=2036) / 100
+    return np.append(path, LONG_RUN_R_GOV)
+
+
+def market_r_gov_shift_path(
+    r_gov_scale, r_gov_DY2, debt_ratio_ss, r_ss, debt_path=None
+):
+    """
+    Level-shift path for the sovereign rate on market debt, r_gov =
+    r_gov_scale r - shift + premium, that puts r_gov on market_rate_targets
+    with the debt-elastic premium centred on the long-run market-debt anchor
+    debt_ratio_ss. OG-Core adds r_gov_DY d + r_gov_DY2 d^2 with r_gov_DY =
+    -2 r_gov_DY2 D, which equals r_gov_DY2 (d - D)^2 - r_gov_DY2 D^2; the
+    shift absorbs the constant, and, where an expected market-debt path is
+    given, the premium along it, so the target holds on that path. The
+    market return r is approximated by its steady-state value.
+
+    Args:
+        r_gov_scale (scalar): pass-through of the market return
+        r_gov_DY2 (scalar): curvature of the debt-elastic premium
+        debt_ratio_ss (scalar): long-run market-debt anchor (model units)
+        r_ss (scalar): steady-state market return
+        debt_path (array_like): expected market debt, model units, for the
+            first years of the path (None: the premium is zero along it)
+
+    Returns:
+        list: r_gov_shift path, one value per year to 2036 plus the long run
+    """
+    targets = market_rate_targets()
+    gap = np.zeros_like(targets)
+    if debt_path is not None:
+        d = np.asarray(debt_path, dtype=float)[: len(targets)]
+        gap[: len(d)] = r_gov_DY2 * (d - debt_ratio_ss) ** 2
     centering = r_gov_DY2 * debt_ratio_ss**2
-    shift = (
-        r_gov_scale * r_ss
-        + r_gov_DY2 * (debt - debt_ratio_ss) ** 2
-        - centering
-        - targets
-    )
+    shift = r_gov_scale * r_ss + gap - centering - targets
     return [float(x) for x in shift]
+
+
+def program_market_debt_path():
+    """
+    Market debt along the IMF program, model units: general-government debt
+    less concessional debt, for the program years.
+
+    Returns:
+        Numpy array: length len(PROGRAM_YEARS)
+    """
+    total = np.array(to_model(np.array(IMF_PUBLIC_DEBT) / 100))
+    oda = np.array(concessional_debt_path()[: len(PROGRAM_YEARS)])
+    return total - oda
+
+
+def zeta_D_path():
+    """
+    Foreign share of new market debt, both scenarios: the FY2024/25 foreign
+    share of market debt (MARKET_FOREIGN_DEBT_SHARE). Under the program the
+    government contracts no new non-concessional external debt beyond the
+    Koysha dam loan (CR 26/174), and new concessional loans are modelled
+    through alpha_ODA, so new market debt is domestic in the same proportion
+    as the stock.
+
+    Returns:
+        list: same length as the spending paths (program years plus the long
+            run)
+    """
+    return [MARKET_FOREIGN_DEBT_SHARE] * (len(PROGRAM_YEARS) + 1)
 
 
 def fiscal_program_params(p, r_ss=None):
@@ -1572,7 +1681,7 @@ def fiscal_program_params(p, r_ss=None):
     out = {}
     out.update(program_spending_paths())
     out.update(program_compliance_paths())
-    out["zeta_D"] = program_zeta_D_path()
+    out["zeta_D"] = zeta_D_path()
     out.update(derived_transfer_eta(p))
     out.update(
         program_revenue_paths(
@@ -1582,16 +1691,14 @@ def fiscal_program_params(p, r_ss=None):
             ),
         )
     )
-    out["r_gov_shift"] = r_gov_shift_path(
-        p.g_y,
-        p.g_n,
+    out["r_gov_shift"] = market_r_gov_shift_path(
         float(np.asarray(p.r_gov_scale).flatten()[0]),
         float(p.r_gov_DY2),
         PROGRAM_DEBT_RATIO_SS,
         r_ss,
+        debt_path=program_market_debt_path(),
     )
-    out["initial_debt_ratio"] = INITIAL_DEBT_RATIO
-    out["initial_foreign_debt_ratio"] = GG_FOREIGN_DEBT_SHARE
+    out.update(concessional_params())
     out["debt_ratio_ss"] = PROGRAM_DEBT_RATIO_SS
     out["r_gov_DY"] = -2 * float(p.r_gov_DY2) * PROGRAM_DEBT_RATIO_SS
     out["tG1"] = len(PROGRAM_YEARS)
@@ -1763,8 +1870,13 @@ DEFAULT_SCENARIO = "history"
 # FY2024/25 outturn (model period 0) and the enacted FY2025/26 budget
 # (period 1); the budget-year values are held for the long run.
 HISTORY_KNOWN_YEARS = 2
-# History-anchored long-run debt ratio: the measured FY2024/25 ratio, so the
-# closure rule stabilizes debt where it starts rather than at a plan.
+# History-anchored long-run debt ratio: the measured FY2024/25 ratio of all
+# general-government debt, so the closure rule stabilizes debt where it
+# starts rather than at a plan. OG-Core's debt_ratio_ss anchors market debt;
+# concessional debt is repaid by the late 2040s (concessional_debt_path), so
+# in the long run all debt is market debt and the two anchors coincide.
+# Along the way the closure rule refinances the falling concessional stock
+# with market debt.
 HISTORY_DEBT_RATIO_SS = INITIAL_DEBT_RATIO
 
 
@@ -1860,73 +1972,6 @@ def compliance_paths(
     return history_compliance_paths(compliance_scale, pension_coverage_scale)
 
 
-def history_zeta_D_path():
-    """
-    Foreign share of new government borrowing held at LONG_RUN_ZETA_D. The
-    FY2024/25 realized flow is a restructuring-year outlier and the stock
-    share (0.63) is a poor guide to new borrowing while external debt is
-    being restructured, so the medium-term flow share the debt sustainability
-    analysis projects is the one forward-looking input this baseline keeps
-    (macro.md).
-
-    Returns:
-        list: same length as program_zeta_D_path
-    """
-    return [LONG_RUN_ZETA_D] * (len(PROGRAM_YEARS) + 1)
-
-
-def history_real_rate_on_debt(g_y, g_n):
-    """
-    Real effective rate on public debt for the history-anchored baseline:
-    the rate the FY2024/25 outturn and the FY2025/26 budget imply for the
-    stock (the first program-implied value), held through the program
-    horizon before converging to LONG_RUN_R_GOV.
-
-    Args:
-        g_y (scalar): model-period productivity growth rate
-        g_n (array_like): population growth path
-
-    Returns:
-        float: real effective rate
-    """
-    return float(implied_real_rate_on_debt(g_y, g_n)[0])
-
-
-def history_r_gov_shift_path(
-    g_y, g_n, r_gov_scale, r_gov_DY2, debt_ratio_ss, r_ss
-):
-    """
-    Level-shift path for the sovereign rate in the history-anchored
-    baseline: the budget-implied real effective rate held for the program
-    horizon, then a linear convergence to LONG_RUN_R_GOV over
-    R_GOV_CONVERGENCE_PERIODS. The debt path is a model outcome here, so
-    the shift is evaluated at the debt anchor (premium exactly zero there,
-    as in r_gov_shift_path) and the premium prices deviations from it as
-    they occur.
-
-    Args:
-        g_y (scalar): model-period productivity growth rate
-        g_n (array_like): population growth path
-        r_gov_scale (scalar): pass-through of the market return
-        r_gov_DY2 (scalar): curvature of the debt-elastic premium
-        debt_ratio_ss (scalar): debt anchor the premium is centered on
-        r_ss (scalar): steady-state market return
-
-    Returns:
-        list: r_gov_shift path, same length as r_gov_shift_path
-    """
-    n = len(PROGRAM_YEARS)
-    r0 = history_real_rate_on_debt(g_y, g_n)
-    targets = np.concatenate(
-        [
-            np.full(n, r0),
-            np.linspace(r0, LONG_RUN_R_GOV, R_GOV_CONVERGENCE_PERIODS + 2)[1:],
-        ]
-    )
-    centering = r_gov_DY2 * debt_ratio_ss**2
-    return [float(x) for x in r_gov_scale * r_ss - centering - targets]
-
-
 def history_anchored_params(p, r_ss=None):
     """
     All fiscal and external parameters of the history-anchored baseline,
@@ -1946,7 +1991,7 @@ def history_anchored_params(p, r_ss=None):
     out = {}
     out.update(history_spending_paths())
     out.update(history_compliance_paths())
-    out["zeta_D"] = history_zeta_D_path()
+    out["zeta_D"] = zeta_D_path()
     out.update(derived_transfer_eta(p))
     out.update(
         history_revenue_paths(
@@ -1956,16 +2001,13 @@ def history_anchored_params(p, r_ss=None):
             ),
         )
     )
-    out["r_gov_shift"] = history_r_gov_shift_path(
-        p.g_y,
-        p.g_n,
+    out["r_gov_shift"] = market_r_gov_shift_path(
         float(np.asarray(p.r_gov_scale).flatten()[0]),
         float(p.r_gov_DY2),
         HISTORY_DEBT_RATIO_SS,
         r_ss,
     )
-    out["initial_debt_ratio"] = INITIAL_DEBT_RATIO
-    out["initial_foreign_debt_ratio"] = GG_FOREIGN_DEBT_SHARE
+    out.update(concessional_params())
     out["debt_ratio_ss"] = HISTORY_DEBT_RATIO_SS
     out["r_gov_DY"] = -2 * float(p.r_gov_DY2) * HISTORY_DEBT_RATIO_SS
     out["tG1"] = len(PROGRAM_YEARS)
