@@ -112,17 +112,15 @@ members = [
 
 [tool.uv.sources]
 ogeth = { workspace = true, editable = true }
-# OG-Core master (2d09808) plus government debt contracted abroad at its own
-# interest rate (branch concessional-debt, for PSLmodels/OG-Core#1125, 0.25.0)
-# and two open speed fixes for the household transition solves:
-# PSLmodels/OG-Core#1276 (keep small-scale links in the Jacobian sparsity
-# pattern, per-group cache, per-run reset) and PSLmodels/OG-Core#1277 (net
-# taxes once per evaluation, cached Defined Benefits lookups), and initial
-# household wealth accelerated with the prices under Anderson when
-# initial_wealth_ratio is set (branch anderson-initial-wealth). The speed
-# fixes leave results unchanged. Local integration commit; uv-only; the PyPI
-# metadata above keeps ogcore>=0.24.4. Move to a public ref before any push.
-ogcore = { git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast", rev = "5b5c9c7279619112e88c7d165e17da9f178bc40c" }
+# OG-Core master (2d09808) plus four open pull requests, merged on the
+# branch integrate/eth-external-debt of marcelolafleur/OG-Core:
+# PSLmodels/OG-Core#1279 (government debt contracted abroad at its own
+# interest rate, alpha_D_ext and r_D_ext_annual, for Issue #1125),
+# PSLmodels/OG-Core#1280 (initial household wealth accelerated with the
+# prices under Anderson), and the speed fixes PSLmodels/OG-Core#1276 and
+# #1277 (household transition solves; results unchanged). uv-only; the PyPI
+# metadata above keeps ogcore>=0.24.4. Move to a release once they merge.
+ogcore = { git = "https://github.com/marcelolafleur/OG-Core", rev = "5b5c9c7279619112e88c7d165e17da9f178bc40c" }
 
 [dependency-groups]
 dev = [
