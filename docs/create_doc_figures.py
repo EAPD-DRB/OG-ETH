@@ -215,6 +215,8 @@ def calibration_vs_data(
     )[:horizon].reshape(horizon, -1).sum(axis=1)
 
     def ratio(key):
+        if key not in tpi:  # an ogcore without concessional debt
+            return np.zeros(horizon)
         return (
             np.asarray(tpi[key])[:horizon].reshape(horizon, -1).sum(axis=1)
             / y_mkt
@@ -225,9 +227,9 @@ def calibration_vs_data(
         1 + np.asarray(params.g_n)[1 : horizon + 1]
     ) - 1
     # the model's current account: the goods-market residual (net exports)
-    # less the returns paid on foreign-owned capital and foreign-held debt
-    # (OG-Core prices both at the household portfolio return r_p) plus
-    # remittances and grants
+    # less the returns paid on foreign-owned capital and foreign-held market
+    # debt (OG-Core prices both at the household portfolio return r_p) and
+    # the interest on concessional debt, plus remittances and grants
     net_exports = (
         np.asarray(tpi["Y"])[:horizon] / y_mkt
         - ratio("C")
@@ -236,7 +238,9 @@ def calibration_vs_data(
         - ratio("G")
     )
     r_p = np.asarray(tpi["r_p"])[:horizon]
-    factor_payments = r_p * (ratio("K_f") + ratio("D_f"))
+    factor_payments = r_p * (ratio("K_f") + ratio("D_f")) + ratio(
+        "debt_service_ODA"
+    )
     grants = (
         np.asarray(params.alpha_FA).flatten()[:horizon]
         * np.asarray(tpi["Y"])[:horizon]
@@ -244,7 +248,11 @@ def calibration_vs_data(
     )
     current_account = net_exports - factor_payments + ratio("RM") + grants
     panels = [
-        ("Public debt (% of GDP)", 100 * ratio("D"), program.IMF_PUBLIC_DEBT),
+        (
+            "Public debt (% of GDP)",
+            100 * (ratio("D") + ratio("D_ODA")),
+            program.IMF_PUBLIC_DEBT,
+        ),
         (
             "Revenue excl. grants (% of GDP)",
             100 * ratio("total_tax_revenue"),
@@ -288,7 +296,7 @@ def calibration_vs_data(
         ),
         (
             "Public debt held abroad (% of GDP)",
-            100 * ratio("D_f"),
+            100 * (ratio("D_f") + ratio("D_ODA")),
             list(
                 np.array(program.IMF_PUBLIC_DEBT)
                 - np.array(program.IMF_DOMESTIC_DEBT)
