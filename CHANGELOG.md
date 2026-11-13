@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.0] - 2026-11-11 18:00:00
+## [0.4.0] - 2026-11-13 18:00:00
 
 ### Changed
 * Recalibrated the single-industry baseline to Ethiopia's **rebased national accounts** (base year FY2024/25, announced 4 November 2026: FY2024/25 GDP 24,030 billion birr against 15,094 on the old base). Fiscal flows and stocks in birr and balance-of-payments flows in dollars keep their numerators, so their ratios are the published IMF ratios times old over new GDP of the same year (`macro_params.rebase_factors`, 0.628 for FY2024/25 and 0.605 for FY2025/26 and after); the IMF tables are kept as published and converted in code. National-accounts components come from the rebased accounts directly (private consumption 64.4 and gross capital formation 35.3 percent of GDP). Every ratio is to GDP at market prices: shares OG-Core applies to its own output, which excludes the consumption tax, are converted by 1/(1 - consumption-tax share) = 1.031, and model moments are scored over output plus the consumption tax.
