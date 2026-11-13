@@ -1629,7 +1629,7 @@ wheels = [
 [[package]]
 name = "ogcore"
 version = "0.25.0"
-source = { git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast?rev=14a41048bbf252819c413b75183ef5ea862b1947#14a41048bbf252819c413b75183ef5ea862b1947" }
+source = { git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast?rev=8a359fc40d4b7f8df5d9eeba5550e518875ec6ee#8a359fc40d4b7f8df5d9eeba5550e518875ec6ee" }
 dependencies = [
     { name = "dask" },
     { name = "distributed" },
@@ -1703,7 +1703,7 @@ requires-dist = [
     { name = "linecheck" },
     { name = "matplotlib" },
     { name = "numpy" },
-    { name = "ogcore", git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast?rev=14a41048bbf252819c413b75183ef5ea862b1947" },
+    { name = "ogcore", git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast?rev=8a359fc40d4b7f8df5d9eeba5550e518875ec6ee" },
     { name = "openpyxl", specifier = ">=3.1.2" },
     { name = "pandas", specifier = ">=1.2.5" },
     { name = "paramtools", specifier = ">=0.20.0" },

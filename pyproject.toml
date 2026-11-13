@@ -122,7 +122,7 @@ ogeth = { workspace = true, editable = true }
 # initial_wealth_ratio is set (branch anderson-initial-wealth). The speed
 # fixes leave results unchanged. Local integration commit; uv-only; the PyPI
 # metadata above keeps ogcore>=0.24.4. Move to a public ref before any push.
-ogcore = { git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast", rev = "14a41048bbf252819c413b75183ef5ea862b1947" }
+ogcore = { git = "file:///Users/marcelolafleur/Projects/OG-Core-oda-fast", rev = "8a359fc40d4b7f8df5d9eeba5550e518875ec6ee" }
 
 [dependency-groups]
 dev = [
